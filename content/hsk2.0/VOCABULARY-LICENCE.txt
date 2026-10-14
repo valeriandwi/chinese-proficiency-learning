@@ -1,0 +1,54 @@
+Vocabulary data — licence and provenance
+=======================================
+
+The vocabulary in content/hsk2.0/level-2.yaml … level-6.yaml is derived from the
+published HSK 2.0 (汉语水平考试) level word lists, as collected by the Complete HSK
+Vocabulary project.
+
+    Source:  https://github.com/drkameleon/complete-hsk-vocabulary
+    Files:   wordlists/exclusive/old/{2,3,4,5,6}.json  ("exclusive" = the words
+             newly introduced at that level, which is what a level's syllabus is)
+    Fetched: 2026-10-13
+    Licence: MIT
+
+The word lists themselves are published by Chinese Testing International / the
+Center for Language Education and Cooperation; HSK is a trademark of the
+administering body. This application is not endorsed by them — see
+docs/sources.md §2.
+
+MIT License
+-----------
+
+Copyright (c) 2025 Yanis Zafirópulos (aka Dr.Kameleon)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in the
+Software without restriction, including without limitation the rights to use, copy,
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+and to permit persons to whom the Software is furnished to do so, subject to the
+following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+How to regenerate
+-----------------
+
+    mkdir -p .local/wordlists
+    for l in 2 3 4 5 6; do
+      curl -sSfL -o .local/wordlists/old-$l.json \
+        https://raw.githubusercontent.com/drkameleon/complete-hsk-vocabulary/main/wordlists/exclusive/old/$l.json
+    done
+    go run ./cmd/contentgen -levels 2,3,4,5
+    go run ./cmd/contentctl validate content/hsk2.0/level-2.yaml
+
+The raw JSON stays out of the repository (it is fetched into the gitignored
+.local/); what is committed is the derived spine above, which is what the MIT
+notice covers.

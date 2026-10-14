@@ -1,0 +1,91 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: hanpath
+          POSTGRES_PASSWORD: hanpath_dev_pw
+          POSTGRES_DB: hanpath
+        ports: ['5435:5432']
+        options: >-
+          --health-cmd "pg_isready -U hanpath -d hanpath"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      # The Go module pins a toolchain; without this a CI runner with a newer Go
+      # would try to download a different one and the build would diverge from
+      # the developer's machine.
+      GOTOOLCHAIN: local
+      DATABASE_URL: postgres://hanpath:hanpath_dev_pw@127.0.0.1:5435/hanpath?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: gofmt
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "these files are not gofmt'd:"; echo "$unformatted"; exit 1
+          fi
+
+      - name: build and vet
+        run: |
+          go build ./...
+          go vet ./...
+
+      - name: unit tests
+        run: go test ./... -count=1
+
+      - name: content validates
+        run: go run ./cmd/contentctl validate --file content/hsk2.0/level-1.yaml
+
+      - name: migrate
+        run: go run ./cmd/contentctl migrate
+
+      - name: integration tests (the target that actually sets the env var)
+        run: HANPATH_TEST_DATABASE_URL="$DATABASE_URL" go test ./integration/ -count=1 -v
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+      - name: copy stroke-order data for the authored characters
+        run: pnpm run hanzi-data
+      - name: generated API types match openapi/openapi.yaml
+        run: |
+          pnpm exec openapi-typescript ../openapi/openapi.yaml -o src/api/schema.ts
+          if ! git diff --quiet -- src/api/schema.ts; then
+            echo "src/api/schema.ts is stale: run 'make openapi-types' and commit the result"
+            git --no-pager diff --stat -- src/api/schema.ts
+            exit 1
+          fi
+      - name: typecheck
+        run: pnpm exec tsc -b
+      - name: unit tests
+        run: pnpm test
+      - name: production build
+        run: pnpm build

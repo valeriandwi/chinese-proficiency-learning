@@ -1,0 +1,26 @@
+# Local environment
+.env
+.env.local
+*.local
+# The local Postgres cluster's data directory and log
+/.local/
+
+# Build output
+/bin/
+web/dist/
+web/node_modules/
+web/.vite/
+
+# Test and coverage output
+coverage.out
+*.test
+integration/*.out
+
+# Editor and OS noise
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# The workspace marker for the agent that built this repo
+.cache/

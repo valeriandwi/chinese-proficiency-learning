@@ -1,0 +1,40 @@
+# Production edge for hanpath.
+#
+# The single rule that matters here: the SPA and the API must be SAME ORIGIN. The
+# session cookie is first-party only because of that, and reference audio is
+# fetched as `/media/...` by the browser rather than from a media host. Routing
+# either path to a different hostname (api.example.com vs www.example.com) makes
+# them different sites, and the learner's session is silently dropped.
+#
+# Both paths below are therefore proxied from the same origin that serves the SPA,
+# exactly as the Vite dev proxy does.
+
+{$HANPATH_DOMAIN:localhost} {
+	encode zstd gzip
+
+	# Built SPA assets. `pnpm build` writes web/dist.
+	root * /srv/hanpath/web/dist
+	file_server
+
+	# API.
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8081
+	}
+
+	# Reference audio and other learning assets, served by the API from
+	# MEDIA_DIR. Cached hard because asset keys are content hashes: a changed clip
+	# is a different URL, so a stale entry is impossible.
+	handle /media/* {
+		reverse_proxy 127.0.0.1:8081
+	}
+
+	# SPA fallback: any other path is a client-side route.
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+
+	log {
+		output file /var/log/caddy/hanpath.log
+	}
+}

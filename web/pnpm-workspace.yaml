@@ -1,0 +1,5 @@
+# pnpm 11 reads build-script approvals from here, not from package.json.
+# esbuild needs its postinstall to place the platform binary that Vite and Vitest
+# execute; without this approval both fail at runtime with a missing-binary error.
+allowBuilds:
+  esbuild: true

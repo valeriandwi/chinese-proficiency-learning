@@ -1,0 +1,1146 @@
+version: hsk2.0
+name: HSK 2.0 — Levels 1-6
+standard: HSK 2.0 (Chinese Testing International six-level syllabus)
+stage_model: six-levels
+status: published
+effective_from: 2010-01-01
+notes: |
+  The legacy six-level HSK syllabus. Vocabulary placement follows the published
+  HSK 2.0 level word lists; definitions and example sentences here are authored
+  for this application (see docs/sources.md for what is derived from third-party
+  data and under which licence).
+
+  HSK 3.0 (three stages, nine levels) is a separate curriculum version and is
+  imported alongside this one — nothing in the application assumes six levels.
+
+  Levels 2 to 5 are generated from the same published word lists by
+  cmd/contentgen, and carry only the drills that can be derived from a word without
+  inventing language: meaning, listening, dictation, speaking and stroke order.
+  Authored sentences — fill_blank, sentence_order, translation, short_answer — exist
+  only where a person wrote them, which today means this file.
+
+  Every listening drill needs generated reference audio; the importer synthesises it
+  from the item's audio_text and stores a content-hash key, so an item whose audio
+  cannot be produced fails the import instead of shipping a silent lesson.
+
+vocabulary:
+  # --- unit 1: greetings and names ---
+  - key: ni3
+    simplified: 你
+    traditional: 你
+    pinyin: nǐ
+    parts_of_speech: [pronoun]
+    senses: [{en: "you (singular)"}]
+    freq_rank: 3
+    levels: {hsk2.0: 1}
+  - key: wo3
+    simplified: 我
+    traditional: 我
+    pinyin: wǒ
+    parts_of_speech: [pronoun]
+    senses: [{en: "I; me"}]
+    freq_rank: 2
+    levels: {hsk2.0: 1}
+  - key: hao3
+    simplified: 好
+    traditional: 好
+    pinyin: hǎo
+    parts_of_speech: [adjective]
+    senses: [{en: "good; well"}]
+    freq_rank: 6
+    levels: {hsk2.0: 1}
+  - key: shi4
+    simplified: 是
+    traditional: 是
+    pinyin: shì
+    parts_of_speech: [verb]
+    senses: [{en: "to be; is"}]
+    freq_rank: 1
+    levels: {hsk2.0: 1}
+  - key: ma
+    simplified: 吗
+    traditional: 嗎
+    pinyin: ma
+    parts_of_speech: [particle]
+    senses: [{en: "question particle for yes/no questions"}]
+    freq_rank: 20
+    levels: {hsk2.0: 1}
+  - key: xie4xie
+    simplified: 谢谢
+    traditional: 謝謝
+    pinyin: xièxie
+    parts_of_speech: [verb]
+    senses: [{en: "thank you; to thank"}]
+    freq_rank: 40
+    levels: {hsk2.0: 1}
+  - key: zai4jian4
+    simplified: 再见
+    traditional: 再見
+    pinyin: zàijiàn
+    parts_of_speech: [verb]
+    senses: [{en: "goodbye; see you again"}]
+    freq_rank: 60
+    levels: {hsk2.0: 1}
+  - key: jiao4
+    simplified: 叫
+    traditional: 叫
+    pinyin: jiào
+    parts_of_speech: [verb]
+    senses: [{en: "to be called; to call"}]
+    freq_rank: 30
+    levels: {hsk2.0: 1}
+  - key: shen2me
+    simplified: 什么
+    traditional: 什麼
+    pinyin: shénme
+    parts_of_speech: [pronoun]
+    senses: [{en: "what"}]
+    freq_rank: 12
+    levels: {hsk2.0: 1}
+  - key: ming2zi
+    simplified: 名字
+    traditional: 名字
+    pinyin: míngzi
+    parts_of_speech: [noun]
+    senses: [{en: "name"}]
+    freq_rank: 45
+    levels: {hsk2.0: 1}
+  - key: xue2sheng
+    simplified: 学生
+    traditional: 學生
+    pinyin: xuésheng
+    parts_of_speech: [noun]
+    senses: [{en: "student; pupil"}]
+    freq_rank: 28
+    levels: {hsk2.0: 1}
+
+  # --- unit 2: people, identity, languages ---
+  - key: ta1he
+    simplified: 他
+    traditional: 他
+    pinyin: tā
+    parts_of_speech: [pronoun]
+    senses: [{en: "he; him"}]
+    freq_rank: 8
+    levels: {hsk2.0: 1}
+  - key: ta1she
+    simplified: 她
+    traditional: 她
+    pinyin: tā
+    parts_of_speech: [pronoun]
+    senses: [{en: "she; her"}]
+    freq_rank: 9
+    levels: {hsk2.0: 1}
+  - key: ren2
+    simplified: 人
+    traditional: 人
+    pinyin: rén
+    parts_of_speech: [noun]
+    senses: [{en: "person; people"}]
+    freq_rank: 4
+    levels: {hsk2.0: 1}
+  - key: peng2you
+    simplified: 朋友
+    traditional: 朋友
+    pinyin: péngyou
+    parts_of_speech: [noun]
+    senses: [{en: "friend"}]
+    freq_rank: 25
+    levels: {hsk2.0: 1}
+  - key: lao3shi1
+    simplified: 老师
+    traditional: 老師
+    pinyin: lǎoshī
+    parts_of_speech: [noun]
+    senses: [{en: "teacher"}]
+    freq_rank: 35
+    levels: {hsk2.0: 1}
+  - key: yi1sheng1
+    simplified: 医生
+    traditional: 醫生
+    pinyin: yīshēng
+    parts_of_speech: [noun]
+    senses: [{en: "doctor; physician"}]
+    freq_rank: 70
+    levels: {hsk2.0: 1}
+  - key: ren4shi
+    simplified: 认识
+    traditional: 認識
+    pinyin: rènshi
+    parts_of_speech: [verb]
+    senses: [{en: "to know (a person); to recognise"}]
+    freq_rank: 50
+    levels: {hsk2.0: 1}
+  - key: gao1xing4
+    simplified: 高兴
+    traditional: 高興
+    pinyin: gāoxìng
+    parts_of_speech: [adjective]
+    senses: [{en: "happy; glad"}]
+    freq_rank: 65
+    levels: {hsk2.0: 1}
+  - key: zhong1guo2
+    simplified: 中国
+    traditional: 中國
+    pinyin: Zhōngguó
+    parts_of_speech: [noun]
+    senses: [{en: "China"}]
+    freq_rank: 55
+    levels: {hsk2.0: 1}
+  - key: mei3guo2
+    simplified: 美国
+    traditional: 美國
+    pinyin: Měiguó
+    parts_of_speech: [noun]
+    senses: [{en: "the United States"}]
+    freq_rank: 80
+    levels: {hsk2.0: 1}
+  - key: han4yu3
+    simplified: 汉语
+    traditional: 漢語
+    pinyin: Hànyǔ
+    parts_of_speech: [noun]
+    senses: [{en: "Chinese (language)"}]
+    freq_rank: 90
+    levels: {hsk2.0: 1}
+  - key: ying1yu3
+    simplified: 英语
+    traditional: 英語
+    pinyin: Yīngyǔ
+    parts_of_speech: [noun]
+    senses: [{en: "English (language)"}]
+    freq_rank: 95
+    levels: {hsk2.0: 1}
+  - key: shuo1
+    simplified: 说
+    traditional: 說
+    pinyin: shuō
+    parts_of_speech: [verb]
+    senses: [{en: "to speak; to say"}]
+    freq_rank: 10
+    levels: {hsk2.0: 1}
+  - key: xue2xi2
+    simplified: 学习
+    traditional: 學習
+    pinyin: xuéxí
+    parts_of_speech: [verb]
+    senses: [{en: "to study; to learn"}]
+    freq_rank: 22
+    levels: {hsk2.0: 1}
+  - key: qu4
+    simplified: 去
+    traditional: 去
+    pinyin: qù
+    parts_of_speech: [verb]
+    senses: [{en: "to go"}]
+    freq_rank: 11
+    levels: {hsk2.0: 1}
+  - key: xue2xiao4
+    simplified: 学校
+    traditional: 學校
+    pinyin: xuéxiào
+    parts_of_speech: [noun]
+    senses: [{en: "school"}]
+    freq_rank: 38
+    levels: {hsk2.0: 1}
+
+  # --- unit 3: time, dates, daily routine ---
+  - key: jin1tian1
+    simplified: 今天
+    traditional: 今天
+    pinyin: jīntiān
+    parts_of_speech: [noun]
+    senses: [{en: "today"}]
+    freq_rank: 18
+    levels: {hsk2.0: 1}
+  - key: ming2tian1
+    simplified: 明天
+    traditional: 明天
+    pinyin: míngtiān
+    parts_of_speech: [noun]
+    senses: [{en: "tomorrow"}]
+    freq_rank: 26
+    levels: {hsk2.0: 1}
+  - key: zuo2tian1
+    simplified: 昨天
+    traditional: 昨天
+    pinyin: zuótiān
+    parts_of_speech: [noun]
+    senses: [{en: "yesterday"}]
+    freq_rank: 32
+    levels: {hsk2.0: 1}
+  - key: zao3shang
+    simplified: 早上
+    traditional: 早上
+    pinyin: zǎoshang
+    parts_of_speech: [noun]
+    senses: [{en: "early morning"}]
+    freq_rank: 58
+    levels: {hsk2.0: 1}
+  - key: zhong1wu3
+    simplified: 中午
+    traditional: 中午
+    pinyin: zhōngwǔ
+    parts_of_speech: [noun]
+    senses: [{en: "noon; midday"}]
+    freq_rank: 75
+    levels: {hsk2.0: 1}
+  - key: wan3shang
+    simplified: 晚上
+    traditional: 晚上
+    pinyin: wǎnshang
+    parts_of_speech: [noun]
+    senses: [{en: "evening; night"}]
+    freq_rank: 48
+    levels: {hsk2.0: 1}
+  - key: dian3
+    simplified: 点
+    traditional: 點
+    pinyin: diǎn
+    parts_of_speech: [noun]
+    senses: [{en: "o'clock; point"}]
+    freq_rank: 42
+    levels: {hsk2.0: 1}
+  - key: fen1
+    simplified: 分
+    traditional: 分
+    pinyin: fēn
+    parts_of_speech: [noun]
+    senses: [{en: "minute; to divide"}]
+    freq_rank: 44
+    levels: {hsk2.0: 1}
+  - key: ji3
+    simplified: 几
+    traditional: 幾
+    pinyin: jǐ
+    parts_of_speech: [pronoun]
+    senses: [{en: "how many; several"}]
+    freq_rank: 36
+    levels: {hsk2.0: 1}
+  - key: xian4zai4
+    simplified: 现在
+    traditional: 現在
+    pinyin: xiànzài
+    parts_of_speech: [noun]
+    senses: [{en: "now; at present"}]
+    freq_rank: 24
+    levels: {hsk2.0: 1}
+  - key: nian2
+    simplified: 年
+    traditional: 年
+    pinyin: nián
+    parts_of_speech: [noun]
+    senses: [{en: "year"}]
+    freq_rank: 15
+    levels: {hsk2.0: 1}
+  - key: yue4
+    simplified: 月
+    traditional: 月
+    pinyin: yuè
+    parts_of_speech: [noun]
+    senses: [{en: "month; moon"}]
+    freq_rank: 17
+    levels: {hsk2.0: 1}
+  - key: hao4
+    simplified: 号
+    traditional: 號
+    pinyin: hào
+    parts_of_speech: [noun]
+    senses: [{en: "day of the month; number"}]
+    freq_rank: 52
+    levels: {hsk2.0: 1}
+  - key: xing1qi1
+    simplified: 星期
+    traditional: 星期
+    pinyin: xīngqī
+    parts_of_speech: [noun]
+    senses: [{en: "week"}]
+    freq_rank: 62
+    levels: {hsk2.0: 1}
+  - key: chi1
+    simplified: 吃
+    traditional: 吃
+    pinyin: chī
+    parts_of_speech: [verb]
+    senses: [{en: "to eat"}]
+    freq_rank: 19
+    levels: {hsk2.0: 1}
+  - key: fan4
+    simplified: 饭
+    traditional: 飯
+    pinyin: fàn
+    parts_of_speech: [noun]
+    senses: [{en: "meal; cooked rice"}]
+    freq_rank: 34
+    levels: {hsk2.0: 1}
+  - key: he1
+    simplified: 喝
+    traditional: 喝
+    pinyin: hē
+    parts_of_speech: [verb]
+    senses: [{en: "to drink"}]
+    freq_rank: 46
+    levels: {hsk2.0: 1}
+  - key: shui3
+    simplified: 水
+    traditional: 水
+    pinyin: shuǐ
+    parts_of_speech: [noun]
+    senses: [{en: "water"}]
+    freq_rank: 29
+    levels: {hsk2.0: 1}
+  - key: qi3chuang2
+    simplified: 起床
+    traditional: 起床
+    pinyin: qǐchuáng
+    parts_of_speech: [verb]
+    senses: [{en: "to get up (out of bed)"}]
+    freq_rank: 88
+    levels: {hsk2.0: 1}
+
+passages:
+  - kind: reading
+    title: 我的一天
+    level: 1
+    instruction: Read the text, then answer the questions. Tap a word to see its meaning.
+    body: 我早上七点起床。我上午去学校学习汉语。我中午在学校吃饭。我晚上在家喝水、看书。今天我认识了一个新朋友，我很高兴。
+    sentences:
+      - zh: 我早上七点起床。
+        pinyin: Wǒ zǎoshang qī diǎn qǐchuáng.
+        en: I get up at seven in the morning.
+        tokens:
+          - {zh: 我, pinyin: wǒ, en: "I"}
+          - {zh: 早上, pinyin: zǎoshang, en: "morning"}
+          - {zh: 七, pinyin: qī, en: "seven"}
+          - {zh: 点, pinyin: diǎn, en: "o'clock"}
+          - {zh: 起床, pinyin: qǐchuáng, en: "get up"}
+      - zh: 我上午去学校学习汉语。
+        pinyin: Wǒ shàngwǔ qù xuéxiào xuéxí Hànyǔ.
+        en: In the morning I go to school to study Chinese.
+      - zh: 我中午在学校吃饭。
+        pinyin: Wǒ zhōngwǔ zài xuéxiào chīfàn.
+        en: At noon I eat at school.
+      - zh: 我晚上在家喝水、看书。
+        pinyin: Wǒ wǎnshang zài jiā hē shuǐ, kàn shū.
+        en: In the evening I drink water and read at home.
+      - zh: 今天我认识了一个新朋友，我很高兴。
+        pinyin: Jīntiān wǒ rènshi le yí gè xīn péngyou, wǒ hěn gāoxìng.
+        en: Today I met a new friend, I am very happy.
+    word_count: 51
+    minutes: 3
+
+levels:
+  - level: 1
+    stage: elementary
+    title: Level 1 — survival Mandarin
+    description: Greetings, names, people, and the clock. Everything here is usable in a first conversation.
+    vocab_target: 150
+    units:
+      - unit: 1
+        title: 你好 — greetings and names
+        description: Say hello, give your name, and ask for someone else's.
+        lessons:
+          - lesson: 1
+            title: 你好 — saying hello
+            kind: lesson
+            goal: Greet someone, say who you are, and thank them.
+            xp_reward: 10
+            estimated_minutes: 6
+            vocabulary: [ni3, wo3, hao3, shi4, ma, xie4xie, zai4jian4]
+            exercises:
+              - key: l1-greet-mcq1
+                type: mcq
+                skill: vocabulary
+                difficulty: 1
+                explanation: 你 (nǐ) is the singular "you"; 我 (wǒ) is "I", 好 (hǎo) is "good" and 是 (shì) is "to be".
+                prompt:
+                  question: Which character means "you"?
+                  options:
+                    - {id: a, text: "你"}
+                    - {id: b, text: "我"}
+                    - {id: c, text: "好"}
+                    - {id: d, text: "是"}
+                answer_key:
+                  correct_id: a
+                  why: 你 (nǐ) is "you". 我 (wǒ) is "I".
+              - key: l1-greet-mcq2
+                type: mcq
+                skill: vocabulary
+                difficulty: 1
+                prompt:
+                  question: What does 谢谢 mean?
+                  options:
+                    - {id: a, text: "hello"}
+                    - {id: b, text: "thank you"}
+                    - {id: c, text: "goodbye"}
+                    - {id: d, text: "sorry"}
+                answer_key:
+                  correct_id: b
+              - key: l1-greet-tf1
+                type: true_false
+                skill: reading
+                difficulty: 1
+                explanation: 你好 (nǐ hǎo) is the standard greeting — literally "you good".
+                prompt:
+                  statement: 你好 is the standard way to greet someone in Mandarin.
+                answer_key:
+                  correct: true
+                  why: 你好 is the everyday greeting, used from morning to evening.
+              - key: l1-greet-fill1
+                type: fill_blank
+                skill: writing
+                difficulty: 1
+                explanation: 你 plus 好 makes the greeting 你好.
+                prompt:
+                  sentence: 你___！
+                  pinyin: nǐ ___
+                  hint: Complete the greeting "hello".
+                  word_bank: [好, 是, 我]
+                answer_key:
+                  accepted: [好]
+              - key: l1-greet-listen1
+                type: listening_mcq
+                skill: listening
+                difficulty: 1
+                explanation: 吗 is the yes/no question marker; 你好 on its own is just a greeting.
+                prompt:
+                  instruction: Listen, then choose what was said.
+                  audio_text: 你好吗？
+                  replay_limit: 2
+                  options:
+                    - {id: a, text: "How are you?"}
+                    - {id: b, text: "Thank you."}
+                    - {id: c, text: "Goodbye."}
+                    - {id: d, text: "I am fine."}
+                answer_key:
+                  correct_id: a
+                  transcript: 你好吗？
+                  why: "吗 (ma) at the end turns 你好 into a question: “how are you?”"
+              - key: l1-greet-listen2
+                type: listening_dictation
+                skill: listening
+                difficulty: 2
+                explanation: 谢谢 is “thank you”; adding 你 makes it “thank you (to you)”.
+                prompt:
+                  instruction: Listen and type the sentence you hear, in Chinese characters.
+                  audio_text: 谢谢你。
+                  replay_limit: 2
+                answer_key:
+                  accepted: [谢谢你, 谢谢你。]
+                  transcript: 谢谢你。
+                  pinyin: Xièxie nǐ.
+              - key: l1-greet-speak1
+                type: speak_repeat
+                skill: speaking
+                difficulty: 2
+                explanation: 你好 + 我叫… is the shortest complete self-introduction.
+                prompt:
+                  instruction: Listen to the model, then record yourself repeating it. Play both back and compare — nothing here grades your tones.
+                  audio_text: 你好！我叫小明。
+                  text: 你好！我叫小明。
+                  pinyin: Nǐ hǎo! Wǒ jiào Xiǎomíng.
+                  max_seconds: 15
+                answer_key:
+                  reference_text: 你好！我叫小明。
+              - key: l1-greet-speak2
+                type: read_aloud
+                skill: speaking
+                difficulty: 2
+                prompt:
+                  instruction: Read this aloud, then record it. Your recording stays in the browser for comparison and is not uploaded.
+                  text: 你好，我是学生。谢谢你，再见！
+                  pinyin: Nǐ hǎo, wǒ shì xuéshēng. Xièxie nǐ, zàijiàn!
+                  max_seconds: 20
+                answer_key:
+                  reference_text: 你好，我是学生。谢谢你，再见！
+              - key: l1-greet-hanzi1
+                type: hanzi_trace
+                skill: writing
+                difficulty: 2
+                explanation: 你 is written left to right — the person radical 亻 first, then 尔.
+                prompt:
+                  character: 你
+                  mode: guided
+                  stroke_count: 7
+                  instruction: Trace 你 in the correct stroke order.
+                answer_key:
+                  character: 你
+                  stroke_count: 7
+
+          - lesson: 2
+            title: 你叫什么名字 — asking names
+            kind: lesson
+            goal: Ask for and give a name.
+            xp_reward: 10
+            estimated_minutes: 7
+            vocabulary: [jiao4, shen2me, ming2zi, ni3, wo3, shi4, xue2sheng]
+            exercises:
+              - key: l2-name-mcq1
+                type: mcq
+                skill: vocabulary
+                difficulty: 1
+                prompt:
+                  question: 名字 means…
+                  options:
+                    - {id: a, text: "name"}
+                    - {id: b, text: "teacher"}
+                    - {id: c, text: "friend"}
+                    - {id: d, text: "school"}
+                answer_key:
+                  correct_id: a
+              - key: l2-name-order1
+                type: sentence_order
+                skill: writing
+                difficulty: 3
+                explanation: Mandarin word order is subject, verb, object — 我 (subject) 叫 (verb) 小明 (object).
+                prompt:
+                  instruction: Put the words in order to say "My name is Xiaoming."
+                  tokens: [叫, 我, 小明]
+                  pinyin: wǒ jiào Xiǎomíng
+                answer_key:
+                  order: [1, 0, 2]
+                  full_pinyin: wǒ jiào Xiǎomíng
+              - key: l2-name-fill1
+                type: fill_blank
+                skill: grammar
+                difficulty: 2
+                explanation: 什么 goes before the noun it asks about, so 什么名字 is "what name".
+                prompt:
+                  sentence: 你叫___名字？
+                  pinyin: nǐ jiào ___ míngzi?
+                  hint: Add the question word for "what".
+                  word_bank: [什么, 好, 我]
+                answer_key:
+                  accepted: [什么]
+              - key: l2-name-listen1
+                type: listening_mcq
+                skill: listening
+                difficulty: 1
+                prompt:
+                  instruction: Listen, then choose what was said.
+                  audio_text: 你叫什么名字？
+                  replay_limit: 2
+                  options:
+                    - {id: a, text: "What is your name?"}
+                    - {id: b, text: "How are you?"}
+                    - {id: c, text: "Where are you from?"}
+                    - {id: d, text: "Who is he?"}
+                answer_key:
+                  correct_id: a
+                  transcript: 你叫什么名字？
+                  why: 什么 is “what” and 名字 is “name”.
+              - key: l2-name-listen2
+                type: listening_dictation
+                skill: listening
+                difficulty: 2
+                explanation: "叫 (jiào) is how you give your own name: 我叫小明."
+                prompt:
+                  instruction: Listen and type the sentence you hear, in Chinese characters.
+                  audio_text: 我叫小明。
+                  replay_limit: 2
+                answer_key:
+                  accepted: [我叫小明, 我叫小明。]
+                  transcript: 我叫小明。
+                  pinyin: Wǒ jiào Xiǎomíng.
+              - key: l2-name-speak1
+                type: speak_repeat
+                skill: speaking
+                difficulty: 2
+                prompt:
+                  instruction: Listen to the model, then record yourself repeating it. Play both back and compare — nothing here grades your tones.
+                  audio_text: 你叫什么名字？
+                  text: 你叫什么名字？
+                  pinyin: Nǐ jiào shénme míngzi?
+                  max_seconds: 12
+                answer_key:
+                  reference_text: 你叫什么名字？
+              - key: l2-name-speak2
+                type: speak_answer
+                skill: speaking
+                difficulty: 3
+                prompt:
+                  instruction: Answer the question out loud in a full sentence. You get 10 seconds to think first.
+                  question: 你叫什么名字？
+                  key_points: [我叫…, 我是…]
+                  prep_seconds: 10
+                  max_seconds: 20
+                answer_key:
+                  reference_text: 我叫小明。
+              - key: l2-name-trans1
+                type: translation
+                skill: writing
+                difficulty: 2
+                explanation: A yes/no question adds the particle 吗 at the end, so "are you a student" becomes 你是学生吗？
+                prompt:
+                  instruction: Translate into Chinese.
+                  direction: en->zh
+                  source: Are you a student?
+                  hint: Add the yes/no question particle.
+                answer_key:
+                  accepted: [你是学生吗, 你是学生吗？]
+                  reference: 你是学生吗？
+
+      - unit: 2
+        title: 他是谁 — people and identity
+        description: Talk about other people, your nationality, and the languages you study.
+        lessons:
+          - lesson: 1
+            title: 他是谁 — he, she and they
+            kind: lesson
+            goal: Say who someone is and what they do.
+            xp_reward: 10
+            estimated_minutes: 8
+            vocabulary: [ta1he, ta1she, ren2, peng2you, lao3shi1, xue2sheng, yi1sheng1, ren4shi]
+            exercises:
+              - key: l3-people-mcqmulti1
+                type: mcq_multi
+                skill: vocabulary
+                difficulty: 2
+                explanation: 老师, 学生, 医生 and 朋友 are all people; 学校 is a place.
+                prompt:
+                  question: Select every word that refers to a person.
+                  options:
+                    - {id: a, text: "老师"}
+                    - {id: b, text: "学生"}
+                    - {id: c, text: "学校"}
+                    - {id: d, text: "医生"}
+                    - {id: e, text: "朋友"}
+                answer_key:
+                  correct_ids: [a, b, d, e]
+                  why: 学校 (xuéxiào) means "school", a place, not a person.
+              - key: l3-people-mcq1
+                type: mcq
+                skill: grammar
+                difficulty: 2
+                explanation: 他 and 她 sound identical (tā) and differ only in writing — 他 for male, 她 for female.
+                prompt:
+                  question: You are writing about a woman. Which character do you use for "she"?
+                  options:
+                    - {id: a, text: "他"}
+                    - {id: b, text: "她"}
+                    - {id: c, text: "我"}
+                    - {id: d, text: "你"}
+                answer_key:
+                  correct_id: b
+                  why: Both are pronounced tā; the 女 (woman) radical marks the female form.
+              - key: l3-people-tf1
+                type: true_false
+                skill: reading
+                difficulty: 2
+                explanation: 认识 means "to know a person", as in having met them.
+                prompt:
+                  statement: 认识 means "to know someone", as in having met them.
+                answer_key:
+                  correct: true
+              - key: l3-people-listen1
+                type: listening_mcq
+                skill: listening
+                difficulty: 2
+                prompt:
+                  instruction: Listen, then choose what was said.
+                  audio_text: 她是我的朋友。
+                  replay_limit: 2
+                  options:
+                    - {id: a, text: "She is my friend."}
+                    - {id: b, text: "He is my friend."}
+                    - {id: c, text: "She is my teacher."}
+                    - {id: d, text: "I know her friend."}
+                answer_key:
+                  correct_id: a
+                  transcript: 她是我的朋友。
+                  why: 她 is “she” and 他 is “he” — they sound identical, so the rest of the sentence is what tells them apart.
+              - key: l3-people-listen2
+                type: listening_dictation
+                skill: listening
+                difficulty: 2
+                explanation: 医生 (yīshēng) is “doctor”; 老师 (lǎoshī) is “teacher”.
+                prompt:
+                  instruction: Listen and type the sentence you hear, in Chinese characters.
+                  audio_text: 他是医生。
+                  replay_limit: 2
+                answer_key:
+                  accepted: [他是医生, 他是医生。]
+                  transcript: 他是医生。
+                  pinyin: Tā shì yīshēng.
+              - key: l3-people-speak1
+                type: speak_repeat
+                skill: speaking
+                difficulty: 2
+                prompt:
+                  instruction: Listen to the model, then record yourself repeating it. Play both back and compare — nothing here grades your tones.
+                  audio_text: 她是我的老师。
+                  text: 她是我的老师。
+                  pinyin: Tā shì wǒ de lǎoshī.
+                  max_seconds: 12
+                answer_key:
+                  reference_text: 她是我的老师。
+              - key: l3-people-speak2
+                type: speak_answer
+                skill: speaking
+                difficulty: 3
+                prompt:
+                  instruction: Answer the question out loud in a full sentence. You get 10 seconds to think first.
+                  question: 他是谁？
+                  key_points: [他是我的…, 他叫…]
+                  prep_seconds: 10
+                  max_seconds: 20
+                answer_key:
+                  reference_text: 他是我的老师。
+              - key: l3-people-hanzi1
+                type: hanzi_recall
+                skill: writing
+                difficulty: 3
+                explanation: 人 is two strokes — a left-falling stroke then a right-falling stroke.
+                prompt:
+                  character: 人
+                  mode: recall
+                  stroke_count: 2
+                  instruction: Write 人 from memory. No outline this time.
+                answer_key:
+                  character: 人
+                  stroke_count: 2
+
+          - lesson: 2
+            title: 我是美国学生 — where you are from
+            kind: lesson
+            goal: Say your nationality and the languages you speak.
+            xp_reward: 10
+            estimated_minutes: 8
+            vocabulary: [zhong1guo2, mei3guo2, han4yu3, ying1yu3, shuo1, xue2xi2, ren2]
+            exercises:
+              - key: l4-origin-mcq1
+                type: mcq
+                skill: reading
+                difficulty: 2
+                explanation: 人 after a country name means a person from there, so 中国 plus 人 is a Chinese person.
+                prompt:
+                  question: What does 中国人 mean?
+                  options:
+                    - {id: a, text: "a Chinese person"}
+                    - {id: b, text: "the Chinese language"}
+                    - {id: c, text: "to live in China"}
+                    - {id: d, text: "Chinese food"}
+                answer_key:
+                  correct_id: a
+              - key: l4-origin-trans1
+                type: translation
+                skill: reading
+                difficulty: 3
+                explanation: 会 marks a learned ability, so 我会说英语 is "I can speak English".
+                prompt:
+                  instruction: Translate into English.
+                  direction: zh->en
+                  source: 我会说英语。
+                  hint: The 会 in front of 说 signals an ability.
+                answer_key:
+                  accepted: [I can speak English, I can speak English.]
+                  reference: I can speak English.
+              - key: l4-origin-order1
+                type: sentence_order
+                skill: writing
+                difficulty: 3
+                explanation: 我 is the subject, 学习 the verb, 汉语 the object.
+                prompt:
+                  instruction: Put the words in order to say "I study Chinese."
+                  tokens: [汉语, 我, 学习]
+                answer_key:
+                  order: [1, 2, 0]
+              - key: l4-origin-listen1
+                type: listening_mcq
+                skill: listening
+                difficulty: 2
+                prompt:
+                  instruction: Listen, then choose what was said.
+                  audio_text: 我是美国人。
+                  replay_limit: 2
+                  options:
+                    - {id: a, text: "I am American."}
+                    - {id: b, text: "I am Chinese."}
+                    - {id: c, text: "I speak English."}
+                    - {id: d, text: "I study Chinese."}
+                answer_key:
+                  correct_id: a
+                  transcript: 我是美国人。
+                  why: 美国 is “America”; 中国 is “China” — 美 and 中 are the characters to catch.
+              - key: l4-origin-listen2
+                type: listening_dictation
+                skill: listening
+                difficulty: 3
+                explanation: 学习 (xuéxí) is “to study”; 汉语 (Hànyǔ) is the Chinese language.
+                prompt:
+                  instruction: Listen and type the sentence you hear, in Chinese characters.
+                  audio_text: 我学习汉语。
+                  replay_limit: 2
+                answer_key:
+                  accepted: [我学习汉语, 我学习汉语。]
+                  transcript: 我学习汉语。
+                  pinyin: Wǒ xuéxí Hànyǔ.
+              - key: l4-origin-speak1
+                type: speak_repeat
+                skill: speaking
+                difficulty: 3
+                prompt:
+                  instruction: Listen to the model, then record yourself repeating it. Play both back and compare — nothing here grades your tones.
+                  audio_text: 我是中国人，我说汉语。
+                  text: 我是中国人，我说汉语。
+                  pinyin: Wǒ shì Zhōngguó rén, wǒ shuō Hànyǔ.
+                  max_seconds: 18
+                answer_key:
+                  reference_text: 我是中国人，我说汉语。
+              - key: l4-origin-speak2
+                type: read_aloud
+                skill: speaking
+                difficulty: 3
+                prompt:
+                  instruction: Read this aloud, then record it. Your recording stays in the browser for comparison and is not uploaded.
+                  text: 我是美国人，我学习汉语。
+                  pinyin: Wǒ shì Měiguó rén, wǒ xuéxí Hànyǔ.
+                  max_seconds: 20
+                answer_key:
+                  reference_text: 我是美国人，我学习汉语。
+              - key: l4-origin-fill1
+                type: fill_blank
+                skill: grammar
+                difficulty: 3
+                explanation: 是 links a person to their nationality, so 我是美国人 is "I am American".
+                prompt:
+                  sentence: 我___美国人。
+                  pinyin: wǒ ___ Měiguó rén.
+                  hint: Add the verb "to be".
+                answer_key:
+                  accepted: [是]
+
+      - unit: 3
+        title: 现在几点 — time and dates
+        description: Tell the time, talk about days and dates, and describe your daily routine.
+        lessons:
+          - lesson: 1
+            title: 现在几点 — telling the time
+            kind: lesson
+            goal: Read a clock and say when something happens.
+            xp_reward: 10
+            estimated_minutes: 8
+            vocabulary: [xian4zai4, ji3, dian3, fen1, zao3shang, zhong1wu3, wan3shang]
+            exercises:
+              - key: l5-time-mcq1
+                type: mcq
+                skill: reading
+                difficulty: 2
+                explanation: The hour comes first with 点, then the minutes with 分, so 三点十分 is 3:10.
+                prompt:
+                  question: What time is 三点十分?
+                  options:
+                    - {id: a, text: "3:10"}
+                    - {id: b, text: "10:03"}
+                    - {id: c, text: "3:30"}
+                    - {id: d, text: "10:15"}
+                answer_key:
+                  correct_id: a
+              - key: l5-time-mcqmulti1
+                type: mcq_multi
+                skill: vocabulary
+                difficulty: 2
+                explanation: 早上, 中午 and 晚上 are parts of the day; 几点 asks for a clock time.
+                prompt:
+                  question: Select every phrase that names a part of the day.
+                  options:
+                    - {id: a, text: "早上"}
+                    - {id: b, text: "中午"}
+                    - {id: c, text: "几点"}
+                    - {id: d, text: "晚上"}
+                answer_key:
+                  correct_ids: [a, b, d]
+              - key: l5-time-fill1
+                type: fill_blank
+                skill: grammar
+                difficulty: 2
+                explanation: 现在几点？ is the fixed way to ask what time it is now.
+                prompt:
+                  sentence: 现在___点？
+                  pinyin: xiànzài ___ diǎn?
+                  hint: Add the question word for "how many".
+                  word_bank: [几, 什么, 多少]
+                answer_key:
+                  accepted: [几]
+              - key: l5-time-listen1
+                type: listening_mcq
+                skill: listening
+                difficulty: 3
+                prompt:
+                  instruction: Listen, then choose the clock time you heard.
+                  audio_text: 现在三点十分。
+                  replay_limit: 2
+                  options:
+                    - {id: a, text: "3:10"}
+                    - {id: b, text: "10:03"}
+                    - {id: c, text: "3:30"}
+                    - {id: d, text: "10:30"}
+                answer_key:
+                  correct_id: a
+                  transcript: 现在三点十分。
+                  why: "Chinese says the hour first: 三点十分 is three o'clock and ten minutes."
+              - key: l5-time-listen2
+                type: listening_dictation
+                skill: listening
+                difficulty: 3
+                explanation: 几点 (jǐ diǎn) asks “what time?”
+                prompt:
+                  instruction: Listen and type the question you hear, in Chinese characters.
+                  audio_text: 现在几点？
+                  replay_limit: 2
+                answer_key:
+                  accepted: [现在几点, 现在几点？, 现在几点。]
+                  transcript: 现在几点？
+                  pinyin: Xiànzài jǐ diǎn?
+              - key: l5-time-speak1
+                type: speak_repeat
+                skill: speaking
+                difficulty: 3
+                prompt:
+                  instruction: Listen to the model, then record yourself repeating it. Play both back and compare — nothing here grades your tones.
+                  audio_text: 现在三点十分。
+                  text: 现在三点十分。
+                  pinyin: Xiànzài sān diǎn shí fēn.
+                  max_seconds: 12
+                answer_key:
+                  reference_text: 现在三点十分。
+              - key: l5-time-speak2
+                type: read_aloud
+                skill: speaking
+                difficulty: 3
+                prompt:
+                  instruction: Read this aloud, then record it. Your recording stays in the browser for comparison and is not uploaded.
+                  text: 我早上七点起床，中午吃饭，晚上看书。
+                  pinyin: Wǒ zǎoshang qī diǎn qǐchuáng, zhōngwǔ chīfàn, wǎnshang kàn shū.
+                  max_seconds: 25
+                answer_key:
+                  reference_text: 我早上七点起床，中午吃饭，晚上看书。
+              - key: l5-time-hanzi1
+                type: hanzi_trace
+                skill: writing
+                difficulty: 3
+                explanation: 点 has nine strokes; the 灬 (fire) radical comes last, left to right.
+                prompt:
+                  character: 点
+                  mode: guided
+                  stroke_count: 9
+                  instruction: Trace 点. Watch the order of the four dots at the bottom.
+                answer_key:
+                  character: 点
+                  stroke_count: 9
+
+          - lesson: 2
+            title: 我的一天 — a day in my life
+            kind: lesson
+            goal: Read a short text about someone's day and write two sentences about your own.
+            xp_reward: 15
+            estimated_minutes: 10
+            vocabulary: [jin1tian1, ming2tian1, zuo2tian1, nian2, yue4, hao4, xing1qi1, chi1, fan4, he1, shui3, qi3chuang2, qu4, xue2xiao4, gao1xing4]
+            passages: [我的一天]
+            exercises:
+              - key: l6-day-mcq1
+                type: mcq
+                skill: reading
+                difficulty: 2
+                explanation: The text says 我早上七点起床, which is seven o'clock in the morning.
+                prompt:
+                  question: According to 我的一天, what time does the writer get up?
+                  options:
+                    - {id: a, text: "six"}
+                    - {id: b, text: "seven"}
+                    - {id: c, text: "eight"}
+                    - {id: d, text: "noon"}
+                answer_key:
+                  correct_id: b
+              - key: l6-day-mcq2
+                type: mcq
+                skill: reading
+                difficulty: 2
+                explanation: 我中午在学校吃饭 — the meal happens at school.
+                prompt:
+                  question: Where does the writer eat at noon?
+                  options:
+                    - {id: a, text: "at home"}
+                    - {id: b, text: "at school"}
+                    - {id: c, text: "in a restaurant"}
+                    - {id: d, text: "at a friend's house"}
+                answer_key:
+                  correct_id: b
+              - key: l6-day-trans1
+                type: translation
+                skill: writing
+                difficulty: 3
+                explanation: 明天 (tomorrow) comes first, then subject 我, verb 去, place 学校.
+                prompt:
+                  instruction: Translate into Chinese. Use 明天 for "tomorrow".
+                  direction: en->zh
+                  source: Tomorrow I go to school.
+                  hint: Put the time word first.
+                answer_key:
+                  accepted: [明天我去学校, 明天我去学校。]
+                  reference: 明天我去学校。
+              - key: l6-day-listen1
+                type: listening_mcq
+                skill: listening
+                difficulty: 3
+                prompt:
+                  instruction: Listen, then choose what was said.
+                  audio_text: 我今天去学校学习。
+                  replay_limit: 2
+                  options:
+                    - {id: a, text: "Today I go to school to study."}
+                    - {id: b, text: "Yesterday I went to school."}
+                    - {id: c, text: "Tomorrow I will go to school."}
+                    - {id: d, text: "Today I study at home."}
+                answer_key:
+                  correct_id: a
+                  transcript: 我今天去学校学习。
+                  why: 今天 is “today”, 明天 “tomorrow”, 昨天 “yesterday”.
+              - key: l6-day-listen2
+                type: listening_dictation
+                skill: listening
+                difficulty: 3
+                explanation: 在家 (zài jiā) is “at home”; 喝水 (hē shuǐ) is “to drink water”.
+                prompt:
+                  instruction: Listen and type the sentence you hear, in Chinese characters.
+                  audio_text: 我在家喝水。
+                  replay_limit: 2
+                answer_key:
+                  accepted: [我在家喝水, 我在家喝水。]
+                  transcript: 我在家喝水。
+                  pinyin: Wǒ zài jiā hē shuǐ.
+              - key: l6-day-speak1
+                type: speak_answer
+                skill: speaking
+                difficulty: 4
+                prompt:
+                  instruction: Answer the question out loud in a full sentence. You get 10 seconds to think first.
+                  question: 你今天做什么？
+                  key_points: [今天, 我…, 学校, 家]
+                  prep_seconds: 10
+                  max_seconds: 30
+                answer_key:
+                  reference_text: 我今天去学校学习汉语，晚上在家吃饭。
+              - key: l6-day-speak2
+                type: read_aloud
+                skill: speaking
+                difficulty: 4
+                prompt:
+                  instruction: Read this aloud, then record it. Your recording stays in the browser for comparison and is not uploaded.
+                  text: 我早上七点起床，晚上在家吃饭。
+                  pinyin: Wǒ zǎoshang qī diǎn qǐchuáng, wǎnshang zài jiā chīfàn.
+                  max_seconds: 20
+                answer_key:
+                  reference_text: 我早上七点起床，晚上在家吃饭。
+              - key: l6-day-short1
+                type: short_answer
+                skill: writing
+                difficulty: 4
+                explanation: This answer is checked for the vocabulary and length you were asked for. It cannot judge grammar or style — read the reference answer and compare with your own.
+                prompt:
+                  question: Write two sentences in Chinese about your day. Use 今天 and at least one time of day (早上 / 中午 / 晚上).
+                  min_sentences: 2
+                answer_key:
+                  must_include: [今天]
+                  min_chars: 12
+                  reference: 今天我早上八点起床。我中午吃饭，晚上学习汉语。
