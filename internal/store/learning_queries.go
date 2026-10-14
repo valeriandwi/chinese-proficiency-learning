@@ -89,12 +89,19 @@ func InsertAttemptTx(ctx context.Context, tx pgx.Tx, in AttemptInsert) (uuid.UUI
 // is always one call away from being correct.
 //
 // Order matters and is deliberate:
-//  1. lesson_progress  (from attempts)
-//  2. xp_events        (from completed lessons; deduplicated by ref_id)
-//  3. review_items     (deck seeded from completed lessons)
-//  4. skill_mastery    (from attempts)
-//  5. daily_activity   (local calendar days, using the learner's timezone)
-//  6. user_streaks     (from daily_activity, computed in Go)
+// onPathAttempt is the predicate for "counts toward the path". A tone-practice attempt
+// is recorded in the same table so the learner's tone record survives, but it is
+// deliberately not part of the path: it must not move lesson status, award XP or
+// mastery, or feed the daily rollup the streak is derived from. One predicate, applied
+// wherever this file reads attempts, keeps that one idea in one place.
+const onPathAttempt = `a.mode <> 'tone'`
+
+// 1. lesson_progress  (from attempts)
+// 2. xp_events        (from completed lessons; deduplicated by ref_id)
+// 3. review_items     (deck seeded from completed lessons)
+// 4. skill_mastery    (from attempts)
+// 5. daily_activity   (local calendar days, using the learner's timezone)
+// 6. user_streaks     (from daily_activity, computed in Go)
 func RecomputeProgress(ctx context.Context, q querier, userID uuid.UUID) error {
 	// 1. lesson_progress
 	if _, err := q.Exec(ctx, `
@@ -108,7 +115,7 @@ func RecomputeProgress(ctx context.Context, q querier, userID uuid.UUID) error {
 			       max(a.created_at)                  AS last_at
 			FROM attempts a
 			JOIN exercises e ON e.id = a.exercise_id
-			WHERE a.user_id = $1::uuid
+			WHERE a.user_id = $1::uuid AND `+onPathAttempt+`
 			GROUP BY e.lesson_id, a.exercise_id
 		),
 		per_lesson AS (
@@ -187,7 +194,7 @@ func RecomputeProgress(ctx context.Context, q querier, userID uuid.UUID) error {
 		       now()
 		FROM attempts a
 		JOIN exercises e ON e.id = a.exercise_id
-		WHERE a.user_id = $1::uuid
+		WHERE a.user_id = $1::uuid AND `+onPathAttempt+`
 		GROUP BY e.skill
 		ON CONFLICT (user_id, skill) DO UPDATE SET
 			attempts_count  = EXCLUDED.attempts_count,
@@ -209,7 +216,7 @@ func RecomputeProgress(ctx context.Context, q querier, userID uuid.UUID) error {
 			       count(*) FILTER (WHERE a.is_correct)::int    AS correct_count,
 			       (coalesce(sum(a.duration_ms), 0) / 60000)::int AS minutes
 			FROM attempts a CROSS JOIN bounds b
-			WHERE a.user_id = $1::uuid
+			WHERE a.user_id = $1::uuid AND `+onPathAttempt+`
 			GROUP BY 1
 		),
 		xpe AS (
@@ -372,8 +379,8 @@ func (s *Store) SkillMasteryFor(ctx context.Context, userID uuid.UUID) ([]SkillM
 func (s *Store) Totals(ctx context.Context, userID uuid.UUID) (attempts, correct, lessonsDone, totalXP int, err error) {
 	err = s.Pool.QueryRow(ctx, `
 		SELECT
-			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid),
-			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid AND is_correct IS TRUE),
+			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid AND mode <> 'tone'),
+			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid AND mode <> 'tone' AND is_correct IS TRUE),
 			(SELECT count(*)::int FROM lesson_progress WHERE user_id = $1::uuid AND status = 'completed'),
 			(SELECT coalesce(sum(amount), 0)::int FROM xp_events WHERE user_id = $1::uuid)`,
 		userID).Scan(&attempts, &correct, &lessonsDone, &totalXP)

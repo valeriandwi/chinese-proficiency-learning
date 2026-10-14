@@ -49,6 +49,7 @@ export function isAnswered(exercise: Exercise, answer: AnswerPayload | undefined
       const strokes = (answer.strokes as unknown[] | undefined) ?? []
       return answer.completed === true && strokes.length > 0
     }
+    case 'tone_mcq':
     case 'listening_mcq':
       return typeof answer.option_id === 'string' && answer.option_id !== ''
     case 'listening_dictation':
@@ -82,6 +83,14 @@ export function modelAnswer(exercise: Exercise, result: AttemptResult): string {
     case 'mcq': {
       const id = (solution.correct_id as string | undefined) ?? (feedback.correct_id as string | undefined)
       return options.find((o) => o.id === id)?.text ?? id ?? ''
+    }
+    case 'tone_mcq': {
+      // The tone it picked, and the explanation that names the tones — which is where
+      // the sandhi lives for a word whose spoken pattern differs from the written one.
+      const id = (solution.correct_id as string | undefined) ?? (feedback.correct_id as string | undefined)
+      const option = options.find((o) => o.id === id)?.text ?? (feedback.tones as string | undefined) ?? ''
+      const why = (solution.why as string | undefined) ?? (feedback.why as string | undefined) ?? ''
+      return [option, why].filter(Boolean).join(' — ')
     }
     case 'listening_mcq': {
       // Both halves matter for a listening item: the sentence that was said (which a

@@ -66,6 +66,8 @@ func init() {
 	register(hanziTraceGrader{})
 	register(hanziRecallGrader{})
 	register(shortAnswerGrader{})
+	// Tone: the pronunciation question that needs no provider (see tone.go).
+	register(toneMCQGrader{})
 	// Listening: audio in, mechanically gradable.
 	register(listeningMCQGrader{})
 	register(listeningDictationGrader{})

@@ -19,11 +19,14 @@ it is proven.
 | Placement: vocabulary self-check → recommended level | done (self-report, not a scored test) |
 | Curriculum as data: parse → validate → idempotent import (`contentctl`) | done |
 | HSK 2.0 Level 1 authored: 3 units, 6 lessons, 46 lexemes, 49 exercises, 1 reading passage | done |
-| HSK 2.0 levels 2–5 generated from the published word lists: 392 lessons, 2,341 words, 8,076 drills (`cmd/contentgen`) | done (drills derived from the words; no generated sentences) |
-| Exercise registry: 14 types, validated at import, graded on the server | done |
+| HSK 2.0 levels 2–5 generated from the published word lists: 392 lessons, 2,341 words, 10,482 drills (`cmd/contentgen`) | done (drills derived from the words; no generated sentences) |
+| Tone drills: one per word per level (2,387), plus 65 discrimination drills for words that differ only in tone | done (`tone_mcq`; a one-syllable word is asked by sound, a longer one as written — see the sandhi rule below) |
+| Exercise registry: 15 types, validated at import, graded on the server | done |
 | Reference audio: TTS at import time, content-hash keys, served same-origin at `/media/{key}` | done (licence for end-user serving open — see docs/sources.md) |
 | Listening drills: audio MCQ + dictation, graded against an answer key, transcript withheld until an attempt exists | done |
-| Speaking drills: repeat / read aloud / answer, with recording, playback, self-rating | done (tier 1 — nothing judges pronunciation) |
+| Speaking drills: repeat / read aloud / answer, with recording, playback, self-rating | done (tier 1 — always available, no provider needed) |
+| Pronunciation scoring: per-word assessment, score bands, XP eligibility, daily cap, transient audio | done (`internal/speech`; off by default — needs a provider, see docs/sources.md §7) |
+| Tone practice: a page to drill tone alone, one tone drill per word, off-path by design | done (`/tones`; attempts recorded with mode `tone` and excluded from every derived value — see docs/architecture.md) |
 | Lesson player: per-type renderers, pinyin toggle, exam-mode switch, batch submit | done |
 | Interface: semantic design tokens with measured contrast, lesson trail, phone bottom navigation, celebration screen | done (see docs/architecture.md) |
 | Hanzi writing: guided trace + write-from-memory, stroke errors recorded | done (client-side stroke check) |
@@ -104,7 +107,8 @@ social features, an offline PWA, native apps, and a shop/currency economy.
 
 ## Known limitations, stated plainly
 
-1. **Pronunciation is not graded** by the app. A speaking result always carries
+1. **Pronunciation is not graded unless a provider is configured** (see 10 below).
+   By default a speaking result always carries
    `is_correct: null`, `needs_review: true` and a `limitation` string naming what was
    *not* assessed; the score reflects a recording that exists and is the right
    length, so completing a speaking drill means the drill was done, not that it was
@@ -120,35 +124,55 @@ social features, an offline PWA, native apps, and a shop/currency economy.
    locked lesson's payload to preview it; they cannot answer it.
 5. **Rate limiting is per-process.** Two API instances would each allow the
    configured rate. Redis is provisioned for the distributed version.
-6. **No mock-exam mode in the UI yet.** The API supports `mode: "exam"` and the
+6. **A tone drill asks about tone, not about your ear for a whole sentence.** A
+   one-syllable word is asked by sound and a longer word as written — never by sound —
+   because 你好 is written 3-3 and spoken 2-3, and a listening question would mark a
+   learner wrong for hearing correctly. The explanation states both forms. A tone drill
+   is also not a pronunciation judgement: it checks that a learner knows a word's tones,
+   not that they can produce them. Producing them is what scoring is for (8).
+7. **The tone unit at Level 1 gates Level 2.** Lessons unlock in order, and the tone
+   drills were appended as a fourth unit rather than interleaved, so a learner now
+   clears 46 tone drills before the generated levels open. That is a deliberate change
+   of the path, not an accident of import order: tones decide whether spoken Chinese is
+   understood, and 46 drills is a short review. Interleaving them per word instead is
+   the alternative, and it is more invasive.
+8. **No mock-exam mode in the UI yet.** The API supports `mode: "exam"` and the
    lesson player exposes it, but blueprints and timed papers are M3.
-7. **Exam mode reveals per-answer correctness but not the answer.** Submitting with
+9. **Exam mode reveals per-answer correctness but not the answer.** Submitting with
    `mode: "exam"` returns `is_correct` with `solution`, `feedback`, `explanation` and
    `score` stripped. A learner could therefore probe options and learn which was
    right without seeing why. That is pre-existing behaviour for every MCQ type, it
    matters more now that an exam can contain audio, and it should be closed when mock
    exams are built.
-8. **Levels 2–5 are drilled, not taught.** They cover every word of the published
+10. **Scoring needs a vendor and a decision.** The pipeline, the contract and the
+   fallback are built and tested, but a real deployment must choose a provider and
+   accept its terms (cost per hour of audio, and the learner's voice leaving the
+   machine) before any learner is scored. With no provider configured the endpoint
+   answers `503` and speaking stays self-assessed — which is the default, and the
+   reason the feature cannot quietly become a lie. Only `speak_repeat` and `read_aloud`
+   can be scored: an open speaking prompt has no reference utterance to compare
+   against, and scoring one against its own question would mark a correct answer wrong.
+11. **Levels 2–5 are drilled, not taught.** They cover every word of the published
    HSK 2.0 lists for those levels with meaning, listening, dictation, speaking and
    stroke-order drills, but they contain no authored sentences: `fill_blank`,
    `sentence_order`, `translation` and `short_answer` exist only in level 1, because
    a generator asked to write Chinese would produce plausible but wrong grammar.
    Writing those items is human work. The glosses also carry an open licence
    question — see `docs/sources.md` §3.
-9. **The interface shows only the gamification the server can back.** Streaks, XP,
+12. **The interface shows only the gamification the server can back.** Streaks, XP,
    the daily goal, skill mastery, activity and the review-due count are real. Hearts,
    gems, leagues, badges and crowns would each need server work, so they are absent
    rather than mocked — a decorative progress bar is a promise the app cannot keep.
-10. **The SPA ships as one bundle.** `pnpm build` reports ~520 kB before gzip
+13. **The SPA ships as one bundle.** `pnpm build` reports ~520 kB before gzip
    (Vite's 500 kB warning) now that the icon set and the typeface are bundled. It is
    a warning, not a failure: nothing loads from a CDN, and the fonts are subsets the
    browser fetches on demand (39 kB for Latin). Route-level `import()` splitting is
    the obvious next step if the warning starts to matter.
-11. **The mobile layout is verified at one size.** The E2E emulates 375×812 and
+14. **The mobile layout is verified at one size.** The E2E emulates 375×812 and
    asserts a single bottom navigation, reachable targets and the trail. Tablet widths
    and landscape phones are covered by the responsive utilities but not by a test.
 
-12. **Email in development goes to the log.** There is no mail server in the local
+15. **Email in development goes to the log.** There is no mail server in the local
    setup: with `SMTP_ADDR` unset, the log transport prints the message (including
    the verification link) rather than losing it. `brew install mailpit`, set
    `SMTP_ADDR=127.0.0.1:1025` and the smoke test's delivery assertion runs again.

@@ -119,6 +119,7 @@ export type ExerciseType =
   | 'hanzi_recall'
   | 'short_answer'
   // Listening (mechanically graded) and speaking (never graded for pronunciation).
+  | 'tone_mcq'
   | 'listening_mcq'
   | 'listening_dictation'
   | 'speak_repeat'
@@ -165,6 +166,42 @@ export type LessonDetail = {
 }
 
 export type AnswerPayload = Record<string, unknown>
+
+// --- tone practice ---------------------------------------------------------
+// Drills on tone alone, from any level: not gated by the lesson path, and graded
+// without touching it (see migrations/0006). The prompt never carries an answer key,
+// and a written tone question carries no pinyin — there the pinyin IS the answer.
+
+export type ToneDrill = Exercise & { level: number }
+
+export type ToneLevelStat = {
+  level: number
+  /** How many tone drills exist at this level. */
+  drills: number
+  /** Tone-mode attempts by this learner. */
+  answered: number
+  correct: number
+}
+
+export type ToneTallyRow = {
+  tone: string
+  label: string
+  asked: number
+  missed: number
+}
+
+export type ToneQueue = {
+  items: ToneDrill[]
+  /** The level the drills were drawn from; 0 means every level. */
+  level: number
+  stats: ToneLevelStat[]
+}
+
+export type ToneAnswersResponse = {
+  results: AttemptResult[]
+  tone_tally: ToneTallyRow[]
+  stats: ToneLevelStat[]
+}
 
 export type AttemptInput = {
   exercise_id: string

@@ -93,6 +93,9 @@ type PromptShape = {
     key_points?: string[]
     prep_seconds?: number
     max_seconds?: number
+    /** What a tone drill asks (it has no "question"), and the tone a speaking drill aims for. */
+    instruction?: string
+    tone_note?: string
 }
 
 function renderer(
@@ -112,6 +115,34 @@ function renderer(
   switch (exercise.type) {
     case 'mcq':
       return <OptionChoices legend={prompt.question} options={options} chosen={chosen} disabled={disabled} result={result} onChange={onChange} />
+
+    case 'tone_mcq':
+      // A tone drill. One syllable is asked about by SOUND — a single syllable cannot
+      // undergo tone sandhi, so the audio and the answer always agree. More than one
+      // syllable is asked about as WRITTEN, because 你好 is written 3-3 and spoken 2-3:
+      // a listening question would mark a learner wrong for hearing correctly. The
+      // word is shown either way, and no pinyin is: naming the tones of a word you can
+      // see is the skill being drilled.
+      return (
+        <div className="flex flex-col gap-4">
+          {prompt.text ? (
+            <p className="hanzi text-3xl font-semibold text-ink" aria-label={`Word: ${prompt.text}`}>
+              {prompt.text}
+            </p>
+          ) : null}
+          {audioUrlOf(prompt) ? (
+            <AudioPanel
+              url={audioUrlOf(prompt)}
+              replayLimit={prompt.replay_limit ?? 3}
+              disabled={disabled}
+              reveal={result ? revealedTranscript(result) : null}
+            />
+          ) : null}
+          {/* No legend: the card already renders prompt.instruction above the drill, so
+              passing it again as the option group's label printed it twice. */}
+          <OptionChoices options={options} chosen={chosen} disabled={disabled} result={result} onChange={onChange} />
+        </div>
+      )
 
     case 'listening_mcq':
       return (
@@ -155,6 +186,9 @@ function renderer(
         <div className="flex flex-col gap-4">
           <AudioPanel url={audioUrlOf(prompt)} replayLimit={prompt.replay_limit ?? 3} disabled={disabled} />
           <RecorderPanel
+            exerciseId={exercise.id}
+            scoreable
+            toneNote={prompt.tone_note}
             maxSeconds={prompt.max_seconds ?? 20}
             reference={{ zh: prompt.text ?? '', pinyin: prompt.pinyin }}
             disabled={disabled}
@@ -166,6 +200,8 @@ function renderer(
     case 'read_aloud':
       return (
         <RecorderPanel
+          exerciseId={exercise.id}
+          scoreable
           maxSeconds={prompt.max_seconds ?? 20}
           reference={{ zh: prompt.text ?? '', pinyin: prompt.pinyin }}
           disabled={disabled}
@@ -195,6 +231,7 @@ function renderer(
             <p className="text-sm text-ink-3">You get {prompt.prep_seconds} seconds to think before you record.</p>
           ) : null}
           <RecorderPanel
+            exerciseId={exercise.id}
             maxSeconds={prompt.max_seconds ?? 20}
             reference={{ zh: prompt.question ?? '' }}
             disabled={disabled}

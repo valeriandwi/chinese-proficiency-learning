@@ -351,3 +351,104 @@ func TestSpeakAnswerReturnsKeyPoints(t *testing.T) {
 		t.Fatal("speak_answer must not assert correctness")
 	}
 }
+
+// --- pronunciation scoring ----------------------------------------------------------
+//
+// These pin the contract of a *scored* speaking drill. The numbers themselves come
+// from a provider (internal/speech); what matters here is what the grader does with
+// them, and what it refuses to claim.
+
+const scoredPrompt = `{"instruction":"Say it","audio_key":"k","text":"你好","max_seconds":15}`
+const scoredAnswerKey = `{"reference_text":"你好"}`
+
+func gradeScored(t *testing.T, response string) Result {
+	t.Helper()
+	res, err := Grade("speak_repeat", json.RawMessage(scoredPrompt), json.RawMessage(scoredAnswerKey), json.RawMessage(response))
+	if err != nil {
+		t.Fatalf("grading: %v", err)
+	}
+	return res
+}
+
+func TestScoredSpeakingReportsWhatWasMeasured(t *testing.T) {
+	res := gradeScored(t, `{"duration_ms":2000,"self_rating":4,"recording_id":"11111111-1111-1111-1111-111111111111",
+		"score":0.82,"provider":"test","accuracy":0.84,"fluency":0.79,"completeness":0.9,"prosody":0.7,
+		"words":[{"word":"你","accuracy":0.91,"error_type":"None"},{"word":"好","accuracy":0.41,"error_type":"Mispronunciation"}]}`)
+
+	if res.Score != 0.82 {
+		t.Errorf("score %v, want the measured 0.82", res.Score)
+	}
+	if res.IsCorrect != nil {
+		t.Errorf("is_correct must stay null: a pronunciation score is not a verdict on correctness")
+	}
+	if got := res.Feedback["needs_review"]; got != false {
+		t.Errorf("needs_review is %v; a machine-judged drill must stop asking for a human", got)
+	}
+	if got := res.Feedback["has_speech_recognition"]; got != true {
+		t.Errorf("has_speech_recognition is %v, want true once a service actually listened", got)
+	}
+	if got := res.Feedback["passed"]; got != true {
+		t.Errorf("passed is %v for a score above the band", got)
+	}
+	if got := res.Feedback["provider"]; got != "test" {
+		t.Errorf("provider is %v", got)
+	}
+	weak, ok := res.Feedback["weak_words"].([]map[string]any)
+	if !ok || len(weak) != 1 || weak[0]["word"] != "好" {
+		t.Fatalf("weak_words should name exactly the word below the band, got %#v", res.Feedback["weak_words"])
+	}
+	if limitation, _ := res.Feedback["limitation"].(string); !strings.Contains(limitation, "not an examiner") {
+		t.Errorf("the limitation must state what the score is not: %q", limitation)
+	}
+	if _, ok := res.Feedback["expected_seconds"]; ok {
+		t.Error("a scored result should not carry the duration-window heuristic as if it were the scoring")
+	}
+}
+
+func TestScoredSpeakingBelowTheBandDoesNotCount(t *testing.T) {
+	res := gradeScored(t, `{"duration_ms":2000,"score":0.4,"provider":"test","words":[{"word":"你","accuracy":0.4,"error_type":"Mispronunciation"}]}`)
+	if got := res.Feedback["passed"]; got != false {
+		t.Errorf("passed is %v for a score below the band", got)
+	}
+	if res.Score != 0.4 {
+		t.Errorf("score %v, want the measured 0.4 — the number is reported honestly", res.Score)
+	}
+	// Below the band is a measurement too, so it is still not queued for a human.
+	if got := res.Feedback["needs_review"]; got != false {
+		t.Errorf("needs_review is %v; a low score is not an open question", got)
+	}
+	if msg, _ := res.Feedback["message"].(string); !strings.Contains(msg, "below the") {
+		t.Errorf("a below-band message should say so, got %q", msg)
+	}
+}
+
+func TestUnscoredSpeakingStillAsksForReview(t *testing.T) {
+	// The tier-1 path must survive: no provider, no score, and the honest "a human
+	// should look at this" the app has always given.
+	res := gradeScored(t, `{"duration_ms":3000,"self_rating":4}`)
+	if got := res.Feedback["needs_review"]; got != true {
+		t.Errorf("needs_review is %v for an unscored attempt, want true", got)
+	}
+	if got := res.Feedback["has_speech_recognition"]; got != false {
+		t.Errorf("has_speech_recognition is %v with no score", got)
+	}
+	if res.IsCorrect != nil {
+		t.Errorf("is_correct must stay null")
+	}
+}
+
+func TestSpeakingScoreIsClampedIntoRange(t *testing.T) {
+	for _, tc := range []struct {
+		in   string
+		want float64
+	}{
+		{`{"duration_ms":1000,"score":1.4}`, 1},
+		{`{"duration_ms":1000,"score":-0.5}`, 0},
+		{`{"duration_ms":1000,"score":0.65}`, 0.65},
+	} {
+		res := gradeScored(t, tc.in)
+		if res.Score != tc.want {
+			t.Errorf("score %s graded %v, want %v", tc.in, res.Score, tc.want)
+		}
+	}
+}

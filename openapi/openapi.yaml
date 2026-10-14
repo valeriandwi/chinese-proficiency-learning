@@ -467,6 +467,55 @@ paths:
         '409': { description: A client_ref was reused for a different exercise }
         '422': { description: Empty batch, too large, unknown exercise or bad mode }
 
+  /api/v1/recordings:
+    post:
+      tags: [lessons]
+      summary: Score a spoken recording against its drill's reference
+      description: |
+        The one endpoint that accepts a learner's voice. Scoring is server-side: the
+        audio is read into memory, handed to the configured pronunciation provider and
+        dropped — it is never written to storage, and the UI says so before the learner
+        records.
+
+        Only drills with a single reference utterance (`speak_repeat`, `read_aloud`) can
+        be scored: an open speaking prompt has nothing to compare against and returns
+        `422`. The score is stored, and an attempt that names it with `recording_id` is
+        graded from that stored value. A client can name a recording it owns; it can
+        never send a score.
+
+        `503` means this deployment has no pronunciation provider configured, which is a
+        supported configuration: speaking drills then stay self-assessed, exactly as
+        they behaved before scoring existed.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [exercise_id, audio]
+              properties:
+                exercise_id: { type: string, format: uuid }
+                audio:
+                  type: string
+                  format: binary
+                  description: The recording as the browser produced it (WebM/Opus, WAV, OGG/Opus).
+      responses:
+        '200':
+          description: Scored
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecordingScore' }
+        '400': { description: The audio part is missing or unreadable }
+        '413': { description: The recording is larger than this deployment accepts }
+        '422':
+          description: Not a speaking drill, no reference utterance, unsupported audio, or no speech recognised
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+        '429': { description: Per-learner rate limit, or the daily scoring cap for this account }
+        '502': { description: The provider failed, or rejected the configured credentials }
+        '503': { description: No pronunciation provider is configured on this deployment }
+
   /api/v1/progress/overview:
     get:
       tags: [progress]
@@ -491,6 +540,83 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ProgressOverview' }
+
+  /api/v1/tones/queue:
+    get:
+      tags: [tones]
+      summary: Tone drills to practise, outside the lesson path
+      description: |
+        Tone questions from any level — deliberately NOT gated by the path, because a
+        tone drill is self-contained and this surface exists so a learner can work on
+        tone without walking a level first. Filtered by level instead: answering
+        questions about words you have never met teaches nothing. Defaults to the
+        learner's own level. Answer keys never appear here.
+      parameters:
+        - { name: level, in: query, schema: { type: integer, default: 0, minimum: 0, maximum: 5 }, description: '0 = every level; otherwise 1-5' }
+        - { name: limit, in: query, schema: { type: integer, default: 10, maximum: 50 } }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/ToneDrill' }
+                  level: { type: integer, description: The level the drills were drawn from; 0 means every level }
+                  stats:
+                    type: array
+                    items: { $ref: '#/components/schemas/ToneLevelStat' }
+
+  /api/v1/tones/answers:
+    post:
+      tags: [tones]
+      summary: Grade tone answers and report which tones were missed
+      description: |
+        Graded by the same registry as every other exercise type, and recorded with
+        mode `tone`: the attempt log keeps the learner's tone record, while lesson
+        status, XP, mastery, the daily rollup and the streak are all left untouched.
+        Practising tone must not advance a lesson the learner has not unlocked.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [answers]
+              properties:
+                answers:
+                  type: array
+                  maxItems: 20
+                  items:
+                    type: object
+                    required: [exercise_id, option_id]
+                    properties:
+                      exercise_id: { type: string, format: uuid }
+                      client_ref: { type: string, description: Unique per attempt; makes a retried submit idempotent. }
+                      option_id: { type: string }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items: { $ref: '#/components/schemas/AttemptResult' }
+                  tone_tally:
+                    type: array
+                    description: Per tone, how often it came up in this batch and how often it was missed.
+                    items: { $ref: '#/components/schemas/ToneTallyRow' }
+                  stats:
+                    type: array
+                    items: { $ref: '#/components/schemas/ToneLevelStat' }
+        '422':
+          description: '`not_a_tone_drill` when an exercise id is not a tone drill'
 
   /api/v1/reviews/queue:
     get:
@@ -736,6 +862,65 @@ components:
         vocabulary:
           type: array
           items: { $ref: '#/components/schemas/Lexeme' }
+
+    RecordingScore:
+      type: object
+      description: |
+        A pronunciation assessment. Every ratio is 0..1; `passing_band` is the value at
+        or above which the drill counts as done.
+      required: [id, provider, overall, passing_band]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Name this in an attempt's `recording_id` to have it graded from this score.
+        provider: { type: string, description: Which scorer produced it, e.g. azure or fake. }
+        overall: { type: number, minimum: 0, maximum: 1 }
+        accuracy: { type: number, minimum: 0, maximum: 1 }
+        fluency: { type: number, minimum: 0, maximum: 1 }
+        completeness: { type: number, minimum: 0, maximum: 1 }
+        prosody: { type: number, minimum: 0, maximum: 1 }
+        passing_band: { type: number, minimum: 0, maximum: 1 }
+        reference: { type: string, description: The utterance that was assessed. }
+        words:
+          type: array
+          description: Per-word assessment, which is the part a learner can act on.
+          items:
+            type: object
+            required: [word, accuracy]
+            properties:
+              word: { type: string }
+              accuracy: { type: number, minimum: 0, maximum: 1 }
+              error_type: { type: string, description: 'Provider taxonomy, e.g. None or Mispronunciation.' }
+
+    ToneDrill:
+      description: One tone question as the learner sees it — the prompt, the level it comes from, and no answer key.
+      type: object
+      required: [id, type, prompt]
+      properties:
+        id: { type: string, format: uuid }
+        number: { type: integer }
+        type: { type: string, enum: [tone_mcq, listening_mcq] }
+        skill: { type: string }
+        difficulty: { type: integer }
+        level: { type: integer }
+        prompt: { type: object, additionalProperties: true }
+
+    ToneLevelStat:
+      type: object
+      properties:
+        level: { type: integer }
+        drills: { type: integer, description: How many tone drills exist at this level }
+        answered: { type: integer, description: Tone attempts by this learner }
+        correct: { type: integer }
+
+    ToneTallyRow:
+      type: object
+      properties:
+        tone: { type: string, description: 'Tone digit, 1-5 (5 = neutral)' }
+        label: { type: string, description: 'How the tone is described, e.g. "3rd tone — falling then rising"' }
+        asked: { type: integer }
+        missed: { type: integer }
 
     AttemptInput:
       type: object

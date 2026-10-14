@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"mime/multipart"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -384,6 +385,26 @@ func loadContent(t *testing.T) *curriculum.File {
 	return doc
 }
 
+// loadToneFile parses the tone drills that a second file adds to the authored level.
+// They are a separate file because they are generated rather than written, and the
+// Makefile imports them last so they append a unit instead of replacing one.
+func loadToneFile(t *testing.T) *curriculum.File {
+	t.Helper()
+	f, err := os.Open("../content/hsk2.0/level-1-tones.yaml")
+	if err != nil {
+		t.Fatalf("opening tone content: %v", err)
+	}
+	defer f.Close()
+	doc, err := curriculum.Parse(f)
+	if err != nil {
+		t.Fatalf("parsing tone content: %v", err)
+	}
+	if problems := doc.Validate(); len(problems) > 0 {
+		t.Fatalf("tone content is invalid: %v", problems)
+	}
+	return doc
+}
+
 // correctAnswers reads the answer keys straight out of the database and builds a
 // response that every grader should accept. This is what makes the test a real
 // check of the graders rather than of the test's own idea of the answers.
@@ -491,7 +512,7 @@ func responseFor(t *testing.T, exerciseType string, answerKey json.RawMessage) m
 			"completed":    true,
 			"hints_used":   0,
 		}
-	case "listening_mcq":
+	case "tone_mcq", "listening_mcq":
 		var k struct {
 			CorrectID string `json:"correct_id"`
 		}
@@ -592,9 +613,48 @@ func (c *client) do(method, path string, body any, out any) int {
 	if c.csrf != "" {
 		req.Header.Set("X-CSRF-Token", c.csrf)
 	}
+	return c.send(req, out)
+}
+
+// doMultipart posts a file part alongside form fields, the way the recorder uploads a
+// recording. It shares the CSRF handling and cookie re-reading with do().
+func (c *client) doMultipart(path string, fields map[string]string, fieldName, filename string, content []byte, out any) int {
+	c.t.Helper()
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	for k, v := range fields {
+		if err := w.WriteField(k, v); err != nil {
+			c.t.Fatalf("writing multipart field: %v", err)
+		}
+	}
+	part, err := w.CreateFormFile(fieldName, filename)
+	if err != nil {
+		c.t.Fatalf("creating the file part: %v", err)
+	}
+	if _, err := part.Write(content); err != nil {
+		c.t.Fatalf("writing the file part: %v", err)
+	}
+	if err := w.Close(); err != nil {
+		c.t.Fatalf("closing the multipart writer: %v", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, c.base+path, &buf)
+	if err != nil {
+		c.t.Fatalf("building request: %v", err)
+	}
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	if c.csrf != "" {
+		req.Header.Set("X-CSRF-Token", c.csrf)
+	}
+	return c.send(req, out)
+}
+
+// send performs a prepared request and decodes the response.
+func (c *client) send(req *http.Request, out any) int {
+	c.t.Helper()
 	resp, err := c.http.Do(req)
 	if err != nil {
-		c.t.Fatalf("%s %s: %v", method, path, err)
+		c.t.Fatalf("%s %s: %v", req.Method, req.URL.Path, err)
 	}
 	defer resp.Body.Close()
 	raw, err := io.ReadAll(resp.Body)
@@ -608,7 +668,7 @@ func (c *client) do(method, path string, body any, out any) int {
 	}
 	if out != nil && len(raw) > 0 {
 		if err := json.Unmarshal(raw, out); err != nil {
-			c.t.Fatalf("%s %s: decoding response %s: %v", method, path, raw, err)
+			c.t.Fatalf("%s %s: decoding response %s: %v", req.Method, req.URL.Path, raw, err)
 		}
 	}
 	return resp.StatusCode

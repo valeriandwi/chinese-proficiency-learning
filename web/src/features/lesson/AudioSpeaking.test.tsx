@@ -109,7 +109,8 @@ describe('RecorderPanel', () => {
 
   it('submits nothing until the learner acts, so a drill cannot be skipped silently', () => {
     const onChange = vi.fn()
-    render(<RecorderPanel reference={{ zh: '你好' }} onChange={onChange} />)
+    render(<RecorderPanel
+        exerciseId="ex-speak" reference={{ zh: '你好' }} onChange={onChange} />)
     // Mounting must not report an answer: a 0 ms payload would satisfy isAnswered
     // and the lesson would advance without a word spoken.
     expect(onChange).not.toHaveBeenCalled()
@@ -117,7 +118,8 @@ describe('RecorderPanel', () => {
 
   it('records with the microphone, then reports duration and releases the stream', async () => {
     const onChange = vi.fn()
-    render(<RecorderPanel reference={{ zh: '你好' }} onChange={onChange} />)
+    render(<RecorderPanel
+        exerciseId="ex-speak" reference={{ zh: '你好' }} onChange={onChange} />)
 
     await userEvent.click(screen.getByRole('button', { name: /^● record$/i }))
     await waitFor(() => expect(screen.getByText(/recording \d+\.\d+s/)).toBeInTheDocument())
@@ -135,7 +137,8 @@ describe('RecorderPanel', () => {
 
   it('sends the learner own rating, and only as a rating', async () => {
     const onChange = vi.fn()
-    render(<RecorderPanel reference={{ zh: '你好' }} onChange={onChange} />)
+    render(<RecorderPanel
+        exerciseId="ex-speak" reference={{ zh: '你好' }} onChange={onChange} />)
 
     await userEvent.click(screen.getByRole('button', { name: /^● record$/i }))
     await userEvent.click(screen.getByRole('button', { name: /^■ stop$/i }))
@@ -154,7 +157,8 @@ describe('RecorderPanel', () => {
       value: { getUserMedia: vi.fn().mockRejectedValue(denied) },
     })
     const onChange = vi.fn()
-    render(<RecorderPanel reference={{ zh: '你好' }} onChange={onChange} />)
+    render(<RecorderPanel
+        exerciseId="ex-speak" reference={{ zh: '你好' }} onChange={onChange} />)
 
     await userEvent.click(screen.getByRole('button', { name: /^● record$/i }))
     await waitFor(() => expect(screen.getByText(/microphone access is blocked/i)).toBeInTheDocument())
@@ -164,7 +168,8 @@ describe('RecorderPanel', () => {
   it('explains an insecure context where getUserMedia does not exist at all', async () => {
     // @ts-expect-error simulating a non-secure origin
     delete navigator.mediaDevices
-    render(<RecorderPanel reference={{ zh: '你好' }} onChange={vi.fn()} />)
+    render(<RecorderPanel
+        exerciseId="ex-speak" reference={{ zh: '你好' }} onChange={vi.fn()} />)
 
     await userEvent.click(screen.getByRole('button', { name: /^● record$/i }))
     expect(screen.getByText(/secure \(https\) page/i)).toBeInTheDocument()
@@ -173,7 +178,8 @@ describe('RecorderPanel', () => {
   it('refuses to call an empty take a recording', async () => {
     FakeMediaRecorder.behaviour = 'empty'
     const onChange = vi.fn()
-    render(<RecorderPanel reference={{ zh: '你好' }} onChange={onChange} />)
+    render(<RecorderPanel
+        exerciseId="ex-speak" reference={{ zh: '你好' }} onChange={onChange} />)
 
     await userEvent.click(screen.getByRole('button', { name: /^● record$/i }))
     await userEvent.click(screen.getByRole('button', { name: /^■ stop$/i }))
@@ -184,7 +190,8 @@ describe('RecorderPanel', () => {
 
   it('offers an honest skip that submits an unrecorded attempt', async () => {
     const onChange = vi.fn()
-    render(<RecorderPanel reference={{ zh: '你好' }} onChange={onChange} />)
+    render(<RecorderPanel
+        exerciseId="ex-speak" reference={{ zh: '你好' }} onChange={onChange} />)
 
     await userEvent.click(screen.getByRole('button', { name: /cannot record/i }))
     expect(onChange).toHaveBeenCalledWith({ duration_ms: 0 })
@@ -194,7 +201,8 @@ describe('RecorderPanel', () => {
 
   it('stops an in-flight recording when the learner leaves the exercise', async () => {
     const onChange = vi.fn()
-    const { unmount } = render(<RecorderPanel reference={{ zh: '你好' }} onChange={onChange} />)
+    const { unmount } = render(<RecorderPanel
+        exerciseId="ex-speak" reference={{ zh: '你好' }} onChange={onChange} />)
     await userEvent.click(screen.getByRole('button', { name: /^● record$/i }))
     await waitFor(() => expect(screen.getByText(/recording \d+\.\d+s/)).toBeInTheDocument())
 

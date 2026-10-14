@@ -83,9 +83,15 @@ func stageFor(level int) string {
 
 // difficultyFor keeps new words below the four hardest rungs: a level's first pass
 // is vocabulary recognition, not exam trickery.
+// difficultyFor keeps the generated material inside the 1..5 band the validator
+// enforces. Level 1 is written by hand and was never generated, so the level-1 tone
+// drills were the first caller to expose that "level - 1" left it at zero.
 func difficultyFor(level int) int {
 	if level > 4 {
 		return 4
+	}
+	if level < 2 {
+		return 1
 	}
 	return level - 1
 }
@@ -103,7 +109,8 @@ type options struct {
 func main() {
 	var levelsFlag string
 	var opt options
-	flag.StringVar(&levelsFlag, "levels", "2,3,4,5", "comma-separated HSK levels to generate")
+	flag.StringVar(&levelsFlag, "levels", "1,2,3,4,5",
+		"comma-separated HSK levels to generate; level 1 has no word list of its own, so it produces tone drills derived from the authored file")
 	flag.StringVar(&opt.rawDir, "raw", ".local/wordlists", "directory holding old-<level>.json from the word-list project")
 	flag.StringVar(&opt.outDir, "out", "content/hsk2.0", "directory to write level-<n>.yaml into")
 	flag.IntVar(&opt.wordsPerUnit, "unit-words", 24, "words per unit")
@@ -128,6 +135,32 @@ func main() {
 
 	strokes := newStrokeIndex(opt.hanziData)
 	for _, level := range opt.levels {
+		// Level 1's vocabulary is authored, so there is no word list to fetch: it gets a
+		// tone unit derived from the file that already exists, written beside it.
+		if level == 1 {
+			authoredPath := filepath.Join(opt.outDir, "level-1.yaml")
+			authored, err := readAuthored(authoredPath)
+			if err != nil {
+				fail("reading %s for the level 1 tone drills: %v", authoredPath, err)
+			}
+			doc, err := buildToneLevelFromAuthored(header, authored, opt)
+			if err != nil {
+				fail("level 1 tones: %v", err)
+			}
+			path := filepath.Join(opt.outDir, "level-1-tones.yaml")
+			if err := writeDocument(path, doc); err != nil {
+				fail("level 1 tones: %v", err)
+			}
+			exercises := 0
+			for _, u := range doc.Levels[0].Units {
+				for _, l := range u.Lessons {
+					exercises += len(l.Exercises)
+				}
+			}
+			fmt.Printf("level 1 tones: %d words, %d lessons, %d tone drills -> %s\n",
+				len(doc.Vocabulary), len(doc.Levels[0].Units[0].Lessons), exercises, path)
+			continue
+		}
 		words, err := readWords(filepath.Join(opt.rawDir, fmt.Sprintf("old-%d.json", level)), level, opt.perLevel)
 		if err != nil {
 			fail("level %d: %v", level, err)
@@ -342,6 +375,10 @@ func buildLevel(header curriculum.File, level int, words []rawWord, opt options,
 		})
 	}
 
+	// Tone pairs are a property of the whole level's word list, so they are found once
+	// and attached to whichever lesson holds the pair.
+	pairsByIndex := tonePairs(words)
+
 	lessonIndex, unitIndex := 0, 0
 	units := []curriculum.UnitDef{}
 	for start := 0; start < len(words); start += opt.wordsPerUnit {
@@ -355,8 +392,14 @@ func buildLevel(header curriculum.File, level int, words []rawWord, opt options,
 		for lessonStart := start; lessonStart < end; lessonStart += opt.wordsPerLesson {
 			lessonEnd := min(lessonStart+opt.wordsPerLesson, end)
 			lessonIndex++
+			lessonPairs := map[int][][]tonePairMember{}
+			for index, pairs := range pairsByIndex {
+				if index >= lessonStart && index < lessonEnd {
+					lessonPairs[index] = pairs
+				}
+			}
 			lesson, err := buildLesson(
-				header.Version, level, lessonIndex, lessonStart, lessonEnd, words, keys, glosses, strokes,
+				header.Version, level, lessonIndex, lessonStart, lessonEnd, words, keys, glosses, strokes, lessonPairs,
 			)
 			if err != nil {
 				return curriculum.File{}, fmt.Errorf("lesson %d: %w", lessonIndex, err)
@@ -382,7 +425,7 @@ func buildLevel(header curriculum.File, level int, words []rawWord, opt options,
 
 func buildLesson(
 	version string, level, lessonNumber, start, end int,
-	words []rawWord, keys, glosses []string, strokes strokeSource,
+	words []rawWord, keys, glosses []string, strokes strokeSource, pairsByIndex map[int][][]tonePairMember,
 ) (curriculum.LessonDef, error) {
 	lesson := curriculum.LessonDef{
 		Lesson:           lessonNumber,
@@ -400,6 +443,7 @@ func buildLesson(
 		n := i - start + 1
 		word, meaning := words[i].Simplified, glosses[i]
 		py := pinyin(words[i])
+		pattern := tonePattern(numericOf(words[i]))
 
 		lesson.Exercises = append(lesson.Exercises, exercise(fmt.Sprintf("%s-mcq%d", prefix, n), "mcq", "vocabulary", difficulty,
 			fmt.Sprintf("%s (%s) means “%s”.", word, py, meaning),
@@ -433,9 +477,15 @@ func buildLesson(
 				"audio_text":  word,
 				"text":        word,
 				"pinyin":      py,
+				// The tone target, so a speaking drill about a word is also a tone drill
+				// for it — and so a scored attempt has something to be measured against.
+				"tone_note":   toneNote(word, pattern),
 				"max_seconds": 8,
 			},
 			map[string]any{"reference_text": word}))
+
+		// The tone drill: by sound for one syllable, as written for more (see tone.go).
+		lesson.Exercises = append(lesson.Exercises, toneExercise(prefix, n, word, py, pattern, level, difficulty))
 	}
 
 	// Dictation and stroke order are labour-intensive, so the lesson spreads them
@@ -484,6 +534,18 @@ func buildLesson(
 				"stroke_count": count,
 			}))
 		break // one writing drill per lesson is enough alongside the per-word drills
+	}
+
+	// Discrimination drills for words that differ only in tone. They belong to the
+	// lesson that first teaches the pair, because that is where the learner met it.
+	pairIndex := 0
+	for _, groups := range pairsByIndex {
+		for _, members := range groups {
+			pairIndex++
+			if pair, ok := tonePairExercise(prefix, pairIndex, members, difficulty); ok {
+				lesson.Exercises = append(lesson.Exercises, pair)
+			}
+		}
 	}
 
 	// A lesson's length is derived from what it actually contains, not guessed:
@@ -639,4 +701,15 @@ func countLessons(level curriculum.LevelDef) int {
 func fail(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, "contentgen: "+format+"\n", args...)
 	os.Exit(1)
+}
+
+// readAuthored parses a hand-authored content file (see readHeader, which only needs the
+// metadata; this one needs the vocabulary too).
+func readAuthored(path string) (*curriculum.File, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return curriculum.Parse(f)
 }

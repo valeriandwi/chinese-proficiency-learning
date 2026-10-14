@@ -62,6 +62,21 @@ duration, mode. Everything a learner sees on the dashboard is derived from it:
 Because it is one code path, `POST /progress/refresh` is a legitimate answer to
 "these numbers look stale", and there is no incremental-update bug surface.
 
+**One exclusion: `mode = 'tone'`.** The tone practice page serves drills from any level,
+including lessons the learner has not reached, because a tone question is self-contained
+and the page exists precisely so tone can be drilled without walking a level first. That
+makes it the one surface whose attempts must not feed the derivation above: with no mode
+filter, an ordinary attempt against a locked lesson's drill flips that lesson to
+`in_progress` and counts toward completing it, so practising tone would erode the linear
+path. Tone attempts are therefore recorded in the same append-only log — the learner's
+tone record survives — and excluded by `onPathAttempt` wherever this derivation reads
+attempts. `integration/tone_practice_test.go` pins it: after a tone round on a locked
+lesson, the lesson is still locked and there is no `lesson_progress` row, no `xp_events`
+row and no `daily_activity` row.
+
+The cost is stated plainly: tone practice earns no XP, no mastery and no streak credit.
+It is off-path by design, not by omission.
+
 ### Curriculum as versioned data
 
 Content is a build artifact of a generator where generation is safe. `cmd/contentgen`
@@ -139,6 +154,32 @@ needs no cloud credentials and keeps the SPA same-origin. `media.Store` is the s
 — an S3 implementation is a new type, not a change to any caller — and the
 `S3_*` variables stay unread until one exists, rather than being wired to a stub
 that hides the fact that nothing consumes them.
+
+## Pronunciation is scored, never stored
+
+A spoken attempt is the only thing in the product that carries a learner's voice, and
+the shape of the feature follows from that:
+
+- **The audio is transient.** `POST /recordings` reads it into memory, hands it to the
+  configured provider and drops it — no audio column, no temp file, nothing to purge.
+  What persists is the assessment (`speaking_scores`): numbers, and the per-word
+  detail a learner can act on. The recorder tells them so *before* they record.
+- **The score is server-side.** The client names a recording it owns
+  (`recording_id`); grading reads the score from storage. The attempts service strips
+  every scoring field from a client payload before grading and restores them only from
+  a stored score, so a hand-built payload cannot award itself the pass that completes
+  the lesson and pays the XP. That property has its own end-to-end test.
+- **Grading stays honest.** `is_correct` remains `null` for speaking even when scored: a
+  pronunciation score measures how someone sounded, not whether their Chinese was
+  right, and "wrong" is a verdict that would stop people speaking. What the score does
+  decide is whether the drill counts as done — the same 0.7 band every other exercise
+  uses — and therefore whether it still asks for human review, which is the question
+  tier 1 could never answer.
+- **The provider is a seam, and off by default.** `internal/speech` has one interface
+  and three implementations (a vendor, a deterministic fake for development, and none).
+  Unset means the feature is off and the drill behaves exactly as it did before scoring
+  existed; `fake` is refused in production; the vendor is opt-in per deployment. See
+  `docs/sources.md` §7 for the terms that come with it.
 
 ## The interface is a system, not a stylesheet
 

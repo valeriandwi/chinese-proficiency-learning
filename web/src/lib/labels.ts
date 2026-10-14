@@ -42,6 +42,7 @@ const exerciseTypes: Record<string, string> = {
   hanzi_trace: 'Trace the character',
   hanzi_recall: 'Write from memory',
   short_answer: 'Write an answer',
+  tone_mcq: 'Tone: choose',
   listening_mcq: 'Listening: choose',
   listening_dictation: 'Listening: transcribe',
   speak_repeat: 'Speaking: repeat',
@@ -73,6 +74,7 @@ const graders: Record<string, string> = {
   hanzi_trace: 'stroke check',
   hanzi_recall: 'stroke check',
   rubric: 'keyword rubric',
+  tone_mcq: 'exact match',
   listening_mcq: 'exact match',
   listening_dictation: 'accepted answers',
   // Speaking is scored on what can be checked (a recording exists and is the right

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import type { Tone } from '../lib/labels'
 
 // The component kit. Every colour comes from a semantic token in index.css: a role,
@@ -57,6 +57,9 @@ export function StatTile({
   )
 }
 
+// Every remaining native button attribute is forwarded, so ARIA state reaches the DOM.
+// Without the pass-through, `aria-pressed` on a toggle silently vanished: the control
+// looked right and announced nothing, and only an assertion on the attribute noticed.
 type ButtonProps = {
   children: ReactNode
   onClick?: () => void
@@ -65,7 +68,7 @@ type ButtonProps = {
   type?: 'button' | 'submit'
   className?: string
   title?: string
-}
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'onClick' | 'disabled' | 'type' | 'className' | 'title'>
 
 export function Button({
   children,
@@ -75,6 +78,7 @@ export function Button({
   type = 'button',
   className = '',
   title,
+  ...rest
 }: ButtonProps) {
   const base =
     'inline-flex select-none items-center justify-center gap-2 rounded-tile px-4 py-2.5 text-sm font-extrabold tracking-wide transition active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50'
@@ -89,7 +93,14 @@ export function Button({
     success: 'bg-success-700 text-white hover:bg-success-600',
   } as const
   return (
-    <button type={type} onClick={onClick} disabled={disabled} title={title} className={`${base} ${variants[variant]} ${className}`}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`${base} ${variants[variant]} ${className}`}
+      {...rest}
+    >
       {children}
     </button>
   )

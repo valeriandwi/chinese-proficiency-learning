@@ -18,7 +18,10 @@ export
 endif
 
 TEST_DATABASE_URL ?= postgres://hanpath:hanpath_dev_pw@127.0.0.1:5435/hanpath?sslmode=disable
-CONTENT := $(wildcard content/*/*.yaml)
+# Tone-drill files append units to a level that already exists, so they are imported
+# last: the wildcard would otherwise order level-1-tones.yaml before level-1.yaml and
+# add the tone unit before the level it belongs to is imported.
+CONTENT := $(filter-out %-tones.yaml,$(wildcard content/*/*.yaml)) $(wildcard content/*/*-tones.yaml)
 
 .PHONY: help
 help: ## Show this help
@@ -121,9 +124,9 @@ content-import: ## Import every authored content file
 	go run ./cmd/contentctl import $(foreach f,$(CONTENT),--file $(f))
 
 .PHONY: content-gen 
-content-gen: ## Generate levels 2-5 from the published HSK 2.0 word lists
+content-gen: ## Generate levels 2-5 from the word lists, plus level 1's tone drills
 	@test -d .local/wordlists || (echo "missing .local/wordlists/*.json — the fetch command is in content/hsk2.0/VOCABULARY-LICENCE.txt" && exit 1)
-	go run ./cmd/contentgen -levels 2,3,4,5
+	go run ./cmd/contentgen -levels 1,2,3,4,5
 
 .PHONY: content-list 
 content-list: ## List imported curricula

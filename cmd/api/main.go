@@ -19,6 +19,7 @@ import (
 	"github.com/valeriandwipurnomo/hanpath/internal/httpapi"
 	"github.com/valeriandwipurnomo/hanpath/internal/mail"
 	"github.com/valeriandwipurnomo/hanpath/internal/media"
+	"github.com/valeriandwipurnomo/hanpath/internal/speech"
 	"github.com/valeriandwipurnomo/hanpath/internal/store"
 )
 
@@ -78,6 +79,25 @@ func run(migrateOnly bool) error {
 	if err != nil {
 		return err
 	}
+	// Pronunciation scoring is optional. No provider configured is a supported
+	// deployment: speaking drills stay self-assessed and the recordings endpoint says
+	// so. A provider that IS configured but unusable is a startup failure, because a
+	// silent downgrade would leave learners wondering why nothing is ever scored.
+	scorer, err := speech.New(speech.Config{
+		Provider:    cfg.SpeechProvider,
+		AppEnv:      cfg.AppEnv,
+		AzureKey:    cfg.SpeechAzureKey,
+		AzureRegion: cfg.SpeechAzureRegion,
+		FFmpegPath:  cfg.FFmpegPath,
+	})
+	if err != nil {
+		if !errors.Is(err, speech.ErrNoProvider) {
+			return err
+		}
+		log.Info("no pronunciation provider configured; speaking drills stay self-assessed")
+		scorer = nil
+	}
+
 	srv := httpapi.New(httpapi.Deps{
 		Config:   cfg,
 		Log:      log,
@@ -85,6 +105,7 @@ func run(migrateOnly bool) error {
 		Attempts: attempts.New(st),
 		Media:    mediaStore,
 		Mail:     sender,
+		Speech:   scorer,
 	})
 
 	httpServer := &http.Server{

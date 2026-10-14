@@ -48,6 +48,11 @@ func TestCompleteEntireLevel(t *testing.T) {
 	if _, err := curriculum.Import(ctx, st, doc, provisionerFor(t)); err != nil {
 		t.Fatalf("importing content: %v", err)
 	}
+	// The tone unit is a second file for the same level. Without it the walk below would
+	// never see a tone drill, and a tone drill is now part of every level's path.
+	if _, err := curriculum.Import(ctx, st, loadToneFile(t), provisionerFor(t)); err != nil {
+		t.Fatalf("importing tone content: %v", err)
+	}
 
 	cfg := &config.Config{
 		AppEnv: "test", LogLevel: "error",
@@ -82,10 +87,20 @@ func TestCompleteEntireLevel(t *testing.T) {
 	})
 
 	ordered := pathLessonIDs(t, c)
-	t.Logf("path has %d lessons; walking them in order", len(ordered))
+	// Walking the whole path stopped being a useful test when levels 2-5 were
+	// generated: 398 lessons x 4 round trips is ten minutes of CI to re-prove what the
+	// first dozen already prove. The prefix deliberately runs past the end of the
+	// authored level and into a generated one, because that boundary is the seam worth
+	// checking — everything after it is the same machinery with different words.
+	const walkedLessons = 12
+	walked := ordered
+	if len(walked) > walkedLessons {
+		walked = walked[:walkedLessons]
+	}
+	t.Logf("path has %d lessons; walking the first %d (authored level plus the start of a generated level)", len(ordered), len(walked))
 
 	exercisesSeen := map[string]bool{}
-	for i, lessonID := range ordered {
+	for i, lessonID := range walked {
 		var lesson store.LessonDetail
 		if code := c.do(http.MethodGet, "/api/v1/lessons/"+lessonID.String(), nil, &lesson); code != http.StatusOK {
 			t.Fatalf("lesson %d: status %d", i, code)
@@ -138,6 +153,59 @@ func TestCompleteEntireLevel(t *testing.T) {
 	}
 	t.Logf("exercise types exercised: %d", len(exercisesSeen))
 
+	// --- a tone drill, judged both ways ------------------------------------
+	//
+	// The walk above submits only correct answers, which proves the happy path and
+	// nothing else. A tone drill is the one question a learner can answer by ear alone,
+	// so what has to hold is that a wrong tone is judged wrong and that the tones come
+	// back — a tone drill that cannot say why teaches nothing.
+	var toneExerciseID, toneLessonID uuid.UUID
+	var correctOption, correctTones, otherOption string
+	if err := st.Pool.QueryRow(ctx, `
+		SELECT e.id, e.lesson_id, e.answer_key->>'correct_id', e.answer_key->>'tones',
+		       (SELECT o->>'id' FROM jsonb_array_elements(e.prompt->'options') o
+		         WHERE o->>'id' <> e.answer_key->>'correct_id' LIMIT 1)
+		FROM exercises e
+		WHERE e.type = 'tone_mcq' AND e.lesson_id = ANY($1)
+		LIMIT 1`, walked).Scan(&toneExerciseID, &toneLessonID, &correctOption, &correctTones, &otherOption); err != nil {
+		t.Fatalf("no tone drill in the walked lessons: %v", err)
+	}
+	submitTone := func(ref, option string) attempts.Summary {
+		t.Helper()
+		var out attempts.Summary
+		if code := c.do(http.MethodPost, "/api/v1/lessons/"+toneLessonID.String()+"/attempts", map[string]any{
+			"mode": "practice",
+			"attempts": []map[string]any{{
+				"exercise_id": toneExerciseID,
+				"client_ref":  ref,
+				"response":    map[string]any{"option_id": option},
+			}},
+		}, &out); code != http.StatusOK {
+			t.Fatalf("tone submission: status %d", code)
+		}
+		if len(out.Results) != 1 {
+			t.Fatalf("tone submission returned %d results", len(out.Results))
+		}
+		return out
+	}
+
+	wrong := submitTone("tone-wrong-"+uuid.NewString(), otherOption).Results[0]
+	if wrong.IsCorrect == nil || *wrong.IsCorrect {
+		t.Errorf("a wrong tone was judged %v", wrong.IsCorrect)
+	}
+	if wrong.Score != 0 {
+		t.Errorf("a wrong tone scored %.2f", wrong.Score)
+	}
+	if got, _ := wrong.Feedback["tones"].(string); got != correctTones {
+		t.Errorf("the tones came back as %v, want %q", wrong.Feedback["tones"], correctTones)
+	}
+
+	right := submitTone("tone-right-"+uuid.NewString(), correctOption).Results[0]
+	if right.IsCorrect == nil || !*right.IsCorrect {
+		t.Errorf("the right tone was judged %v", right.IsCorrect)
+	}
+	t.Logf("tone drill graded over HTTP: wrong=%v (tones %v), right=%v", *wrong.IsCorrect, wrong.Feedback["tones"], *right.IsCorrect)
+
 	// --- final path state --------------------------------------------------
 	var final struct {
 		Levels []struct {
@@ -151,26 +219,37 @@ func TestCompleteEntireLevel(t *testing.T) {
 	if code := c.do(http.MethodGet, "/api/v1/curriculum/hsk2.0/path", nil, &final); code != http.StatusOK {
 		t.Fatalf("final path: status %d", code)
 	}
+	statesInOrder := make([]string, 0, len(ordered))
 	for _, lv := range final.Levels {
 		for _, u := range lv.Units {
 			for _, l := range u.Lessons {
-				if l.State != "completed" {
-					t.Errorf("after walking the whole path a lesson is still %q", l.State)
-				}
+				statesInOrder = append(statesInOrder, l.State)
 			}
+		}
+	}
+	if len(statesInOrder) != len(ordered) {
+		t.Fatalf("the path reports %d lessons but listed %d", len(statesInOrder), len(ordered))
+	}
+	for i, state := range statesInOrder {
+		switch {
+		case i < len(walked):
+			if state != "completed" {
+				t.Errorf("lesson %d is %q after this run submitted it", i, state)
+			}
+		case state == "completed":
+			// Nothing beyond the walked prefix may be complete: the server enforces
+			// that lessons unlock in order, and this is where that shows.
+			t.Errorf("lesson %d is completed although this run never reached it", i)
 		}
 	}
 
 	// --- aggregates --------------------------------------------------------
+	// Scoped to the lessons this run actually walked, for the same reason.
 	var expectedXP int
 	if err := st.Pool.QueryRow(ctx, `
-		SELECT coalesce(sum(ls.xp_reward), 0)::int
-		FROM lessons ls
-		JOIN units u ON u.id = ls.unit_id
-		JOIN levels l ON l.id = u.level_id
-		JOIN curricula c ON c.id = l.curriculum_id
-		WHERE c.version = 'hsk2.0'`).Scan(&expectedXP); err != nil {
-		t.Fatalf("summing authored XP: %v", err)
+		SELECT coalesce(sum(ls.xp_reward), 0)::int FROM lessons ls WHERE ls.id = ANY($1)`,
+		walked).Scan(&expectedXP); err != nil {
+		t.Fatalf("summing walked XP: %v", err)
 	}
 	var actualXP int
 	if err := st.Pool.QueryRow(ctx, `SELECT coalesce(sum(amount), 0)::int FROM xp_events WHERE user_id = $1`, userID).
@@ -201,17 +280,25 @@ func TestCompleteEntireLevel(t *testing.T) {
 	if err := st.Pool.QueryRow(ctx, `SELECT count(*)::int FROM review_items WHERE user_id = $1`, userID).Scan(&deck); err != nil {
 		t.Fatalf("counting the review deck: %v", err)
 	}
-	var levelWords int
+	// Coverage, not equality: the deck must hold every word a completed lesson taught.
+	// Walking a prefix of the generated levels adds more words to it, and that is
+	// correct — an equality check here would fail for the right behaviour.
+	var unseeded int
 	if err := st.Pool.QueryRow(ctx, `
 		SELECT count(*)::int
 		FROM lexemes x
 		JOIN lexeme_levels ll ON ll.lexeme_id = x.id
 		JOIN curricula c ON c.id = ll.curriculum_id
-		WHERE c.version = 'hsk2.0' AND ll.level_number = 1`).Scan(&levelWords); err != nil {
-		t.Fatalf("counting level vocabulary: %v", err)
+		WHERE c.version = 'hsk2.0' AND ll.level_number = 1
+		  AND NOT EXISTS (SELECT 1 FROM review_items r WHERE r.user_id = $1 AND r.lexeme_id = x.id)`,
+		userID).Scan(&unseeded); err != nil {
+		t.Fatalf("checking review-deck coverage: %v", err)
 	}
-	if deck != levelWords {
-		t.Errorf("review deck holds %d words, want all %d taught at this level", deck, levelWords)
+	if unseeded > 0 {
+		t.Errorf("%d word(s) taught by a completed level-1 lesson never entered the review deck", unseeded)
+	}
+	if deck < 46 {
+		t.Errorf("the review deck holds %d cards; every word of the completed level 1 should be there", deck)
 	}
 
 	// --- a client_ref reused for a different exercise is rejected ------------
@@ -233,8 +320,8 @@ func TestCompleteEntireLevel(t *testing.T) {
 	if code := c.do(http.MethodGet, "/api/v1/progress/overview", nil, &overview); code != http.StatusOK {
 		t.Fatalf("overview: status %d", code)
 	}
-	if overview.LessonsDone != len(ordered) {
-		t.Errorf("overview reports %d completed lessons, want %d", overview.LessonsDone, len(ordered))
+	if overview.LessonsDone != len(walked) {
+		t.Errorf("overview reports %d completed lessons, want the %d this run walked", overview.LessonsDone, len(walked))
 	}
 	t.Logf("aggregates: %d XP, %d completed lessons, %d review cards, %d skills, streak %d",
 		actualXP, overview.LessonsDone, deck, len(overview.Skills), overview.Streak.CurrentStreak)

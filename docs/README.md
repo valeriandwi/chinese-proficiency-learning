@@ -5,10 +5,12 @@ structured lessons by level, practice in reading / listening / writing / speakin
 spaced repetition, streaks, and (in progress) mock exams.
 
 **Status: M0–M2 are playable end to end.** Accounts, the HSK 2.0 levels 1–5 path
-(2,387 words, 8,125 drills, 392 lessons at levels 2–5 generated from the published
-word lists),
-practice lessons with **fourteen** exercise types (reading, listening and speaking
-included), reference audio generated at import time and served same-origin,
+(2,387 words, 10,577 drills, 392 lessons at levels 2–5 generated from the published
+word lists), pronunciation scoring for speaking drills behind a provider interface
+(off by default; the recording is scored and never stored),
+a tone-practice page (drill tone alone without walking the path; it earns no XP and
+moves nothing), practice lessons with **fifteen** exercise types (reading, listening, speaking and
+tone choice included), reference audio generated at import time and served same-origin,
 server-side grading, derived progress, streaks and the review deck all work against
 real Postgres, covered by Go unit tests, Go integration tests, an HTTP smoke test
 and a browser end-to-end test. Hanzi writing is practised in-app but graded from the
@@ -92,8 +94,9 @@ docs/               architecture, licensing, roadmap
    import time and upserted on natural keys. HSK 3.0 — three stages, nine levels —
    is an import, not a release. Re-importing never deletes an exercise, because a
    delete would cascade away every learner attempt against it.
-3. **The server grades; the client renders.** Nine exercise types are validated and
-   graded by one registry. Answer keys are structurally absent from lesson
+3. **The server grades; the client renders.** Every exercise type is validated and
+   graded by one registry, and a new one cannot reach a learner without passing its
+   own validator. Answer keys are structurally absent from lesson
    payloads, exam mode withholds solutions, and a free-form answer is rubric-checked
    and flagged `needs_review` rather than declared correct — no keyword check can
    judge grammar or style, and the API says so in its own response.

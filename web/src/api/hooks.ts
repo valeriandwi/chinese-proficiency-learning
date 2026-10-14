@@ -9,6 +9,8 @@ import type {
   ReviewAnswerResponse,
   ReviewQueue,
   SessionInfo,
+  ToneAnswersResponse,
+  ToneQueue,
   SubmitSummary,
   User,
 } from './types'
@@ -19,6 +21,7 @@ export const queryKeys = {
   path: (version: string) => ['curriculum', version, 'path'] as const,
   lesson: (id: string) => ['lesson', id] as const,
   reviewQueue: (limit: number) => ['reviews', 'queue', limit] as const,
+  toneQueue: (level: number | null) => ['tones', 'queue', level ?? 'mine'] as const,
   curricula: ['curricula'] as const,
 }
 
@@ -69,6 +72,34 @@ export function useReviewQueue(limit = 20) {
   return useQuery({
     queryKey: queryKeys.reviewQueue(limit),
     queryFn: () => api<ReviewQueue>(`/api/v1/reviews/queue?limit=${limit}`),
+  })
+}
+
+/**
+ * Tone drills for a level. `null` lets the server pick the learner's own level, which
+ * is what a page should do rather than guessing at a default of its own — the server
+ * already knows whether they have said which level they are working on.
+ */
+export function useToneQueue(level: number | null) {
+  return useQuery({
+    queryKey: queryKeys.toneQueue(level),
+    queryFn: () =>
+      api<ToneQueue>(`/api/v1/tones/queue${level === null ? '' : `?level=${level}`}`),
+  })
+}
+
+/**
+ * Grades one tone answer.
+ *
+ * Deliberately does not invalidate the queue: a round is snapshotted when it starts, so
+ * a background refetch cannot reshuffle the questions mid-round, and the page already
+ * holds the lifetime stats each answer returns. Refreshing is the page's call, when it
+ * begins a new round.
+ */
+export function useAnswerTone() {
+  return useMutation({
+    mutationFn: (input: { exercise_id: string; client_ref: string; option_id: string }) =>
+      api<ToneAnswersResponse>('/api/v1/tones/answers', { method: 'POST', body: { answers: [input] } }),
   })
 }
 

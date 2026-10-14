@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"errors"
 	"log/slog"
 	"os"
 	"testing"
@@ -11,6 +12,7 @@ import (
 	"github.com/valeriandwipurnomo/hanpath/internal/httpapi"
 	"github.com/valeriandwipurnomo/hanpath/internal/mail"
 	"github.com/valeriandwipurnomo/hanpath/internal/media"
+	"github.com/valeriandwipurnomo/hanpath/internal/speech"
 	"github.com/valeriandwipurnomo/hanpath/internal/store"
 )
 
@@ -50,6 +52,23 @@ func provisionerFor(t *testing.T) curriculum.AudioProvisioner {
 // wires it in production.
 func serverFor(t *testing.T, cfg *config.Config, log *slog.Logger, st *store.Store) *httpapi.Server {
 	t.Helper()
+	// Built the same way cmd/api builds it, so a misconfiguration that would stop the
+	// real API from starting stops this test too — including a provider named in the
+	// config that cannot be constructed.
+	scorer, err := speech.New(speech.Config{
+		Provider:    cfg.SpeechProvider,
+		AppEnv:      cfg.AppEnv,
+		AzureKey:    cfg.SpeechAzureKey,
+		AzureRegion: cfg.SpeechAzureRegion,
+		FFmpegPath:  cfg.FFmpegPath,
+	})
+	if err != nil && !errors.Is(err, speech.ErrNoProvider) {
+		t.Fatalf("building the pronunciation scorer: %v", err)
+	}
+	var speechScorer speech.Scorer
+	if scorer != nil {
+		speechScorer = scorer
+	}
 	return httpapi.New(httpapi.Deps{
 		Config:   cfg,
 		Log:      log,
@@ -57,5 +76,6 @@ func serverFor(t *testing.T, cfg *config.Config, log *slog.Logger, st *store.Sto
 		Attempts: attempts.New(st),
 		Media:    testMediaStore(t),
 		Mail:     mail.LogSender{Log: log},
+		Speech:   speechScorer,
 	})
 }

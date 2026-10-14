@@ -127,7 +127,7 @@ func TestGeneratedExercisesPassTheRegistryValidator(t *testing.T) {
 	words := sampleWords()
 	keys, glosses := keysAndGlosses(words)
 	strokes := fixedStrokes{"吧": 7}
-	lesson, err := buildLesson("hsk2.0", 2, 1, 0, 6, words, keys, glosses, strokes)
+	lesson, err := buildLesson("hsk2.0", 2, 1, 0, 6, words, keys, glosses, strokes, nil)
 	if err != nil {
 		t.Fatalf("building the lesson: %v", err)
 	}

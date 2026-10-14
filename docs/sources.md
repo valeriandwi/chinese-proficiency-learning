@@ -156,3 +156,45 @@ Both are **bundled by Vite and self-hosted**. Nothing is fetched from a
 third-party font or icon CDN at runtime: the app renders the same offline, and no
 request leaks a learner's session to another origin. `src/lib/design-tokens.test.ts`
 fails the build if a CDN reference ever appears in the stylesheet.
+
+## 7. Pronunciation scoring — a vendor decision, recorded before it is switched on
+
+**What it is.** The score on a speaking drill: how closely the learner's recording
+matched the reference, with per-word detail. Implemented behind one interface
+(`internal/speech`) so the choice of vendor is a setting, not a rewrite.
+
+**Where it comes from, and the terms that come with it.**
+- **`azure`** — Microsoft Pronunciation Assessment (short-audio REST API). It is the
+  provider that can judge Mandarin properly: phoneme-level accuracy, per-word error
+  types, fluency, completeness and prosody — **including tones**, which is most of
+  what a learner of Chinese needs told about. Its terms, stated once here so nobody
+  has to rediscover them: it is billed per hour of audio; the learner's recording and
+  our subscription key are sent to Microsoft, so the audio is governed by Microsoft's
+  terms rather than ours; and it must be enabled deliberately
+  (`SPEECH_PROVIDER=azure` plus `AZURE_SPEECH_KEY`/`AZURE_SPEECH_REGION`), never by
+  default.
+- **`fake`** — deterministic pseudo-scores derived from a hash of the audio. It exists
+  so the upload → score → grade → display path is exercisable offline and in tests. It
+  is refused when `APP_ENV=production`: a fake score shown to a real learner is a lie
+  about their Chinese.
+- **`none` (or unset)** — the feature is off. `POST /recordings` answers `503` with
+  `pronunciation_unavailable` and the drill stays self-assessed. **This is the default**,
+  because sending a learner's voice to a third party is opt-in.
+
+**What we already discharge.**
+- **Nothing is stored.** The recording is read into memory, handed to the provider and
+  dropped: there is no audio column in the schema, no temp file, and nothing to purge.
+  What survives is the score (`speaking_scores`). The UI states this before the learner
+  records.
+- **A client cannot send a score.** It names a recording it owns; the numbers are read
+  back from storage by grading. A tampered payload is stripped and the drill grades the
+  tier-1 way, verified end to end.
+- **Cost is bounded** per learner (12 scored recordings a minute) and per account
+  (`SPEECH_DAILY_SCORING_CAP`), checked before the provider is called.
+- **The reference audio** a score is measured against is our own generated TTS (§5),
+  so scoring introduces no new third-party content.
+
+**Before serving scores to real learners,** the operator decides: which provider,
+with the vendor's terms read and their attribution requirements recorded here with the
+date, and Azure Speech added to the inventory below. Until then, `fake` is for
+development and `none` is what a fresh deployment does.

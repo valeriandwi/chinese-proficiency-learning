@@ -1,6 +1,6 @@
 import { Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { BookOpenCheck, Home, Languages, LogOut, Map, Settings, type LucideIcon } from 'lucide-react'
+import { AudioLines, BookOpenCheck, Home, Languages, LogOut, Map, Settings, type LucideIcon } from 'lucide-react'
 import { useLogout, useOverview, useSession } from './api/hooks'
 import { Button, IconButton, Spinner } from './components/ui'
 import { RightRail } from './components/RightRail'
@@ -8,6 +8,7 @@ import { usePrefs } from './stores/prefs'
 import { LoginPage, RegisterPage } from './features/auth/AuthPages'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { PathPage } from './features/path/PathPage'
+import { TonePage } from './features/tone/TonePage'
 import { LessonPage } from './features/lesson/LessonPage'
 import { ReviewPage } from './features/review/ReviewPage'
 import { ProfilePage } from './features/profile/ProfilePage'
@@ -64,6 +65,14 @@ export function App() {
           }
         />
         <Route
+          path="/tones"
+          element={
+            <RequireAuth authenticated={authenticated}>
+              <TonePage />
+            </RequireAuth>
+          }
+        />
+        <Route
           path="/placement"
           element={
             <RequireAuth authenticated={authenticated}>
@@ -93,6 +102,7 @@ const DESTINATIONS: Destination[] = [
   { to: '/', label: 'Today', icon: Home, end: true },
   { to: '/path', label: 'Path', icon: Map },
   { to: '/reviews', label: 'Reviews', icon: BookOpenCheck },
+  { to: '/tones', label: 'Tones', icon: AudioLines },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 

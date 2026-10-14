@@ -20,6 +20,7 @@ import (
 	"github.com/valeriandwipurnomo/hanpath/internal/config"
 	"github.com/valeriandwipurnomo/hanpath/internal/mail"
 	"github.com/valeriandwipurnomo/hanpath/internal/media"
+	"github.com/valeriandwipurnomo/hanpath/internal/speech"
 	"github.com/valeriandwipurnomo/hanpath/internal/store"
 )
 
@@ -32,6 +33,10 @@ type Deps struct {
 	Attempts *attempts.Service
 	Media    media.Store
 	Mail     mail.Sender
+	// Speech scores spoken answers. Nil means this deployment has no pronunciation
+	// provider, which the recordings endpoint reports as unavailable rather than as a
+	// failure of the learner's recording.
+	Speech speech.Scorer
 }
 
 // Server holds the dependencies for every handler.
@@ -43,9 +48,12 @@ type Server struct {
 	media    media.Store
 	mail     mail.Sender
 
-	authLimiter  *auth.Limiter
-	writeLimiter *auth.Limiter
-	started      time.Time
+	speech speech.Scorer
+
+	authLimiter    *auth.Limiter
+	writeLimiter   *auth.Limiter
+	scoringLimiter *auth.Limiter
+	started        time.Time
 }
 
 // New builds the API server.
@@ -57,9 +65,13 @@ func New(d Deps) *Server {
 		attempts:     d.Attempts,
 		media:        d.Media,
 		mail:         d.Mail,
+		speech:       d.Speech,
 		authLimiter:  auth.NewLimiter(20),  // auth endpoints: 20/min per IP
 		writeLimiter: auth.NewLimiter(120), // learner writes: 120/min per session
-		started:      time.Now(),
+		// Scoring is the one learner action that costs real money per call, so its
+		// ceiling is far below the general write limit.
+		scoringLimiter: auth.NewLimiter(12),
+		started:        time.Now(),
 	}
 }
 
@@ -107,11 +119,21 @@ func (s *Server) Routes() http.Handler {
 			r.Get("/lessons/{id}", s.handleLesson)
 			r.Post("/lessons/{id}/attempts", s.handleSubmitAttempts)
 
+			// Scoring a recording is its own endpoint because it carries audio: it is
+			// the only place a learner's voice crosses the network, and keeping it
+			// separate keeps that visible and separately rate-limited.
+			r.Post("/recordings", s.handleScoreRecording)
+
 			r.Get("/progress/overview", s.handleProgressOverview)
 			r.Post("/progress/refresh", s.handleProgressRefresh)
 
 			r.Get("/reviews/queue", s.handleReviewQueue)
 			r.Post("/reviews/answer", s.handleReviewAnswer)
+
+			// Tone practice: drills on tone alone, served from any level and graded
+			// without touching the path (see handlers_tone.go and migrations/0006).
+			r.Get("/tones/queue", s.handleToneQueue)
+			r.Post("/tones/answers", s.handleToneAnswers)
 		})
 	})
 

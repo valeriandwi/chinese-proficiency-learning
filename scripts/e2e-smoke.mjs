@@ -420,7 +420,17 @@ async function main() {
     await cdp.waitFor('window.__t.byText("Record") ? "recorder" : ""', 'the recorder')
     const speakPage = await cdp.eval('window.__t.text()')
     assert('speaking: the reference sentence is shown', speakPage.includes('你好！我叫小明'))
-    assert('speaking: the learner is told the recording stays local', speakPage.includes('not uploaded'))
+    // The consent copy, pinned because it is a promise rather than a label. It changed
+    // deliberately when scoring arrived: a scoreable drill now says the take is
+    // uploaded, assessed and not stored, and an open speaking prompt still promises it
+    // never leaves the browser. Asserting either one by itself would let the other
+    // regress silently.
+    assert(
+      'speaking: the learner is told what happens to their voice before they record',
+      speakPage.includes('scored takes are uploaded, assessed, and not stored') ||
+        speakPage.includes('stays in this browser and is never uploaded'),
+      'consent copy present',
+    )
 
     // Ask the browser for a microphone through the interface itself, the way a learner
     // does. The panel reports "Waiting for the microphone…" when the request stalls,
@@ -771,6 +781,64 @@ async function main() {
     await cdp.send('Page.navigate', { url: `${BASE}/path` })
     await cdp.waitFor('window.__t.text().includes("unlock in order") ? "path" : ""', 'the path at 1440@2x')
     await shot('07-desktop-macbook-2x')
+
+    // --- tone practice, and the path it must not touch ----------------------
+    // The page exists for a learner whose tones are the problem: it serves drills from
+    // any level, including lessons they have not reached. So it has to be graded for
+    // real (the server judges it) and it has to leave the path exactly as it was — the
+    // dashboard's answer count is where a learner would notice if it did not.
+    const answersBefore = (dashAfter.match(/(\d+)\s*answers/) || [])[1] ?? ''
+
+    await cdp.eval('window.__t.click("Tones", "a")')
+    await cdp.waitFor('window.__t.text().includes("声调") ? "tones" : ""', 'the tone page')
+    const tonePage = await cdp.eval('window.__t.text()')
+    assert(
+      'tones: the page says tone practice does not move the path',
+      /nothing here moves your path/i.test(tonePage),
+      'explanation present',
+    )
+    assert(
+      'tones: a drill is served with its tone choices',
+      /(1st|2nd|3rd|4th) tone —/.test(tonePage),
+      tonePage.includes('No tone drills') ? 'the page reported no drills' : 'tone options present',
+    )
+
+    const toneChoice = await cdp.eval(`(() => {
+      const btn = [...document.querySelectorAll('button')].find((b) => /^(1st|2nd|3rd|4th) tone —|^neutral —/.test(window.__t.norm(b.textContent)))
+      if (!btn) return 'NOT_FOUND'
+      const label = window.__t.norm(btn.textContent)
+      btn.click()
+      return label
+    })()`)
+    assert('tones: a tone can be chosen', toneChoice !== 'NOT_FOUND', String(toneChoice))
+
+    await cdp.waitFor('window.__t.text().includes("checked by") ? "graded" : ""', 'the tone verdict')
+    const toneGraded = await cdp.eval('window.__t.text()')
+    assert('tones: the server graded the answer', /checked by/.test(toneGraded), 'verdict present')
+    assert(
+      'tones: the answer is explained in tones, not just marked',
+      /(1st|2nd|3rd|4th) tone —|neutral —/.test(toneGraded),
+      'tone explanation present',
+    )
+
+    // The tone record DOES move: the page keeps its own lifetime tally.
+    assert(
+      'tones: the practice is recorded on the tone page',
+      /HSK 1:\s*\d+\/\d+ correct/.test(toneGraded),
+      toneGraded.match(/HSK 1:[^·]*/)?.[0]?.trim() ?? 'no lifetime chip',
+    )
+
+    // ...and the path does not. The dashboard's answer count is the learner-visible
+    // proof: a tone answer must not appear as one.
+    await cdp.eval('window.__t.click("Today", "a")')
+    await cdp.waitFor('window.__t.text().toLowerCase().includes("up next") ? "dashboard" : ""', 'the dashboard after tone practice')
+    const dashAfterTones = (await cdp.eval('window.__t.text()')).toLowerCase()
+    const answersAfter = (dashAfterTones.match(/(\d+)\s*answers/) || [])[1] ?? ''
+    assert(
+      'tones: tone practice did not count as a path answer',
+      answersBefore !== '' && answersAfter === answersBefore,
+      `answers before ${answersBefore || 'not found'}, after ${answersAfter || 'not found'}`,
+    )
 
     console.log(`\npassed: ${passed}   failed: ${failed}   skipped: ${skipped}`)
     process.exitCode = failed === 0 ? 0 : 1

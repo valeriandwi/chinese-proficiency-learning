@@ -9,9 +9,12 @@ package exercises
 //     in the ANSWER KEY, so it is structurally absent from the lesson payload and
 //     can only be revealed after a submission — the same guarantee every other
 //     type gives.
-//   * Speaking is NOT gradable in this build. There is no speech recognition and
-//     no pronunciation model, so a speaking result reports what can actually be
-//     checked (a recording exists, it is long enough to be an utterance, the
+//   * Speaking has two modes, and which one applies is a deployment decision, not a
+//     compile-time fact. With a pronunciation provider configured the recording is
+//     scored (see internal/speech): a result reports what was measured, per word, and
+//     stops asking for human review. With no provider — still the default — a speaking
+//     result reports only what can be checked without one (a recording exists, it is
+//     long enough to be an utterance, the
 //     learner rated their own attempt) and returns IsCorrect: nil with
 //     needs_review: true. It never claims the learner pronounced anything
 //     correctly. A score here means "the drill was done", not "it was right".
@@ -19,6 +22,7 @@ package exercises
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -36,11 +40,40 @@ const (
 // tones are correct.
 const speakingLimitation = "recorded and self-reviewed only: this build has no speech recognition, so pronunciation, tones and fluency were NOT assessed. A score here means the drill was completed, not that your Chinese was correct."
 
+// speakingPassingBand is the score at or above which a spoken drill counts as done.
+// It is the same 0.7 the progress recomputation applies to every exercise, so a clear
+// recording is what lets a lesson complete — speaking needs no rule of its own.
+const speakingPassingBand = 0.7
+
+// pronunciationWord is one assessed word, in the shape the scoring endpoint returns.
+type pronunciationWord struct {
+	Word      string  `json:"word"`
+	Accuracy  float64 `json:"accuracy"`
+	ErrorType string  `json:"error_type"`
+}
+
 type speakingResponse struct {
 	DurationMs int `json:"duration_ms"`
 	// SelfRating is the learner's own 1-5 judgement. It is stored as a signal for
 	// them and their future revision, never folded into correctness.
 	SelfRating int `json:"self_rating,omitempty"`
+	// RecordingID names a recording this learner had scored. It is the ONLY scoring
+	// input a client controls: the attempts service looks the score up in storage,
+	// where it was written by the provider.
+	RecordingID string `json:"recording_id,omitempty"`
+
+	// The fields below are filled in by the server. They are declared here so the
+	// graders can read them, and a client that sends them is not trusted — the
+	// attempts service strips them from every payload before grading and restores them
+	// only from a stored score (see attempts.sanitizeSpeakingResponse). Their absence
+	// means simply "not scored".
+	Score        *float64            `json:"score,omitempty"`
+	Provider     string              `json:"provider,omitempty"`
+	Accuracy     float64             `json:"accuracy,omitempty"`
+	Fluency      float64             `json:"fluency,omitempty"`
+	Completeness float64             `json:"completeness,omitempty"`
+	Prosody      float64             `json:"prosody,omitempty"`
+	Words        []pronunciationWord `json:"words,omitempty"`
 }
 
 type listeningMCQAnswerKey struct {
@@ -235,8 +268,13 @@ type speakRepeatPrompt struct {
 	AudioKey    string `json:"audio_key"`
 	Text        string `json:"text"`
 	Pinyin      string `json:"pinyin,omitempty"`
-	MinSeconds  int    `json:"min_seconds,omitempty"`
-	MaxSeconds  int    `json:"max_seconds,omitempty"`
+	// ToneNote names the tones to aim for, e.g. "third tone — falling then rising",
+	// and states the spoken form when it differs from the written one. A speaking drill
+	// about a word IS a tone drill for that word: this is the part of it the learner can
+	// act on before they record, and it reaches the feedback so they know what to fix.
+	ToneNote   string `json:"tone_note,omitempty"`
+	MinSeconds int    `json:"min_seconds,omitempty"`
+	MaxSeconds int    `json:"max_seconds,omitempty"`
 }
 
 type readAloudPrompt struct {
@@ -325,6 +363,13 @@ func gradeSpeaking(grader string, r speakingResponse, minSeconds, maxSeconds int
 		score += 0.2
 	}
 
+	// A scored recording replaces the proxies entirely: the numbers come from a
+	// pronunciation service that actually listened, so the window and self-rating
+	// heuristic is no longer what decides anything.
+	if r.Score != nil {
+		return gradeScoredSpeaking(grader, r, feedback), nil
+	}
+
 	feedback["duration_ms"] = r.DurationMs
 	feedback["expected_seconds"] = []int{minSeconds, maxSeconds}
 	feedback["self_rating"] = r.SelfRating
@@ -386,6 +431,7 @@ func (g speakRepeatGrader) Grade(prompt, answerKey, response json.RawMessage) (R
 		"reference_text": p.Text,
 		"pinyin":         p.Pinyin,
 		"expected":       fallbackText(k.ReferenceText, p.Text),
+		"tone_note":      p.ToneNote,
 	})
 }
 
@@ -492,4 +538,57 @@ func fallbackText(values ...string) string {
 		}
 	}
 	return ""
+}
+
+// scoredSpeakingLimitation states what a pronunciation score is and is not. A learner
+// who reads a number without this will believe it judged their Chinese.
+const scoredSpeakingLimitation = "scored by the configured pronunciation service, which " +
+	"heard the recording and compared it with the reference: accuracy of sounds and tones, " +
+	"fluency, and how much of the reference was completed. It is not an examiner — it does " +
+	"not judge whether your answer was appropriate, and a low score means \"hard to " +
+	"recognise\", not \"wrong Chinese\"."
+
+// gradeScoredSpeaking reports what the service measured.
+//
+// is_correct stays null even here. A pronunciation score measures how someone
+// sounded; it is not a verdict on whether their Chinese was right, and a speaking
+// drill that can be marked "wrong" is one learners stop attempting. What the score
+// does decide is whether the drill counts as done — and therefore whether it still
+// asks a human to review it, which is the thing tier 1 could never answer.
+func gradeScoredSpeaking(grader string, r speakingResponse, feedback map[string]any) Result {
+	overall := clamp01(*r.Score)
+	passed := overall >= speakingPassingBand
+
+	feedback["has_speech_recognition"] = true
+	feedback["provider"] = r.Provider
+	feedback["score"] = overall
+	feedback["accuracy"] = r.Accuracy
+	feedback["fluency"] = r.Fluency
+	feedback["completeness"] = r.Completeness
+	feedback["prosody"] = r.Prosody
+	feedback["passing_band"] = speakingPassingBand
+	feedback["passed"] = passed
+	// Nothing is queued for a human: this drill has been judged, by a machine, and the
+	// honest thing is to say so rather than leave it "pending review" forever.
+	feedback["needs_review"] = false
+	feedback["limitation"] = scoredSpeakingLimitation
+	feedback["words"] = r.Words
+
+	// The words worth practising again, weakest first — the part of the feedback a
+	// learner can act on.
+	weak := make([]map[string]any, 0)
+	for _, w := range r.Words {
+		if w.Accuracy < speakingPassingBand {
+			weak = append(weak, map[string]any{"word": w.Word, "accuracy": w.Accuracy, "error_type": w.ErrorType})
+		}
+	}
+	sort.SliceStable(weak, func(i, j int) bool { return weak[i]["accuracy"].(float64) < weak[j]["accuracy"].(float64) })
+	feedback["weak_words"] = weak
+
+	if !passed {
+		feedback["message"] = fmt.Sprintf(
+			"the pronunciation service scored this %.0f%%, below the %.0f%% that marks the drill done — listen to the reference again and retry",
+			overall*100, speakingPassingBand*100)
+	}
+	return Result{IsCorrect: nil, Score: overall, Grader: grader, Feedback: feedback}
 }

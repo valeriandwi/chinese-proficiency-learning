@@ -31,7 +31,11 @@ const contentDir = "../../content/hsk2.0"
 // this application; levels 2-5 are the complete derived lists.
 var publishedCounts = map[int]int{1: 46, 2: 147, 3: 298, 4: 598, 5: 1298}
 
-func contentFiles(t *testing.T) []int {
+// contentPaths returns every content file under content/, including the files that ADD
+// to a level instead of defining one (level-1-tones.yaml). The structural checks below
+// run over these: a tone drill is a graded exercise like any other, and a check that
+// skipped them would go green while they were broken.
+func contentPaths(t *testing.T) []string {
 	t.Helper()
 	paths, err := filepath.Glob(filepath.Join(contentDir, "level-*.yaml"))
 	if err != nil {
@@ -40,10 +44,24 @@ func contentFiles(t *testing.T) []int {
 	if len(paths) == 0 {
 		t.Fatalf("no content files under %s", contentDir)
 	}
-	levels := make([]int, 0, len(paths))
-	for _, path := range paths {
+	sort.Strings(paths)
+	return paths
+}
+
+// contentFiles returns the levels that DEFINE a level, for the checks that compare a
+// level against its published word count.
+func contentFiles(t *testing.T) []int {
+	t.Helper()
+	levels := make([]int, 0, 8)
+	for _, path := range contentPaths(t) {
 		base := strings.TrimSuffix(filepath.Base(path), ".yaml")
-		n, err := strconv.Atoi(strings.TrimPrefix(base, "level-"))
+		rest := strings.TrimPrefix(base, "level-")
+		// A known addition, not a typo: level-1-tones.yaml appends the tone unit to the
+		// authored level (see the Makefile, which imports it last for that reason).
+		if strings.HasSuffix(rest, "-tones") {
+			continue
+		}
+		n, err := strconv.Atoi(rest)
 		if err != nil {
 			t.Fatalf("unexpected content file name %q", base)
 		}
@@ -51,6 +69,21 @@ func contentFiles(t *testing.T) []int {
 	}
 	sort.Ints(levels)
 	return levels
+}
+
+// parsePath is parseLevel for a file that adds to a level rather than defining one.
+func parsePath(t *testing.T, path string) *curriculum.File {
+	t.Helper()
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatalf("opening %s: %v", path, err)
+	}
+	defer f.Close()
+	parsed, err := curriculum.Parse(f)
+	if err != nil {
+		t.Fatalf("%s does not parse: %v", path, err)
+	}
+	return parsed
 }
 
 func parseLevel(t *testing.T, level int) *curriculum.File {
@@ -169,8 +202,9 @@ func TestEveryExerciseIsGradable(t *testing.T) {
 	}
 
 	total, byType := 0, map[string]int{}
-	for _, level := range contentFiles(t) {
-		doc := parseLevel(t, level)
+	for _, path := range contentPaths(t) {
+		level := strings.TrimSuffix(filepath.Base(path), ".yaml")
+		doc := parsePath(t, path)
 		for _, unit := range doc.Levels[0].Units {
 			for _, lesson := range unit.Lessons {
 				for _, ex := range lesson.Exercises {
@@ -179,18 +213,18 @@ func TestEveryExerciseIsGradable(t *testing.T) {
 					prompt := preparePromptAsTheImporterDoes(ex, listening)
 					promptJSON, err := json.Marshal(prompt)
 					if err != nil {
-						t.Fatalf("level %d: %s prompt is not encodable: %v", level, ex.Key, err)
+						t.Fatalf("%s: %s prompt is not encodable: %v", level, ex.Key, err)
 					}
 					answerJSON, err := json.Marshal(ex.AnswerKey)
 					if err != nil {
-						t.Fatalf("level %d: %s answer_key is not encodable: %v", level, ex.Key, err)
+						t.Fatalf("%s: %s answer_key is not encodable: %v", level, ex.Key, err)
 					}
 					if err := exercises.Validate(ex.Type, promptJSON, answerJSON); err != nil {
-						t.Errorf("level %d: %s (%s) is not gradable: %v", level, ex.Key, ex.Type, err)
+						t.Errorf("%s: %s (%s) is not gradable: %v", level, ex.Key, ex.Type, err)
 					}
 					if listening[ex.Type] {
 						if text, _ := ex.Prompt["audio_text"].(string); strings.TrimSpace(text) == "" {
-							t.Errorf("level %d: %s (%s) has no audio_text, so no audio can be produced for it", level, ex.Key, ex.Type)
+							t.Errorf("%s: %s (%s) has no audio_text, so no audio can be produced for it", level, ex.Key, ex.Type)
 						}
 					}
 				}
@@ -205,7 +239,8 @@ func TestEveryExerciseIsGradable(t *testing.T) {
 		types = append(types, fmt.Sprintf("%s=%d", name, n))
 	}
 	sort.Strings(types)
-	t.Logf("validated %d exercises across %d levels: %s", total, len(contentFiles(t)), strings.Join(types, " "))
+	t.Logf("validated %d exercises across %d content files (%d levels): %s",
+		total, len(contentPaths(t)), len(contentFiles(t)), strings.Join(types, " "))
 }
 
 // preparePromptAsTheImporterDoes mirrors prepareExercisePrompt: authored content
@@ -237,8 +272,9 @@ func preparePromptAsTheImporterDoes(ex curriculum.ExerciseDef, listening map[str
 func TestWritingDrillsHaveStrokeData(t *testing.T) {
 	dir := "../../web/public/hanzi"
 	checked := 0
-	for _, level := range contentFiles(t) {
-		doc := parseLevel(t, level)
+	for _, path := range contentPaths(t) {
+		level := strings.TrimSuffix(filepath.Base(path), ".yaml")
+		doc := parsePath(t, path)
 		for _, unit := range doc.Levels[0].Units {
 			for _, lesson := range unit.Lessons {
 				for _, ex := range lesson.Exercises {
@@ -247,16 +283,16 @@ func TestWritingDrillsHaveStrokeData(t *testing.T) {
 					}
 					character, _ := ex.Prompt["character"].(string)
 					if len([]rune(character)) != 1 {
-						t.Errorf("level %d: %s traces %q, which is not a single character", level, ex.Key, character)
+						t.Errorf("%s: %s traces %q, which is not a single character", level, ex.Key, character)
 						continue
 					}
 					checked++
 					if _, err := os.Stat(filepath.Join(dir, character+".json")); err != nil {
-						t.Errorf("level %d: %s traces %q but %s/%s.json is missing — run `make web-hanzi-data`", level, ex.Key, character, dir, character)
+						t.Errorf("%s: %s traces %q but %s/%s.json is missing — run `make web-hanzi-data`", level, ex.Key, character, dir, character)
 					}
 					strokes, _ := ex.Prompt["stroke_count"].(int)
 					if strokes <= 0 {
-						t.Errorf("level %d: %s has stroke_count %v; the registry rejects a non-positive count", level, ex.Key, ex.Prompt["stroke_count"])
+						t.Errorf("%s: %s has stroke_count %v; the registry rejects a non-positive count", level, ex.Key, ex.Prompt["stroke_count"])
 					}
 				}
 			}

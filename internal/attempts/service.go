@@ -10,6 +10,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -81,16 +83,48 @@ var (
 	ErrUnknownExercise = errors.New("attempts: unknown exercise id in batch")
 	// ErrBadResponse marks a learner payload that does not match its exercise type.
 	ErrBadResponse = errors.New("attempts: the submitted answer does not match this exercise")
-	// ErrBadMode rejects a mode outside the allowed set.
-	ErrBadMode = errors.New("attempts: mode must be one of practice, review, exam, placement")
+	// ErrBadMode rejects a mode outside the allowed set. Its message is built from the
+	// set itself (see init below) so it cannot list a mode the code refuses, or omit one
+	// it accepts — which is how "tone" was briefly rejected by a validator that had
+	// already been taught about it everywhere else.
+	ErrBadMode = badModeError()
 )
 
-// ValidModes mirrors the attempts.mode CHECK constraint.
-var ValidModes = map[string]bool{"practice": true, "review": true, "exam": true, "placement": true}
+// badModeError names every accepted mode, in a stable order, from ValidModes itself.
+func badModeError() error {
+	modes := make([]string, 0, len(ValidModes))
+	for mode := range ValidModes {
+		modes = append(modes, mode)
+	}
+	sort.Strings(modes)
+	return fmt.Errorf("attempts: mode must be one of %s", strings.Join(modes, ", "))
+}
+
+// ValidModes mirrors the attempts.mode CHECK constraint. "tone" is practice that is
+// deliberately off the path (see migrations/0006_tone_practice.sql): it is recorded in
+// the same log and excluded from every derived value.
+var ValidModes = map[string]bool{"practice": true, "review": true, "exam": true, "placement": true, "tone": true}
 
 // Submit grades and records a batch, then recomputes derived state in the same
 // transaction so a submission can never leave progress stale.
 func (s *Service) Submit(ctx context.Context, userID uuid.UUID, mode string, inputs []Input) (*Summary, error) {
+	return s.submit(ctx, userID, mode, inputs, true)
+}
+
+// SubmitOffPath grades a batch and records it without touching the learner's derived
+// state.
+//
+// Tone practice is the only caller. It shares every step with Submit — the same
+// grading, the same idempotency, the same append-only attempt log — and differs in
+// exactly one: RecomputeProgress never runs, so lesson status, XP, skill mastery, the
+// daily rollup and the streak are all exactly as they were. Tone drills are served from
+// any level, including ones the learner has not reached, so recomputing would let
+// practice erode the linear path (see migrations/0006_tone_practice.sql).
+func (s *Service) SubmitOffPath(ctx context.Context, userID uuid.UUID, mode string, inputs []Input) (*Summary, error) {
+	return s.submit(ctx, userID, mode, inputs, false)
+}
+
+func (s *Service) submit(ctx context.Context, userID uuid.UUID, mode string, inputs []Input, onPath bool) (*Summary, error) {
 	if len(inputs) == 0 {
 		return nil, ErrEmptyBatch
 	}
@@ -127,11 +161,25 @@ func (s *Service) Submit(ctx context.Context, userID uuid.UUID, mode string, inp
 	rows := make([]store.AttemptInsert, 0, len(inputs))
 	lessonOf := map[uuid.UUID]uuid.UUID{} // exercise -> lesson
 
+	scoredRecordings := make([]uuid.UUID, 0)
+
 	for _, in := range inputs {
 		spec := specs[in.ExerciseID]
 		lessonOf[in.ExerciseID] = spec.LessonID
 
-		graded, err := exercises.Grade(spec.Type, spec.Prompt, spec.AnswerKey, in.Response)
+		// A speaking answer may name a recording the learner had scored. The score is
+		// read from storage — never from the payload — so a client cannot award itself
+		// a pass (see prepareSpeakingResponse).
+		response := in.Response
+		if isSpeakingType(spec.Type) {
+			var scoreID *uuid.UUID
+			response, scoreID = s.prepareSpeakingResponse(ctx, userID, in.ExerciseID, in.Response)
+			if scoreID != nil {
+				scoredRecordings = append(scoredRecordings, *scoreID)
+			}
+		}
+
+		graded, err := exercises.Grade(spec.Type, spec.Prompt, spec.AnswerKey, response)
 		if err != nil {
 			// A payload that does not match its exercise type is the caller's fault.
 			// Classifying it here keeps it out of the 500 path, where it looked like
@@ -157,7 +205,9 @@ func (s *Service) Submit(ctx context.Context, userID uuid.UUID, mode string, inp
 			Mode:       mode,
 			ClientRef:  in.ClientRef,
 			Grader:     graded.Grader,
-			Response:   in.Response,
+			// The stored payload is the server-augmented one, so the attempt log records
+			// the numbers that actually decided the outcome.
+			Response:   response,
 			Feedback:   fb,
 			IsCorrect:  graded.IsCorrect,
 			Score:      &score,
@@ -215,11 +265,19 @@ func (s *Service) Submit(ctx context.Context, userID uuid.UUID, mode string, inp
 			_ = id
 		}
 
-		if err := store.RecomputeProgress(ctx, tx, userID); err != nil {
-			return err
+		// An off-path batch skips this entirely: nothing derived from it may move.
+		if onPath {
+			if err := store.RecomputeProgress(ctx, tx, userID); err != nil {
+				return err
+			}
 		}
 
-		// Report per-lesson outcomes for the lessons this batch touched.
+		// Report per-lesson outcomes for the lessons this batch touched. Skipped for an
+		// off-path batch, which reports no lesson state at all rather than reporting
+		// numbers it deliberately did not change.
+		if !onPath {
+			return nil
+		}
 		for lessonID := range lessonIDs {
 			var status string
 			var xp int
@@ -236,7 +294,8 @@ func (s *Service) Submit(ctx context.Context, userID uuid.UUID, mode string, inp
 			var attemptsCount, correctCount, total int
 			if err := tx.QueryRow(ctx, `
 				SELECT count(*)::int, count(*) FILTER (WHERE is_correct)::int
-				FROM attempts a WHERE a.user_id = $1::uuid AND a.exercise_id IN (SELECT id FROM exercises WHERE lesson_id = $2::uuid)`,
+				FROM attempts a WHERE a.user_id = $1::uuid AND a.mode <> 'tone'
+				  AND a.exercise_id IN (SELECT id FROM exercises WHERE lesson_id = $2::uuid)`,
 				userID, lessonID).Scan(&attemptsCount, &correctCount); err != nil {
 				return err
 			}
@@ -258,4 +317,67 @@ func (s *Service) Submit(ctx context.Context, userID uuid.UUID, mode string, inp
 		return nil, err
 	}
 	return summary, nil
+}
+
+// speakingScoringFields are response keys only the server may set. They are deleted
+// from every client payload before grading.
+var speakingScoringFields = []string{"score", "provider", "accuracy", "fluency", "completeness", "prosody", "words"}
+
+// prepareSpeakingResponse strips client-supplied scoring fields and restores them from
+// a stored score.
+//
+// This is the security property of scored speaking: a client can name a recording it
+// owns, but it can never send a score. Without the strip, a hand-built payload could
+// carry `"score": 1.0` for an unscored drill and award itself the pass that makes the
+// lesson complete and pays the XP.
+//
+// A recording that does not resolve — unknown id, someone else's, or one scored for a
+// different exercise — is not an error. The drill simply grades the way it did before
+// scoring existed, which is better than failing a whole submitted lesson over it.
+func (s *Service) prepareSpeakingResponse(ctx context.Context, userID, exerciseID uuid.UUID, response json.RawMessage) (json.RawMessage, *uuid.UUID) {
+	var fields map[string]any
+	if err := json.Unmarshal(response, &fields); err != nil {
+		return response, nil
+	}
+	rawID, _ := fields["recording_id"].(string)
+	for _, key := range speakingScoringFields {
+		delete(fields, key)
+	}
+	cleaned, err := json.Marshal(fields)
+	if err != nil {
+		return response, nil
+	}
+	if strings.TrimSpace(rawID) == "" {
+		return cleaned, nil
+	}
+	recordingID, err := uuid.Parse(rawID)
+	if err != nil {
+		return cleaned, nil
+	}
+	score, err := s.store.SpeakingScoreFor(ctx, recordingID, userID, exerciseID)
+	if err != nil {
+		return cleaned, nil
+	}
+	fields["score"] = score.Overall
+	fields["provider"] = score.Provider
+	fields["accuracy"] = score.Accuracy
+	fields["fluency"] = score.Fluency
+	fields["completeness"] = score.Completeness
+	fields["prosody"] = score.Prosody
+	fields["words"] = json.RawMessage(score.Words)
+	augmented, err := json.Marshal(fields)
+	if err != nil {
+		return cleaned, nil
+	}
+	return augmented, &score.ID
+}
+
+// isSpeakingType reports whether a score can apply to this exercise type.
+func isSpeakingType(kind string) bool {
+	for _, t := range exercises.SpeakingTypes() {
+		if t == kind {
+			return true
+		}
+	}
+	return false
 }

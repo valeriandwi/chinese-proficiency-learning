@@ -93,7 +93,7 @@ describe('the application shell', () => {
     const navs = screen.getAllByRole('navigation', { name: 'Main', hidden: true })
     expect(navs).toHaveLength(2)
     for (const navigation of navs) {
-      for (const label of ['Today', 'Path', 'Reviews', 'Settings']) {
+      for (const label of ['Today', 'Path', 'Reviews', 'Tones', 'Settings']) {
         expect(
           within(navigation).getByRole('link', { name: new RegExp(label), hidden: true }),
         ).toBeInTheDocument()

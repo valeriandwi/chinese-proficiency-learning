@@ -914,6 +914,114 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/recordings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Score a spoken recording against its drill's reference
+         * @description The one endpoint that accepts a learner's voice. Scoring is server-side: the
+         *     audio is read into memory, handed to the configured pronunciation provider and
+         *     dropped — it is never written to storage, and the UI says so before the learner
+         *     records.
+         *
+         *     Only drills with a single reference utterance (`speak_repeat`, `read_aloud`) can
+         *     be scored: an open speaking prompt has nothing to compare against and returns
+         *     `422`. The score is stored, and an attempt that names it with `recording_id` is
+         *     graded from that stored value. A client can name a recording it owns; it can
+         *     never send a score.
+         *
+         *     `503` means this deployment has no pronunciation provider configured, which is a
+         *     supported configuration: speaking drills then stay self-assessed, exactly as
+         *     they behaved before scoring existed.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "multipart/form-data": {
+                        /** Format: uuid */
+                        exercise_id: string;
+                        /**
+                         * Format: binary
+                         * @description The recording as the browser produced it (WebM/Opus, WAV, OGG/Opus).
+                         */
+                        audio: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Scored */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RecordingScore"];
+                    };
+                };
+                /** @description The audio part is missing or unreadable */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The recording is larger than this deployment accepts */
+                413: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not a speaking drill, no reference utterance, unsupported audio, or no speech recognised */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorEnvelope"];
+                    };
+                };
+                /** @description Per-learner rate limit */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The provider failed */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No pronunciation provider is configured on this deployment */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/progress/overview": {
         parameters: {
             query?: never;
@@ -981,6 +1089,124 @@ export interface paths {
                     content: {
                         "application/json": components["schemas"]["ProgressOverview"];
                     };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tones/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tone drills to practise, outside the lesson path
+         * @description Tone questions from any level — deliberately NOT gated by the path, because a
+         *     tone drill is self-contained and this surface exists so a learner can work on
+         *     tone without walking a level first. Filtered by level instead: answering
+         *     questions about words you have never met teaches nothing. Defaults to the
+         *     learner's own level. Answer keys never appear here.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description 0 = every level; otherwise 1-5 */
+                    level?: number;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items?: components["schemas"]["ToneDrill"][];
+                            /** @description The level the drills were drawn from; 0 means every level */
+                            level?: number;
+                            stats?: components["schemas"]["ToneLevelStat"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tones/answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Grade tone answers and report which tones were missed
+         * @description Graded by the same registry as every other exercise type, and recorded with
+         *     mode `tone`: the attempt log keeps the learner's tone record, while lesson
+         *     status, XP, mastery, the daily rollup and the streak are all left untouched.
+         *     Practising tone must not advance a lesson the learner has not unlocked.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        answers: {
+                            /** Format: uuid */
+                            exercise_id: string;
+                            /** @description Unique per attempt; makes a retried submit idempotent. */
+                            client_ref?: string;
+                            option_id: string;
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            results?: components["schemas"]["AttemptResult"][];
+                            /** @description Per tone, how often it came up in this batch and how often it was missed. */
+                            tone_tally?: components["schemas"]["ToneTallyRow"][];
+                            stats?: components["schemas"]["ToneLevelStat"][];
+                        };
+                    };
+                };
+                /** @description `not_a_tone_drill` when an exercise id is not a tone drill */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
                 };
             };
         };
@@ -1265,6 +1491,64 @@ export interface components {
             exercises?: components["schemas"]["Exercise"][];
             passages?: components["schemas"]["Passage"][];
             vocabulary?: components["schemas"]["Lexeme"][];
+        };
+        /**
+         * @description A pronunciation assessment. Every ratio is 0..1; `passing_band` is the value at
+         *     or above which the drill counts as done.
+         */
+        RecordingScore: {
+            /**
+             * Format: uuid
+             * @description Name this in an attempt's `recording_id` to have it graded from this score.
+             */
+            id: string;
+            /** @description Which scorer produced it */
+            provider: string;
+            overall: number;
+            accuracy?: number;
+            fluency?: number;
+            completeness?: number;
+            prosody?: number;
+            passing_band: number;
+            /** @description The utterance that was assessed. */
+            reference?: string;
+            /** @description Per-word assessment, which is the part a learner can act on. */
+            words?: {
+                word: string;
+                accuracy: number;
+                /** @description Provider taxonomy, e.g. None or Mispronunciation. */
+                error_type?: string;
+            }[];
+        };
+        /** @description One tone question as the learner sees it — the prompt, the level it comes from, and no answer key. */
+        ToneDrill: {
+            /** Format: uuid */
+            id: string;
+            number?: number;
+            /** @enum {string} */
+            type: "tone_mcq" | "listening_mcq";
+            skill?: string;
+            difficulty?: number;
+            level?: number;
+            prompt: {
+                [key: string]: unknown;
+            };
+        };
+        ToneLevelStat: {
+            level?: number;
+            /** @description How many tone drills exist at this level */
+            drills?: number;
+            /** @description Tone attempts by this learner */
+            answered?: number;
+            correct?: number;
+        };
+        ToneTallyRow: {
+            /** @description Tone digit, 1-5 (5 = neutral) */
+            tone?: string;
+            /** @description How the tone is described, e.g. "3rd tone — falling then rising" */
+            label?: string;
+            asked?: number;
+            missed?: number;
         };
         AttemptInput: {
             /** Format: uuid */

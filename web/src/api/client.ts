@@ -94,3 +94,32 @@ function safeParse(text: string): unknown {
 export function isUnauthorized(error: unknown): boolean {
   return error instanceof ApiError && error.status === 401
 }
+
+/**
+ * Upload a multipart body (a learner's recording, today) with the same rules as
+ * `api`: same-origin, cookies included, CSRF header on the mutation, and the same
+ * `ApiError` on failure so callers can branch on the server's error code.
+ *
+ * The body is deliberately not passed through `JSON.stringify`, which is the only
+ * reason this is a second function rather than an option on the first.
+ */
+export async function apiUpload<T>(path: string, form: FormData, signal?: AbortSignal): Promise<T> {
+  const headers: Record<string, string> = { Accept: 'application/json' }
+  const csrf = readCookie(CSRF_COOKIE)
+  if (csrf) headers[CSRF_HEADER] = csrf
+
+  const response = await fetch(path, {
+    method: 'POST',
+    headers,
+    credentials: 'include',
+    body: form,
+    signal,
+  })
+
+  const text = await response.text()
+  const payload = text ? safeParse(text) : undefined
+  if (!response.ok) {
+    throw new ApiError(response.status, payload as ApiErrorBody | undefined, response.statusText)
+  }
+  return payload as T
+}

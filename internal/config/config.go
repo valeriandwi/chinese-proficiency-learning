@@ -41,6 +41,17 @@ type Config struct {
 	S3Bucket       string
 	S3UsePathStyle bool
 
+	// Pronunciation scoring. Empty SpeechProvider means the feature is off, which is
+	// the default: sending a learner's voice to a third party is opt-in, and a
+	// missing setting must never silently start doing it. "fake" exists for
+	// development and tests and is refused in production; "azure" needs a key and a
+	// region (see internal/speech).
+	SpeechProvider       string
+	SpeechAzureKey       string
+	SpeechAzureRegion    string
+	SpeechMaxUploadBytes int
+	SpeechDailyCap       int
+
 	// Media assets (generated reference audio today). A local directory is the
 	// default so the pipeline works with no cloud credentials; an S3-compatible
 	// store is a new media.Store implementation, not a change to this struct's
@@ -69,29 +80,37 @@ func Load() (*Config, error) {
 	_ = godotenv.Load() // absent in production; never fatal
 
 	c := &Config{
-		AppEnv:                env("APP_ENV", "development"),
-		LogLevel:              env("LOG_LEVEL", "info"),
-		HTTPAddr:              env("HTTP_ADDR", "127.0.0.1:8081"),
-		PublicBase:            env("PUBLIC_BASE_URL", "http://localhost:5174"),
-		DatabaseURL:           os.Getenv("DATABASE_URL"),
-		RedisAddr:             os.Getenv("REDIS_ADDR"),
-		SessionCookieName:     env("SESSION_COOKIE_NAME", "hanpath_session"),
-		SessionCookieDomain:   os.Getenv("SESSION_COOKIE_DOMAIN"),
-		SessionCookieSecure:   envBool("SESSION_COOKIE_SECURE", false),
-		SessionTTL:            time.Duration(envInt("SESSION_TTL_HOURS", 720)) * time.Hour,
-		CSRFCookieName:        env("CSRF_COOKIE_NAME", "hanpath_csrf"),
-		CSRFHeaderName:        env("CSRF_HEADER_NAME", "X-CSRF-Token"),
-		S3Endpoint:            os.Getenv("S3_ENDPOINT"),
-		S3Region:              env("S3_REGION", "us-east-1"),
-		S3AccessKey:           os.Getenv("S3_ACCESS_KEY"),
-		S3SecretKey:           os.Getenv("S3_SECRET_KEY"),
-		S3Bucket:              os.Getenv("S3_BUCKET"),
-		S3UsePathStyle:        envBool("S3_USE_PATH_STYLE", true),
-		MediaDir:              env("MEDIA_DIR", "./var/media"),
-		MediaURLPrefix:        env("MEDIA_URL_PREFIX", "/media"),
-		TTSProvider:           os.Getenv("TTS_PROVIDER"),
-		TTSVoice:              env("TTS_VOICE", "Tingting"),
-		FFmpegPath:            env("FFMPEG_PATH", "ffmpeg"),
+		AppEnv:              env("APP_ENV", "development"),
+		LogLevel:            env("LOG_LEVEL", "info"),
+		HTTPAddr:            env("HTTP_ADDR", "127.0.0.1:8081"),
+		PublicBase:          env("PUBLIC_BASE_URL", "http://localhost:5174"),
+		DatabaseURL:         os.Getenv("DATABASE_URL"),
+		RedisAddr:           os.Getenv("REDIS_ADDR"),
+		SessionCookieName:   env("SESSION_COOKIE_NAME", "hanpath_session"),
+		SessionCookieDomain: os.Getenv("SESSION_COOKIE_DOMAIN"),
+		SessionCookieSecure: envBool("SESSION_COOKIE_SECURE", false),
+		SessionTTL:          time.Duration(envInt("SESSION_TTL_HOURS", 720)) * time.Hour,
+		CSRFCookieName:      env("CSRF_COOKIE_NAME", "hanpath_csrf"),
+		CSRFHeaderName:      env("CSRF_HEADER_NAME", "X-CSRF-Token"),
+		S3Endpoint:          os.Getenv("S3_ENDPOINT"),
+		S3Region:            env("S3_REGION", "us-east-1"),
+		S3AccessKey:         os.Getenv("S3_ACCESS_KEY"),
+		S3SecretKey:         os.Getenv("S3_SECRET_KEY"),
+		S3Bucket:            os.Getenv("S3_BUCKET"),
+		S3UsePathStyle:      envBool("S3_USE_PATH_STYLE", true),
+		MediaDir:            env("MEDIA_DIR", "./var/media"),
+		MediaURLPrefix:      env("MEDIA_URL_PREFIX", "/media"),
+		TTSProvider:         os.Getenv("TTS_PROVIDER"),
+		TTSVoice:            env("TTS_VOICE", "Tingting"),
+		FFmpegPath:          env("FFMPEG_PATH", "ffmpeg"),
+		SpeechProvider:      os.Getenv("SPEECH_PROVIDER"),
+		SpeechAzureKey:      os.Getenv("AZURE_SPEECH_KEY"),
+		SpeechAzureRegion:   os.Getenv("AZURE_SPEECH_REGION"),
+		// A learner recording is a few hundred KB; the cap is a ceiling on abuse, not
+		// a target. The daily cap exists because every scored recording costs money at
+		// the provider.
+		SpeechMaxUploadBytes:  envInt("SPEECH_MAX_UPLOAD_BYTES", 1<<20),
+		SpeechDailyCap:        envInt("SPEECH_DAILY_SCORING_CAP", 200),
 		SMTPAddr:              os.Getenv("SMTP_ADDR"),
 		SMTPFrom:              env("SMTP_FROM", "hanpath <no-reply@hanpath.local>"),
 		RateLimitPerMinute:    envInt("RATE_LIMIT_PER_MINUTE", 30),
