@@ -64,6 +64,30 @@ vi.mock('./api/hooks', async (importOriginal) => {
     useRefreshProgress: () => ({ mutate: vi.fn(), isPending: false }),
     useCurricula: () => ({ isLoading: false, data: { curricula: [] } }),
     useReviewQueue: () => ({ isLoading: false, data: { items: [], due_total: 0 } }),
+    // The home screen is the path, so the shell's test needs it to resolve.
+    usePath: () => ({
+      isLoading: false,
+      error: null,
+      data: {
+        version: 'hsk2.0',
+        levels: [
+          {
+            level_number: 1,
+            title: 'Level 1',
+            units: [
+              {
+                unit_number: 1,
+                title: 'greetings and names',
+                lessons: [
+                  { id: 'l1', lesson_number: 1, title: '你好 — saying hello', state: 'in_progress' },
+                  { id: 'l2', lesson_number: 2, title: '你叫什么名字 — asking names', state: 'locked' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    }),
   }
 })
 
@@ -93,7 +117,9 @@ describe('the application shell', () => {
     const navs = screen.getAllByRole('navigation', { name: 'Main', hidden: true })
     expect(navs).toHaveLength(2)
     for (const navigation of navs) {
-      for (const label of ['Today', 'Path', 'Reviews', 'Tones', 'Settings']) {
+      // Four, not five: "Today" and "Path" were two labels for one screen, and the
+      // learner's numbers ride in the strip on every page rather than owning a tab.
+      for (const label of ['Learn', 'Reviews', 'Tones', 'Settings']) {
         expect(
           within(navigation).getByRole('link', { name: new RegExp(label), hidden: true }),
         ).toBeInTheDocument()
@@ -115,14 +141,37 @@ describe('the application shell', () => {
     expect(within(bottom).getByText('3')).toBeInTheDocument()
   })
 
-  it('keeps the progress rail a labelled landmark with real numbers', () => {
+  it('renders the path as the home screen, not a dashboard', async () => {
     renderAt('/')
-    const rail = screen.getByRole('complementary', { name: 'Your progress' })
-    expect(within(rail).getByText('4')).toBeInTheDocument()
-    expect(within(rail).getByText(/120 XP/)).toBeInTheDocument()
+    // The home's job is to say what to do next. The statistics that used to share this
+    // screen — and the database operation that sat in its primary position — moved to
+    // /progress.
+    expect(await screen.findByText(/你好, Lan/)).toBeInTheDocument()
+    expect(screen.queryByText(/Skill mastery/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Last 30 days/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /recompute/i })).not.toBeInTheDocument()
+  })
+
+  it('shows the learner numbers once, in one strip that leads to the details', () => {
+    renderAt('/')
+    // One strip, because the same numbers used to be a tile row here AND a desktop
+    // rail — two copies of the streak and the goal on a single screen.
+    const strips = screen.getAllByTestId('gamified-header')
+    expect(strips).toHaveLength(1)
+    const strip = strips[0]
+
+    expect(within(strip).getByRole('link', { name: /Streak: 4 days/ })).toBeInTheDocument()
     // The ring is an img with an accessible name that states the percentage, not a
     // progressbar role: it is a picture of a number, and the number is in the label.
-    expect(within(rail).getByRole('img', { name: /of today's goal/i })).toBeInTheDocument()
+    expect(within(strip).getByRole('img', { name: /of today's goal/i })).toBeInTheDocument()
+    expect(within(strip).getByRole('link', { name: /120 XP earned/ })).toBeInTheDocument()
+
+    // Every number in the strip is a way into the full picture.
+    for (const link of within(strip).getAllByRole('link')) {
+      expect(link).toHaveAttribute('href', '/progress')
+    }
+    // And the duplication is gone, not merely restyled.
+    expect(screen.queryByRole('complementary', { name: 'Your progress' })).not.toBeInTheDocument()
   })
 
   it('does not render a navigation when signed out', () => {

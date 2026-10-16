@@ -82,11 +82,47 @@
   --shadow-card: 0 2px 8px rgb(20 24 31 / 0.06);
   --shadow-raised: 0 8px 24px rgb(20 24 31 / 0.12);
 
-  /* motion: two durations, one curve, purposeful feedback only */
+  /* unit — one accent per unit, cycling through five families, so a learner can tell
+     one stretch of the path from the next at a glance. Duolingo's trick, our colours.
+     Same discipline as the rest: 700 carries white text (>= 4.5:1) and tints use 50/100
+     with 700 text, while 600 is only ever a FILL on the track (>= 3:1). */
+  --color-unit-1-50: #f0fdfa;
+  --color-unit-1-100: #ccfbf1;
+  --color-unit-1-300: #5eead4;
+  --color-unit-1-600: #0d9488;
+  --color-unit-1-700: #0f766e;
+  --color-unit-2-50: #eff6ff;
+  --color-unit-2-100: #dbeafe;
+  --color-unit-2-300: #93c5fd;
+  --color-unit-2-600: #2563eb;
+  --color-unit-2-700: #1d4ed8;
+  --color-unit-3-50: #f5f3ff;
+  --color-unit-3-100: #ede9fe;
+  --color-unit-3-300: #c4b5fd;
+  --color-unit-3-600: #7c3aed;
+  --color-unit-3-700: #6d28d9;
+  --color-unit-4-50: #fff7ed;
+  --color-unit-4-100: #ffedd5;
+  --color-unit-4-300: #fdba74;
+  --color-unit-4-600: #ea580c;
+  --color-unit-4-700: #c2410c;
+  --color-unit-5-50: #fff1f2;
+  --color-unit-5-100: #ffe4e6;
+  --color-unit-5-300: #fda4af;
+  --color-unit-5-600: #e11d48;
+  --color-unit-5-700: #be123c;
+
+  /* motion: purposeful feedback only. Every animation below carries nothing that the
+     words do not also say — under prefers-reduced-motion they collapse to their end
+     state (see the media query at the bottom of this file). */
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
   --animate-pop: pop 0.28s var(--ease-bounce);
   --animate-rise: rise 0.24s ease-out;
   --animate-breathe: breathe 2.4s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.26s var(--ease-bounce);
+  --animate-shake: shake 0.4s ease-in-out;
+  --animate-bounce-in: bounce-in 0.44s var(--ease-bounce) backwards;
+  --animate-fall: fall 1.5s ease-in forwards;
 }
 
 @keyframes pop {
@@ -108,6 +144,69 @@
   100% {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+/* The verdict arrives from the action bar, the way a result feels like it comes from
+   the place you pressed. */
+@keyframes slide-up {
+  0% {
+    transform: translateY(0.9rem);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* A wrong answer says so twice: in words, and by shaking. The words are the message;
+   the shake is the emphasis, and it is absent when motion is reduced. */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-0.4rem);
+  }
+  40% {
+    transform: translateX(0.4rem);
+  }
+  60% {
+    transform: translateX(-0.25rem);
+  }
+  80% {
+    transform: translateX(0.25rem);
+  }
+}
+
+/* Path nodes arrive with a small overshoot so the trail assembles rather than appears. */
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Celebration confetti: each piece is given its own drift and spin by the component,
+   so one keyframe animates all of them. It ends invisible, which is also what a
+   learner with reduced motion sees — the pieces never enter the DOM for them. */
+@keyframes fall {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--dx, 0), var(--dy, 12rem), 0) rotate(var(--rot, 220deg));
+    opacity: 0;
   }
 }
 

@@ -181,6 +181,32 @@ the shape of the feature follows from that:
   existed; `fake` is refused in production; the vendor is opt-in per deployment. See
   `docs/sources.md` §7 for the terms that come with it.
 
+### Motion is emphasis, never information
+
+Every animation exists to reinforce words that are already on screen: the verdict band
+says "Correct!" and is *also* green; the shake is added to "Not quite" and is not the
+message. Two consequences are enforced rather than intended. The stylesheet collapses
+every animation and transition under `prefers-reduced-motion` (duration, iteration count
+and scroll behaviour), and the confetti component does not render at all in that mode —
+pieces that fall and stop mid-air are worse than none. A test reads the stylesheet and
+asserts both the named keyframes and that collapse, because a typo'd utility compiles to
+no animation at all, silently.
+
+`useCountUp` shows the final number on its first render: a learner who never sees a frame
+of the animation still sees the right score.
+
+### The unit palette
+
+One accent per unit, cycling through five families, so a learner can tell one stretch of
+the path from the next. The unit colour dresses the *unit* — its band, connector,
+checkpoint and progress badge — and never a lesson node, which keeps the four semantic
+state colours meaning exactly one thing each. The palette is held to the same WCAG
+thresholds as the rest (700 carries white text, 50/100 tints carry 700 text, 600 is only
+a fill on the track), asserted in `src/lib/design-tokens.test.ts`.
+
+A unit's closing checkpoint is a **marker, not a destination**: no lesson exists behind
+it, so it is not a link. Nothing in the interface may look tappable and do nothing.
+
 ## The interface is a system, not a stylesheet
 
 The redesign that made this app feel like a game rather than a textbook is held

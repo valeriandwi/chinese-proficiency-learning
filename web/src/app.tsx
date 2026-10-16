@@ -1,13 +1,15 @@
 import { Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { AudioLines, BookOpenCheck, Home, Languages, LogOut, Map, Settings, type LucideIcon } from 'lucide-react'
+import { Languages, LogOut } from 'lucide-react'
+import type { ReactElement, SVGProps } from 'react'
+import { LearnGlyph, ReviewsGlyph, SettingsGlyph, TonesGlyph } from './components/icons'
 import { useLogout, useOverview, useSession } from './api/hooks'
 import { Button, IconButton, Spinner } from './components/ui'
-import { RightRail } from './components/RightRail'
+import { GamifiedHeader } from './components/GamifiedHeader'
 import { usePrefs } from './stores/prefs'
 import { LoginPage, RegisterPage } from './features/auth/AuthPages'
-import { DashboardPage } from './features/dashboard/DashboardPage'
 import { PathPage } from './features/path/PathPage'
+import { ProgressPage } from './features/progress/ProgressPage'
 import { TonePage } from './features/tone/TonePage'
 import { LessonPage } from './features/lesson/LessonPage'
 import { ReviewPage } from './features/review/ReviewPage'
@@ -32,19 +34,22 @@ export function App() {
       <Route element={<Layout authenticated={authenticated} />}>
         <Route path="/login" element={authenticated ? <Navigate to="/" replace /> : <LoginPage />} />
         <Route path="/register" element={authenticated ? <Navigate to="/" replace /> : <RegisterPage />} />
+        {/* The home screen IS the path: a learner opens the app to be told what to do
+            next, not to read a dashboard. /path stays as a redirect so old links work. */}
         <Route
           path="/"
           element={
             <RequireAuth authenticated={authenticated}>
-              <DashboardPage />
+              <PathPage />
             </RequireAuth>
           }
         />
+        <Route path="/path" element={<Navigate to="/" replace />} />
         <Route
-          path="/path"
+          path="/progress"
           element={
             <RequireAuth authenticated={authenticated}>
-              <PathPage />
+              <ProgressPage />
             </RequireAuth>
           }
         />
@@ -96,14 +101,17 @@ export function App() {
 
 /** One definition of the navigation, rendered twice: a labelled sidebar on a wide
  *  screen, a thumb-reachable bottom bar on a phone. Adding a destination is one line. */
-type Destination = { to: string; label: string; icon: LucideIcon; end?: boolean }
+type Destination = { to: string; label: string; icon: (props: SVGProps<SVGSVGElement>) => ReactElement; end?: boolean }
 
+// Four destinations, not five: "Today" and "Path" were two labels for one screen, and
+// the strip above carries the learner's numbers on every page, so neither needs a tab.
+// The icons are hanpath's own (components/icons.tsx) — filled and chunky, so the chrome
+// reads as pressable rather than as a library default.
 const DESTINATIONS: Destination[] = [
-  { to: '/', label: 'Today', icon: Home, end: true },
-  { to: '/path', label: 'Path', icon: Map },
-  { to: '/reviews', label: 'Reviews', icon: BookOpenCheck },
-  { to: '/tones', label: 'Tones', icon: AudioLines },
-  { to: '/settings', label: 'Settings', icon: Settings },
+  { to: '/', label: 'Learn', icon: LearnGlyph, end: true },
+  { to: '/reviews', label: 'Reviews', icon: ReviewsGlyph },
+  { to: '/tones', label: 'Tones', icon: TonesGlyph },
+  { to: '/settings', label: 'Settings', icon: SettingsGlyph },
 ]
 
 function RequireAuth({ authenticated, children }: { authenticated: boolean; children: ReactNode }) {
@@ -149,19 +157,24 @@ function LearnerShell() {
       {/* 6xl left the middle column 544px wide, which cramps the trail against a
           288px rail on a laptop and leaves a 1152px strip on a 1920 screen. 7xl gives
           the content room without stretching prose to an unreadable measure. */}
-      <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 lg:px-6">
+      {/* No rail any more, so the content column no longer needs a 7xl row to hold it. */}
+      <div className="mx-auto flex w-full max-w-5xl gap-6 px-4 lg:px-6">
         <Sidebar due={due} pinyinOn={prefs.pinyinVisible} onTogglePinyin={prefs.togglePinyin} onSignOut={signOut} />
 
         <div className="flex min-w-0 flex-1 flex-col">
           <MobileBar pinyinOn={prefs.pinyinVisible} onTogglePinyin={prefs.togglePinyin} onSignOut={signOut} />
           {/* pb-24 keeps the last control clear of the fixed bottom bar. */}
-          <main className="flex-1 pb-24 pt-6 lg:pb-10 lg:pt-8">
+          <main className="flex-1 pb-24 pt-4 lg:pb-10 lg:pt-6">
+            {/* The one place the numbers appear. It used to be a tile row on the home
+                page, the same cards again in a desktop rail, and the goal a third time
+                under the greeting. */}
+            <div className="mb-5">
+              <GamifiedHeader />
+            </div>
             <Outlet />
           </main>
           <LicenceFooter className="hidden pb-8 lg:block" />
         </div>
-
-        <RightRail />
       </div>
 
       <BottomNav due={due} />
@@ -223,7 +236,7 @@ function SidebarLink({ destination, badge }: { destination: Destination; badge: 
         }`
       }
     >
-      <Icon size={20} aria-hidden />
+      <Icon className="h-5 w-5" aria-hidden />
       {destination.label}
       {badge > 0 ? <span className="ml-auto rounded-full bg-danger-100 px-2 py-0.5 text-xs font-extrabold text-danger-700">{badge}</span> : null}
     </NavLink>
@@ -289,7 +302,7 @@ function BottomNav({ due }: { due: number }) {
                 }
               >
                 <span className="relative">
-                  <Icon size={22} aria-hidden />
+                  <Icon className="h-[22px] w-[22px]" aria-hidden />
                   {destination.to === '/reviews' && due > 0 ? (
                     <span className="absolute -right-2 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-danger-600 px-1 text-[0.6rem] font-extrabold text-white">
                       {due}

@@ -1,14 +1,35 @@
 import { Link } from "react-router-dom";
 import { Check, Lock, Play, Star } from "lucide-react";
-import { useOverview, usePath } from "../../api/hooks";
+import { useOverview, usePath, useSession } from "../../api/hooks";
 import { describeLessonState } from "../../lib/labels";
 import type { LessonSummary } from "../../api/types";
 import { Chip, ErrorNote, ProgressRing, Spinner } from "../../components/ui";
+import { CheckpointGlyph } from "../../components/icons";
+
+/** One accent per unit, cycling through five families — Duolingo's device for telling
+ *  one stretch of the path from the next. Written as literal class strings because
+ *  Tailwind scans this file for them: a template-built class would compile to nothing.
+ *
+ *  The unit colour dresses the UNIT only (band, connector, checkpoint, badge). A lesson
+ *  node keeps the four semantic state colours, so colour never has to carry two
+ *  meanings at once. */
+const UNIT_SKINS = [
+  { band: "bg-unit-1-700", eyebrow: "text-unit-1-100", line: "bg-unit-1-300", chip: "bg-unit-1-100 text-unit-1-700", dot: "text-unit-1-600" },
+  { band: "bg-unit-2-700", eyebrow: "text-unit-2-100", line: "bg-unit-2-300", chip: "bg-unit-2-100 text-unit-2-700", dot: "text-unit-2-600" },
+  { band: "bg-unit-3-700", eyebrow: "text-unit-3-100", line: "bg-unit-3-300", chip: "bg-unit-3-100 text-unit-3-700", dot: "text-unit-3-600" },
+  { band: "bg-unit-4-700", eyebrow: "text-unit-4-100", line: "bg-unit-4-300", chip: "bg-unit-4-100 text-unit-4-700", dot: "text-unit-4-600" },
+  { band: "bg-unit-5-700", eyebrow: "text-unit-5-100", line: "bg-unit-5-300", chip: "bg-unit-5-100 text-unit-5-700", dot: "text-unit-5-600" },
+] as const;
+
+function unitSkin(unitNumber: number) {
+  return UNIT_SKINS[(unitNumber - 1) % UNIT_SKINS.length];
+}
 
 /** A serpentine offset, so the trail reads as a path rather than a list. Written as
  *  literal class names because Tailwind scans this file for them. */
 
 export function PathPage() {
+  const session = useSession();
   const overview = useOverview();
   const version = overview.data?.curriculum_version ?? "hsk2.0";
   const path = usePath(version, Boolean(overview.data));
@@ -26,16 +47,21 @@ export function PathPage() {
     level.units.flatMap((unit) => unit.lessons),
   );
   const nextLessonId = flat.find((lesson) => lesson.state !== "completed")?.id;
+  const nextLesson = flat.find((lesson) => lesson.id === nextLessonId);
+  const user = session.data?.authenticated ? session.data.user : undefined;
 
   return (
     <div className="flex flex-col gap-8">
+      {/* The home screen. It says hello and then says what to do — the analytics that
+          used to live here are on /progress, one tap from the strip above. */}
       <header>
         <h1 className="text-3xl font-extrabold tracking-tight text-ink">
-          你的学习路径
+          {user ? `你好, ${user.display_name}` : "你的学习路径"}
         </h1>
         <p className="mt-1 text-sm text-ink-2">
-          {path.data.version} · lessons unlock in order, and the server enforces
-          it.
+          {nextLesson
+            ? `Next up: ${nextLesson.title}`
+            : "Every lesson in this curriculum is complete."}
         </p>
       </header>
 
@@ -72,44 +98,54 @@ export function PathPage() {
               <p className="text-sm text-ink-2">{level.description}</p>
             ) : null}
 
-            {level.units.map((unit) => (
-              <div key={unit.id} className="flex flex-col gap-6">
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-card bg-brand-600 px-5 py-4 text-white shadow-card">
-                  <div className="min-w-0">
-                    <p className="text-xs font-extrabold uppercase tracking-widest text-brand-100">
-                      Unit {unit.unit_number}
-                    </p>
-                    <h3 className="hanzi text-lg font-extrabold text-white">
-                      {unit.title}
-                    </h3>
-                    {unit.description ? (
-                      <p className="mt-0.5 text-sm text-brand-100">
-                        {unit.description}
+            {level.units.map((unit) => {
+              const skin = unitSkin(unit.unit_number);
+              const done = unit.lessons.filter((lesson) => lesson.state === "completed").length;
+              const allDone = done === unit.lessons.length && unit.lessons.length > 0;
+              return (
+                <div key={unit.id} className="flex flex-col gap-6">
+                  <div
+                    className={`flex flex-wrap items-center justify-between gap-2 rounded-card px-5 py-4 text-white shadow-card ${skin.band}`}
+                  >
+                    <div className="min-w-0">
+                      <p className={`text-xs font-extrabold uppercase tracking-widest ${skin.eyebrow}`}>
+                        Unit {unit.unit_number}
                       </p>
-                    ) : null}
+                      <h3 className="hanzi text-lg font-extrabold text-white">{unit.title}</h3>
+                      {unit.description ? (
+                        <p className={`mt-0.5 text-sm ${skin.eyebrow}`}>{unit.description}</p>
+                      ) : null}
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-xs font-extrabold ${skin.chip}`}>
+                      {done}/{unit.lessons.length} done
+                    </span>
                   </div>
-                  <Chip tone="accent">
-                    {
-                      unit.lessons.filter(
-                        (lesson) => lesson.state === "completed",
-                      ).length
-                    }
-                    /{unit.lessons.length} done
-                  </Chip>
-                </div>
 
-                <ul className="flex flex-col items-center gap-7 px-2 pb-2 pt-3">
-                  {unit.lessons.map((lesson, index) => (
-                    <LessonNode
-                      key={lesson.id}
-                      lesson={lesson}
-                      isNext={lesson.id === nextLessonId}
-                      showConnector={index > 0}
-                    />
-                  ))}
-                </ul>
-              </div>
-            ))}
+                  <ul className="flex flex-col items-center gap-7 px-2 pb-2 pt-3">
+                    {unit.lessons.map((lesson, index) => (
+                      <LessonNode
+                        key={lesson.id}
+                        lesson={lesson}
+                        isNext={lesson.id === nextLessonId}
+                        showConnector={index > 0}
+                        connectorClass={skin.line}
+                        order={index}
+                      />
+                    ))}
+                    {/* The end of a unit, marked as a milestone. It is a marker, not a
+                        destination: there is no lesson behind it, so it is not a link. */}
+                    <li className="animate-bounce-in flex flex-col items-center gap-2" style={{ animationDelay: `${unit.lessons.length * 55}ms` }}>
+                      <span className={allDone ? skin.dot : "text-ink-4"} aria-hidden>
+                        <CheckpointGlyph className="h-14 w-14" />
+                      </span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-ink-3">
+                        {allDone ? `Unit ${unit.unit_number} complete` : `Unit ${unit.unit_number} checkpoint`}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              );
+            })}
           </section>
         );
       })}
@@ -121,10 +157,14 @@ function LessonNode({
   lesson,
   isNext,
   showConnector,
+  connectorClass,
+  order,
 }: {
   lesson: LessonSummary;
   isNext: boolean;
   showConnector: boolean;
+  connectorClass: string;
+  order: number;
 }) {
   const state = describeLessonState(lesson.state);
   const meta = [
@@ -140,12 +180,14 @@ function LessonNode({
 
   // Four states, told apart by shape and icon as well as colour — a learner who
   // cannot separate green from indigo still sees a tick, a padlock and a play sign.
+  // A deeper lip than before: the trail should look like something you can press, and
+  // the four states stay distinguishable by shape and glyph as well as colour.
   const nodeSkin = {
     completed:
-      "bg-success-600 text-white shadow-[0_4px_0_var(--color-success-700)]",
+      "bg-success-600 text-white shadow-[0_6px_0_var(--color-success-700)]",
     in_progress:
-      "bg-brand-600 text-white shadow-[0_4px_0_var(--color-brand-700)] animate-breathe",
-    available: "border-4 border-brand-500 bg-surface text-brand-700",
+      "bg-brand-600 text-white shadow-[0_6px_0_var(--color-brand-700)] animate-breathe",
+    available: "border-4 border-brand-500 bg-surface text-brand-700 shadow-[0_6px_0_var(--color-brand-100)]",
     locked: "border-2 border-line bg-surface-2 text-ink-3",
   }[lesson.state];
 
@@ -159,11 +201,14 @@ function LessonNode({
     );
 
   return (
-    <li className={`relative flex w-full flex-col items-center`}>
+    <li
+      className="animate-bounce-in relative flex w-full flex-col items-center"
+      style={{ animationDelay: `${order * 55}ms` }}
+    >
       {showConnector ? (
         <span
           aria-hidden
-          className="absolute -top-7 left-1/2 h-7 w-1.5 -translate-x-1/2 rounded-full bg-line"
+          className={`absolute -top-7 left-1/2 h-7 w-2 -translate-x-1/2 rounded-full ${connectorClass}`}
         />
       ) : null}
 
@@ -181,7 +226,7 @@ function LessonNode({
           </span>
         ) : null}
         <span
-          className={`grid h-20 w-20 place-items-center rounded-full transition group-hover:scale-105 ${nodeSkin}`}
+          className={`grid h-24 w-24 place-items-center rounded-full transition group-hover:scale-105 group-active:translate-y-1 ${nodeSkin}`}
         >
           {icon}
         </span>

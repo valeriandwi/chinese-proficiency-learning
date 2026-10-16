@@ -305,15 +305,29 @@ async function main() {
     // The greeting renders with the session; the cards render when the progress
     // query resolves. Waiting only for the greeting reads a half-painted page.
     // Comparisons are case-insensitive because several labels are uppercased by CSS.
-    await cdp.waitFor('window.__t.text().toLowerCase().includes("up next") ? "cards" : ""', 'the dashboard cards')
-    await shot('01-today-desktop')
+    await cdp.waitFor('window.__t.text().toLowerCase().includes("next up") ? "cards" : ""', 'the home screen')
+    await shot('01-home-desktop')
     const dash = (await cdp.eval('window.__t.text()')).toLowerCase()
-    assert('the dashboard greets the new learner', dash.includes('e2e learner'))
-    assert('the streak starts at zero', /streak 0\s*days/.test(dash), 'streak card present')
-    assert('the daily goal is reported as unmet', dash.includes('not yet'))
-    assert('the review queue starts empty', /0\s*due/.test(dash), 'review queue card')
-    assert('the dashboard offers the first lesson', dash.includes('up next') && dash.includes('你好'), 'continue CTA present')
+    assert('the home greets the new learner', dash.includes('e2e learner'))
+    assert('the home is the path, not a dashboard', dash.includes('next up') && !dash.includes('skill mastery'), 'path rendered as home')
+    assert(
+      'the home offers the first lesson',
+      dash.includes('next up') && dash.includes('你好'),
+      'continue CTA present',
+    )
     assert('the first lesson is offered to a learner with no chosen curriculum', !dash.includes('path complete'), 'no dead end')
+    // The learner's numbers live in one strip on every screen — three links into the
+    // details, and no second copy of the same numbers anywhere.
+    assert(
+      'the gamified strip carries the streak, the goal and XP once',
+      (await cdp.eval('document.querySelectorAll(\'[data-testid="gamified-header"] a\').length')) === 3,
+      'strip links',
+    )
+    assert(
+      'the home does not repeat the statistics',
+      !dash.includes('skill mastery') && !dash.includes('last 30 days'),
+      'no analytics on the home',
+    )
 
     // --- the path shows exactly one unlocked lesson -------------------------
     await cdp.eval('window.__t.click("Path", "a")')
@@ -346,6 +360,29 @@ async function main() {
     // --- open the first lesson ---------------------------------------------
     await cdp.eval('window.__t.click("Start", "span")')
     await cdp.waitFor('document.body.innerText.includes("1 / 9") ? "lesson" : ""', 'the lesson player')
+
+    // The loop is answer -> Check -> verdict -> Continue. Each answer is submitted on
+    // its own so the band can carry the SERVER's verdict; exam mode is the exception and
+    // still submits one paper at the end.
+    const checkAndContinue = async (expect = 'Continue') => {
+      await cdp.eval(`window.__t.click("Check")`)
+      await cdp.waitFor(
+        'window.__t.byText("Continue") || window.__t.byText("Finish lesson") ? "verdict" : ""',
+        'the verdict band',
+      )
+      const band = await cdp.eval('window.__t.text()')
+      assert(
+        'lesson: every answer gets a verdict in words, not just colour',
+        /Correct!|Not quite|Saved for you to review/.test(band),
+        band.match(/Correct!|Not quite|Saved for you to review/)?.[0] ?? 'no verdict text',
+      )
+      assert(
+        'lesson: the band says who judged the answer',
+        /checked by/.test(band),
+        'grader named in the band',
+      )
+      await cdp.eval(`window.__t.click("${expect}")`)
+    }
     await shot('03-lesson-player')
     const vocab = await cdp.eval('window.__t.text()')
     assert('lesson: the vocabulary strip shows the new words', vocab.includes('你') && vocab.includes('谢谢'))
@@ -362,7 +399,7 @@ async function main() {
     for (const step of steps) {
       const clicked = await cdp.eval(`window.__t.click(${JSON.stringify(step.click)})`)
       assert(`${step.name}: tapped "${step.click}"`, clicked === 'CLICKED', clicked)
-      await cdp.eval('window.__t.click("Next")')
+      await checkAndContinue()
       await cdp.waitFor(`window.__t.text().includes("${step.after}") ? "next" : ""`, `position ${step.after}`)
     }
 
@@ -407,13 +444,13 @@ async function main() {
     assert('listening: the replay budget is shown', /plays used \d\/\d/.test(beforeAnswer))
 
     await cdp.eval('window.__t.click("How are you?")')
-    await cdp.eval('window.__t.click("Next")')
+    await checkAndContinue()
     await cdp.waitFor('window.__t.text().includes("6 / 9") ? "dictation" : ""', 'the dictation exercise')
 
     // --- dictation: typing what you heard ------------------------------------
     const typed = await cdp.eval(`window.__t.set('input[aria-label="What you heard"]', '谢谢你。')`)
     assert('dictation: the learner can type what they heard', typed === '谢谢你。', String(typed))
-    await cdp.eval('window.__t.click("Next")')
+    await checkAndContinue()
     await cdp.waitFor('window.__t.text().includes("7 / 9") ? "speak" : ""', 'the first speaking exercise')
 
     // --- speaking: audio out, with the fake microphone -----------------------
@@ -474,7 +511,7 @@ async function main() {
       await cdp.eval('window.__t.click("4 · Good")')
     }
 
-    await cdp.eval('window.__t.click("Next")')
+    await checkAndContinue()
     await cdp.waitFor('window.__t.text().includes("8 / 9") ? "read" : ""', 'the read-aloud exercise')
 
     // read_aloud needs no reference clip: the learner reads what is on screen.
@@ -495,7 +532,7 @@ async function main() {
     }
 
     // --- writing: the lesson closes here --------------------------------------
-    await cdp.eval('window.__t.click("Next")')
+    await checkAndContinue()
     await cdp.waitFor('window.__t.text().includes("9 / 9") ? "writing" : ""', 'the writing exercise')
     await shot('04-writing-drill')
     // hanzi-writer draws after its character data resolves, so this must be waited
@@ -508,13 +545,15 @@ async function main() {
     assert('writing: hanzi-writer rendered the character from local stroke data', Number(svgStrokes) > 0, `${svgStrokes} svg paths`)
     assert('writing: the hint control is offered', (await cdp.eval('window.__t.text()')).includes('Show me'))
     assert(
-      'writing: the drill is the last exercise, so an unwritten character does not block the lesson',
-      (await cdp.eval('window.__t.byText("Finish lesson") ? "yes" : "no"')) === 'yes',
-      'the player offers the submit control',
+      'writing: a production drill can be passed over, so an unwritten character does not block the lesson',
+      (await cdp.eval('window.__t.byText("Skip") ? "yes" : "no"')) === 'yes',
+      'Skip is offered for a drill the learner may not be able to produce',
     )
 
     // --- submit -------------------------------------------------------------
-    await cdp.eval('window.__t.click("Finish lesson")')
+    // Skip advances past the last exercise without recording an answer: the summary is
+    // assembled from the verdicts already collected during the lesson.
+    await cdp.eval('window.__t.click("Skip")')
     await cdp.waitFor('window.__t.text().includes("Lesson saved") || window.__t.text().includes("Lesson complete") ? "result" : ""', 'the result screen', 20_000)
     const result = await cdp.eval('window.__t.text()')
     assert(
@@ -543,7 +582,7 @@ async function main() {
     assert('result: per-answer feedback is shown in practice mode', (result.match(/checked by/g) || []).length >= 3, `${(result.match(/checked by/g) || []).length} graded items`)
 
     // --- progress is recomputed by the server, not by the client ------------
-    await cdp.eval('window.__t.click("Back to the path", "button")')
+    await cdp.eval('window.__t.click("Continue", "button")')
     await cdp.waitFor('window.__t.text().includes("unlock in order") ? "path" : ""', 'the path again')
     // The path query was invalidated by the submission; wait for the refetched
     // state instead of reading the stale cache.
@@ -553,13 +592,29 @@ async function main() {
     ).then(async () => (await cdp.eval('window.__t.text()')).toLowerCase())
     assert('path: the lesson is now in progress, not merely available', pathAfter.includes('continue'), 'state changed after submitting')
 
-    await cdp.eval('window.__t.click("Today", "a")')
-    await cdp.waitFor('window.__t.text().toLowerCase().includes("up next") ? "dashboard" : ""', 'the dashboard again')
-    const dashAfter = (await cdp.eval('window.__t.text()')).toLowerCase()
+    await cdp.eval('window.__t.click("Learn", "a")')
+    await cdp.waitFor('window.__t.text().toLowerCase().includes("next up") ? "home" : ""', 'the home screen again')
+    // The statistics live on /progress now that the home screen is the path, so they
+    // are read where a learner reads them — on the page, not inferred from the home.
+    await cdp.send('Page.navigate', { url: `${BASE}/progress` })
+    await cdp.waitFor('window.__t.text().toLowerCase().includes("skill mastery") ? "progress" : ""', 'the progress page')
+    const progressAfter = (await cdp.eval('window.__t.text()')).toLowerCase()
     // Eight: the writing drill is deliberately left unwritten by this flow.
-    assert('dashboard: every submitted answer is counted', /8\s*answers/.test(dashAfter), `answer total in: ${dashAfter.match(/\d+\s*answers/)?.[0] ?? 'not found'}`)
-    assert('dashboard: skill mastery appears after the first answers', dashAfter.includes('vocabulary'))
-    assert('dashboard: the daily goal is still unmet (4 short answers, minutes goal)', dashAfter.includes('not yet'))
+    assert('progress: every submitted answer is counted', /8\s*answers/.test(progressAfter), `answer total in: ${progressAfter.match(/\d+\s*answers/)?.[0] ?? 'not found'}`)
+    assert('progress: skill mastery appears after the first answers', progressAfter.includes('vocabulary'))
+    assert('progress: the daily goal is still unmet (4 short answers, minutes goal)', progressAfter.includes('not yet'))
+    assert(
+      'progress: a skill with no attempts is not reported as zero mastery',
+      progressAfter.includes('not yet assessed'),
+      'speaking has no attempts in this flow',
+    )
+    assert(
+      'progress: the rebuild control lives here, not on the home screen',
+      Boolean(await cdp.eval('window.__t.byText("Recompute", "button") ? "present" : ""')),
+      'Recompute on /progress',
+    )
+    await cdp.eval('window.__t.click("Learn", "a")')
+    await cdp.waitFor('window.__t.text().toLowerCase().includes("next up") ? "home" : ""', 'the home screen again')
 
     // --- a generated level, served by the running API -----------------------
     // The generated levels are checked hardest where a file check cannot reach:
@@ -623,7 +678,7 @@ async function main() {
     })
     await cdp.send('Page.navigate', { url: `${BASE}/` })
     await cdp.waitFor(
-      'window.__t.text().toLowerCase().includes("up next") ? "dashboard" : ""',
+      'window.__t.text().toLowerCase().includes("next up") ? "home" : ""',
       'the dashboard on a phone',
     )
     await shot('06-phone-today')
@@ -652,7 +707,7 @@ async function main() {
     )
     assert(
       'phone: all four destinations are reachable from the bottom bar',
-      ['Today', 'Path', 'Reviews', 'Settings'].every((label) => phoneLayout.tabs.some((tab) => tab.includes(label))),
+      ['Learn', 'Reviews', 'Tones', 'Settings'].every((label) => phoneLayout.tabs.some((tab) => tab.includes(label))),
       phoneLayout.tabs.join(', '),
     )
     assert(
@@ -681,7 +736,7 @@ async function main() {
     await cdp.send('Emulation.clearDeviceMetricsOverride')
     await cdp.send('Page.navigate', { url: `${BASE}/` })
     await cdp.waitFor(
-      'window.__t.text().toLowerCase().includes("up next") ? "dashboard" : ""',
+      'window.__t.text().toLowerCase().includes("next up") ? "home" : ""',
       'the dashboard under reduced motion',
     )
     const reduced = await cdp.eval(
@@ -692,7 +747,8 @@ async function main() {
       'reduced motion: the interface renders its content with no dependence on animation',
       // Case-insensitive: the labels are styled `uppercase`, and innerText reflects
       // the rendered casing, so the rail reads STREAK rather than Streak.
-      /up next/i.test(reducedMotion.text) && /streak/i.test(reducedMotion.text),
+      /next up/i.test(reducedMotion.text) &&
+        (await cdp.eval('document.querySelectorAll(\'[data-testid="gamified-header"] a\').length')) === 3,
       'content present under prefers-reduced-motion: reduce',
     )
     await cdp.send('Emulation.setEmulatedMedia', { features: [] })
@@ -787,7 +843,16 @@ async function main() {
     // any level, including lessons they have not reached. So it has to be graded for
     // real (the server judges it) and it has to leave the path exactly as it was — the
     // dashboard's answer count is where a learner would notice if it did not.
-    const answersBefore = (dashAfter.match(/(\d+)\s*answers/) || [])[1] ?? ''
+    // The count a learner sees on /progress, read from the same derived value the page
+    // renders (total_attempts). The old check scraped the home screen, which no longer
+    // shows statistics at all.
+    const countedAnswers = async () =>
+      Number(
+        await cdp.eval(
+          `(async () => (await (await fetch('/api/v1/progress/overview')).json()).total_attempts)()`,
+        ),
+      )
+    const answersBefore = await countedAnswers()
 
     await cdp.eval('window.__t.click("Tones", "a")')
     await cdp.waitFor('window.__t.text().includes("声调") ? "tones" : ""', 'the tone page')
@@ -830,14 +895,14 @@ async function main() {
 
     // ...and the path does not. The dashboard's answer count is the learner-visible
     // proof: a tone answer must not appear as one.
-    await cdp.eval('window.__t.click("Today", "a")')
-    await cdp.waitFor('window.__t.text().toLowerCase().includes("up next") ? "dashboard" : ""', 'the dashboard after tone practice')
+    await cdp.eval('window.__t.click("Learn", "a")')
+    await cdp.waitFor('window.__t.text().toLowerCase().includes("next up") ? "home" : ""', 'the home screen after tone practice')
     const dashAfterTones = (await cdp.eval('window.__t.text()')).toLowerCase()
-    const answersAfter = (dashAfterTones.match(/(\d+)\s*answers/) || [])[1] ?? ''
+    const answersAfter = await countedAnswers()
     assert(
       'tones: tone practice did not count as a path answer',
-      answersBefore !== '' && answersAfter === answersBefore,
-      `answers before ${answersBefore || 'not found'}, after ${answersAfter || 'not found'}`,
+      answersAfter === answersBefore,
+      `answers before ${answersBefore}, after ${answersAfter}`,
     )
 
     console.log(`\npassed: ${passed}   failed: ${failed}   skipped: ${skipped}`)

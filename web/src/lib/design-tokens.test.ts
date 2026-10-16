@@ -121,6 +121,53 @@ describe('design tokens', () => {
     }
   })
 
+  it('gives every unit family a legible tint, band and fill', () => {
+    // One accent per unit, cycling through five families. Each one needs the same
+    // guarantees as the rest of the palette: 700 carries white text, the 100 tint is
+    // readable ON that 700 band, the 50/100 tints carry 700 text, and 600 is only ever
+    // a fill on the track.
+    const failures: string[] = []
+    for (const family of [1, 2, 3, 4, 5]) {
+      for (const shade of ['50', '100', '300', '600', '700']) {
+        if (!css.includes(`--color-unit-${family}-${shade}:`)) {
+          failures.push(`unit-${family}-${shade} is not defined`)
+        }
+      }
+      const checks: [string, string, number][] = [
+        ['unit-' + family + '-700', 'unit-' + family + '-50', 4.5],
+        ['unit-' + family + '-700', 'unit-' + family + '-100', 4.5],
+        // The band's eyebrow text sits on the band.
+        ['unit-' + family + '-100', 'unit-' + family + '-700', 4.5],
+        // A fill is measured against the track it renders on, not against white.
+        ['unit-' + family + '-600', 'track', 3],
+      ]
+      for (const [fg, bg, minimum] of checks) {
+        const ratio = Number(contrast(token(fg), token(bg)).toFixed(2))
+        if (ratio < minimum) failures.push(`${fg} on ${bg} = ${ratio}:1, needs ${minimum}:1`)
+      }
+      const whiteOnBand = Number(contrast('#ffffff', token('unit-' + family + '-700')).toFixed(2))
+      if (whiteOnBand < 4.5) failures.push(`white on unit-${family}-700 = ${whiteOnBand}:1, needs 4.5:1`)
+    }
+    expect(failures, 'unit palette failures').toEqual([])
+  })
+
+  it('defines the motion it uses, and collapses it when motion is reduced', () => {
+    // Motion is decoration, never information: every animation here reinforces words
+    // that are already on screen. What has to hold is that the names resolve (a typo'd
+    // utility compiles to no animation at all, silently) and that the operating
+    // system's setting genuinely stops it.
+    for (const name of ['pop', 'rise', 'breathe', 'slide-up', 'shake', 'bounce-in', 'fall']) {
+      expect(css, `@keyframes ${name}`).toMatch(new RegExp(`@keyframes ${name}\\b`))
+    }
+    for (const tokenName of ['pop', 'rise', 'breathe', 'slide-up', 'shake', 'bounce-in', 'fall']) {
+      expect(css, `--animate-${tokenName}`).toMatch(new RegExp(`--animate-${tokenName}:`))
+    }
+    const reduced = css.slice(css.indexOf('prefers-reduced-motion: reduce'))
+    expect(reduced).toMatch(/animation-duration:\s*0\.001ms/)
+    expect(reduced).toMatch(/animation-iteration-count:\s*1/)
+    expect(reduced).toMatch(/transition-duration:\s*0\.001ms/)
+  })
+
   it('keeps every meaning-carrying fill and boundary at or above 3:1', () => {
     // Fills sit on the track, not on white: a 500 shade measures 2.1:1 there.
     const nonText: [string, string, string][] = [
