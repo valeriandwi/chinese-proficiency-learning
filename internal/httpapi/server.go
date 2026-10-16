@@ -134,6 +134,12 @@ func (s *Server) Routes() http.Handler {
 			// without touching the path (see handlers_tone.go and migrations/0006).
 			r.Get("/tones/queue", s.handleToneQueue)
 			r.Post("/tones/answers", s.handleToneAnswers)
+
+			// Proficiency tests: a scored paper that can open a level (see
+			// handlers_proficiency.go and migrations/0007).
+			r.Get("/proficiency/cards", s.handleProficiencyCards)
+			r.Get("/proficiency/{level}", s.handleProficiencyPaper)
+			r.Post("/proficiency/{level}/submit", s.handleProficiencySubmit)
 		})
 	})
 

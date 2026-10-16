@@ -10,6 +10,8 @@ import { usePrefs } from './stores/prefs'
 import { LoginPage, RegisterPage } from './features/auth/AuthPages'
 import { PathPage } from './features/path/PathPage'
 import { ProgressPage } from './features/progress/ProgressPage'
+import { ProficiencyPage } from './features/proficiency/ProficiencyPage'
+import { PaperRoute } from './features/proficiency/PaperPage'
 import { TonePage } from './features/tone/TonePage'
 import { LessonPage } from './features/lesson/LessonPage'
 import { ReviewPage } from './features/review/ReviewPage'
@@ -74,6 +76,24 @@ export function App() {
           element={
             <RequireAuth authenticated={authenticated}>
               <TonePage />
+            </RequireAuth>
+          }
+        />
+        {/* Test out: a scored paper that opens a level. Not a nav destination — a
+            learner meets it where the decision is made (a level header, or progress). */}
+        <Route
+          path="/proficiency"
+          element={
+            <RequireAuth authenticated={authenticated}>
+              <ProficiencyPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/proficiency/:level"
+          element={
+            <RequireAuth authenticated={authenticated}>
+              <PaperRoute />
             </RequireAuth>
           }
         />

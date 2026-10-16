@@ -9,7 +9,8 @@ spaced repetition, streaks, and (in progress) mock exams.
 word lists), pronunciation scoring for speaking drills behind a provider interface
 (off by default; the recording is scored and never stored),
 a tone-practice page (drill tone alone without walking the path; it earns no XP and
-moves nothing), practice lessons with **fifteen** exercise types (reading, listening, speaking and
+moves nothing), proficiency tests that open a level at 80% on a paper drawn across it
+(passing opens the level without marking a single lesson learned), practice lessons with **fifteen** exercise types (reading, listening, speaking and
 tone choice included), reference audio generated at import time and served same-origin,
 server-side grading, derived progress, streaks and the review deck all work against
 real Postgres, covered by Go unit tests, Go integration tests, an HTTP smoke test

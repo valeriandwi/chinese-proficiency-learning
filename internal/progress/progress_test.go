@@ -206,7 +206,9 @@ func TestDeriveLessonStates(t *testing.T) {
 		name      string
 		completed []bool
 		started   []bool
-		want      []string
+		// opened marks lessons whose LEVEL a proficiency test opened. Nil means none.
+		opened []bool
+		want   []string
 	}{
 		{
 			name:      "a fresh learner sees one available lesson",
@@ -238,10 +240,43 @@ func TestDeriveLessonStates(t *testing.T) {
 			started:   []bool{true, true},
 			want:      []string{"completed", "completed"},
 		},
+		{
+			// The case the feature exists for: a learner who tested out of the level
+			// those last two lessons belong to can start there, while the level before
+			// it keeps the ordinary one-available rule.
+			name:      "a level opened by a test is available in full",
+			completed: []bool{false, false, false, false},
+			started:   []bool{false, false, false, false},
+			opened:    []bool{false, false, true, true},
+			want:      []string{"available", "locked", "available", "available"},
+		},
+		{
+			// An unlock opens ONE level. If it leaked forward, a single test would
+			// eventually open the whole curriculum.
+			name:      "an opened level does not open the level after it",
+			completed: []bool{true, true, false, false},
+			started:   []bool{true, true, false, false},
+			opened:    []bool{false, false, true, false},
+			want:      []string{"completed", "completed", "available", "locked"},
+		},
+		{
+			name:      "a lesson already begun inside an opened level stays in progress",
+			completed: []bool{false, false, false},
+			started:   []bool{false, true, false},
+			opened:    []bool{false, true, true},
+			want:      []string{"available", "in_progress", "available"},
+		},
+		{
+			name:      "an opened slice shorter than the path is not an error",
+			completed: []bool{false, false, false},
+			started:   []bool{false, false, false},
+			opened:    []bool{true},
+			want:      []string{"available", "locked", "locked"},
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := DeriveLessonStates(tc.completed, tc.started)
+			got := DeriveLessonStates(tc.completed, tc.started, tc.opened)
 			if len(got) != len(tc.want) {
 				t.Fatalf("got %v, want %v", got, tc.want)
 			}

@@ -103,7 +103,10 @@ func badModeError() error {
 // ValidModes mirrors the attempts.mode CHECK constraint. "tone" is practice that is
 // deliberately off the path (see migrations/0006_tone_practice.sql): it is recorded in
 // the same log and excluded from every derived value.
-var ValidModes = map[string]bool{"practice": true, "review": true, "exam": true, "placement": true, "tone": true}
+var ValidModes = map[string]bool{
+	"practice": true, "review": true, "exam": true, "placement": true,
+	"tone": true, "proficiency": true,
+}
 
 // Submit grades and records a batch, then recomputes derived state in the same
 // transaction so a submission can never leave progress stale.

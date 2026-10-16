@@ -27,6 +27,7 @@ it is proven.
 | Speaking drills: repeat / read aloud / answer, with recording, playback, self-rating | done (tier 1 — always available, no provider needed) |
 | Pronunciation scoring: per-word assessment, score bands, XP eligibility, daily cap, transient audio | done (`internal/speech`; off by default — needs a provider, see docs/sources.md §7) |
 | Tone practice: a page to drill tone alone, one tone drill per word, off-path by design | done (`/tones`; attempts recorded with mode `tone` and excluded from every derived value — see docs/architecture.md) |
+| Proficiency tests: a scored paper per level (20 questions drawn across its units) that opens the level at 80% | done (paper drawn and stored server-side, every question answered before it is marked; a pass records an UNLOCK, never completions) |
 | Lesson player: per-type renderers, pinyin toggle, exam-mode switch, batch submit | done |
 | Interface: semantic design tokens with measured contrast, lesson trail, phone bottom navigation, celebration screen | done (see docs/architecture.md) |
 | Hanzi writing: guided trace + write-from-memory, stroke errors recorded | done (client-side stroke check) |
@@ -136,15 +137,21 @@ social features, an offline PWA, native apps, and a shop/currency economy.
    of the path, not an accident of import order: tones decide whether spoken Chinese is
    understood, and 46 drills is a short review. Interleaving them per word instead is
    the alternative, and it is more invasive.
-8. **No mock-exam mode in the UI yet.** The API supports `mode: "exam"` and the
+8. **A proficiency paper is narrower than an HSK exam.** It draws only mechanically
+   gradable questions — meaning, listening, tone, dictation — because a rubric item or an
+   unassisted speaking prompt could not decide whether a level opens. Writing composition
+   and pronunciation are therefore *out of scope* for a pass, and a learner who tests out
+   of a level has not been asked to produce any Chinese. Mock exams with timed sections
+   remain unshipped (M3).
+9. **No mock-exam mode in the UI yet.** The API supports `mode: "exam"` and the
    lesson player exposes it, but blueprints and timed papers are M3.
-9. **Exam mode reveals per-answer correctness but not the answer.** Submitting with
+10. **Exam mode reveals per-answer correctness but not the answer.** Submitting with
    `mode: "exam"` returns `is_correct` with `solution`, `feedback`, `explanation` and
    `score` stripped. A learner could therefore probe options and learn which was
    right without seeing why. That is pre-existing behaviour for every MCQ type, it
    matters more now that an exam can contain audio, and it should be closed when mock
    exams are built.
-10. **Scoring needs a vendor and a decision.** The pipeline, the contract and the
+11. **Scoring needs a vendor and a decision.** The pipeline, the contract and the
    fallback are built and tested, but a real deployment must choose a provider and
    accept its terms (cost per hour of audio, and the learner's voice leaving the
    machine) before any learner is scored. With no provider configured the endpoint
@@ -152,27 +159,27 @@ social features, an offline PWA, native apps, and a shop/currency economy.
    reason the feature cannot quietly become a lie. Only `speak_repeat` and `read_aloud`
    can be scored: an open speaking prompt has no reference utterance to compare
    against, and scoring one against its own question would mark a correct answer wrong.
-11. **Levels 2–5 are drilled, not taught.** They cover every word of the published
+12. **Levels 2–5 are drilled, not taught.** They cover every word of the published
    HSK 2.0 lists for those levels with meaning, listening, dictation, speaking and
    stroke-order drills, but they contain no authored sentences: `fill_blank`,
    `sentence_order`, `translation` and `short_answer` exist only in level 1, because
    a generator asked to write Chinese would produce plausible but wrong grammar.
    Writing those items is human work. The glosses also carry an open licence
    question — see `docs/sources.md` §3.
-12. **The interface shows only the gamification the server can back.** Streaks, XP,
+13. **The interface shows only the gamification the server can back.** Streaks, XP,
    the daily goal, skill mastery, activity and the review-due count are real. Hearts,
    gems, leagues, badges and crowns would each need server work, so they are absent
    rather than mocked — a decorative progress bar is a promise the app cannot keep.
-13. **The SPA ships as one bundle.** `pnpm build` reports ~520 kB before gzip
+14. **The SPA ships as one bundle.** `pnpm build` reports ~520 kB before gzip
    (Vite's 500 kB warning) now that the icon set and the typeface are bundled. It is
    a warning, not a failure: nothing loads from a CDN, and the fonts are subsets the
    browser fetches on demand (39 kB for Latin). Route-level `import()` splitting is
    the obvious next step if the warning starts to matter.
-14. **The mobile layout is verified at one size.** The E2E emulates 375×812 and
+15. **The mobile layout is verified at one size.** The E2E emulates 375×812 and
    asserts a single bottom navigation, reachable targets and the trail. Tablet widths
    and landscape phones are covered by the responsive utilities but not by a test.
 
-15. **Email in development goes to the log.** There is no mail server in the local
+16. **Email in development goes to the log.** There is no mail server in the local
    setup: with `SMTP_ADDR` unset, the log transport prints the message (including
    the verification link) rather than losing it. `brew install mailpit`, set
    `SMTP_ADDR=127.0.0.1:1025` and the smoke test's delivery assertion runs again.

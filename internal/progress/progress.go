@@ -138,16 +138,26 @@ func ScheduleReview(now time.Time, intervalIndex int, ease float64, correct bool
 	return intervalIndex, round2(ease), now.Add(interval)
 }
 
-// DeriveLessonStates assigns locked | available | in_progress | completed to a
-// lesson path in order. The path is linear across the whole level, so exactly one
-// unfinished lesson is available at a time and everything after it is locked.
+// DeriveLessonStates assigns locked | available | in_progress | completed to a lesson
+// path in order.
 //
-// Inputs are parallel slices in path order. It returns states keyed by index so
-// callers with their own id types do not need to import uuid.
-func DeriveLessonStates(orderedCompleted []bool, orderedStarted []bool) []string {
+// The path is linear, so normally exactly one unfinished lesson is available at a time
+// and everything after it is locked. `orderedOpened` is the deliberate exception: it
+// marks the lessons of a level a learner has opened with a proficiency test
+// (see migrations/0007), and every lesson in such a level is available at once.
+//
+// What an opened lesson is NOT is completed. Nothing here marks work done — the
+// distinction between "you may start here" and "you already learned this" is the whole
+// point, and it is why an unlock is a separate input rather than a fabricated
+// completion.
+//
+// Inputs are parallel slices in path order. It returns states keyed by index so callers
+// with their own id types do not need to import uuid.
+func DeriveLessonStates(orderedCompleted []bool, orderedStarted []bool, orderedOpened []bool) []string {
 	states := make([]string, len(orderedCompleted))
 	unlocked := true
 	for i := range orderedCompleted {
+		opened := i < len(orderedOpened) && orderedOpened[i]
 		switch {
 		case orderedCompleted[i]:
 			states[i] = "completed"
@@ -157,6 +167,13 @@ func DeriveLessonStates(orderedCompleted []bool, orderedStarted []bool) []string
 			states[i] = "in_progress"
 			// A lesson already begun stays available even if it is not first.
 			unlocked = true
+		case opened:
+			states[i] = "available"
+			// The sequential pointer is consumed here rather than left standing: a
+			// test-opened level opens its own lessons, and must not carry that
+			// availability into the NEXT level, which nobody has tested out of.
+			// (Within the opened level every lesson matches this case anyway.)
+			unlocked = false
 		case unlocked:
 			states[i] = "available"
 			unlocked = false

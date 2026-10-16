@@ -1,14 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, isUnauthorized } from './client'
 import type {
+  AnswerPayload,
   AttemptInput,
   Curriculum,
   LessonDetail,
   PathResponse,
+  ProficiencyCardsResponse,
+  ProficiencyPaperResponse,
   ProgressOverview,
   ReviewAnswerResponse,
   ReviewQueue,
   SessionInfo,
+  ProficiencySubmitResponse,
   ToneAnswersResponse,
   ToneQueue,
   SubmitSummary,
@@ -22,6 +26,8 @@ export const queryKeys = {
   lesson: (id: string) => ['lesson', id] as const,
   reviewQueue: (limit: number) => ['reviews', 'queue', limit] as const,
   toneQueue: (level: number | null) => ['tones', 'queue', level ?? 'mine'] as const,
+  proficiencyCards: ['proficiency', 'cards'] as const,
+  proficiencyPaper: (level: number) => ['proficiency', 'paper', level] as const,
   curricula: ['curricula'] as const,
 }
 
@@ -100,6 +106,47 @@ export function useAnswerTone() {
   return useMutation({
     mutationFn: (input: { exercise_id: string; client_ref: string; option_id: string }) =>
       api<ToneAnswersResponse>('/api/v1/tones/answers', { method: 'POST', body: { answers: [input] } }),
+  })
+}
+
+/** Test-out cards, one per level. */
+export function useProficiencyCards() {
+  return useQuery({
+    queryKey: queryKeys.proficiencyCards,
+    queryFn: () => api<ProficiencyCardsResponse>('/api/v1/proficiency/cards'),
+  })
+}
+
+/**
+ * Draw a paper. The server draws AND stores it, so the paper is fetched once and held:
+ * a refetch would draw a different paper and invalidate the answers already given.
+ */
+export function useProficiencyPaper(level: number | undefined) {
+  return useQuery({
+    queryKey: queryKeys.proficiencyPaper(level ?? 0),
+    queryFn: () => api<ProficiencyPaperResponse>(`/api/v1/proficiency/${level}`),
+    enabled: Boolean(level),
+    // A new paper is a deliberate act (retry), never an accident of refocusing.
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    retry: false,
+  })
+}
+
+export function useSubmitProficiency(level: number) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { paper_id: string; answers: { exercise_id: string; client_ref: string; response: AnswerPayload }[] }) =>
+      api<ProficiencySubmitResponse>(`/api/v1/proficiency/${level}/submit`, { method: 'POST', body: input }),
+    // A pass changes which lessons are available, so the path and the cards are stale —
+    // but NOT the paper query. Invalidating the whole 'proficiency' prefix refetched the
+    // paper that had just been sat, which draws a different one, resets the page and
+    // leaves the learner staring at question 1 with no result.
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.proficiencyCards })
+      void qc.invalidateQueries({ queryKey: ['curriculum'] })
+      void qc.invalidateQueries({ queryKey: queryKeys.overview })
+    },
   })
 }
 

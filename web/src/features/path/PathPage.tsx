@@ -93,6 +93,14 @@ export function PathPage() {
                 </p>
               </div>
               {level.stage ? <Chip tone="accent">{level.stage}</Chip> : null}
+              {/* The decision is made on the level, so the way through it is offered here
+                  rather than only on a separate page. */}
+              <Link
+                to={`/proficiency/${level.level_number}`}
+                className="ml-auto shrink-0 text-xs font-bold text-brand-700 transition hover:text-brand-500"
+              >
+                Test out of HSK {level.level_number} →
+              </Link>
             </div>
             {level.description ? (
               <p className="text-sm text-ink-2">{level.description}</p>

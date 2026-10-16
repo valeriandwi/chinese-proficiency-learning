@@ -73,6 +73,9 @@ type LessonRef struct {
 	LessonNumber int
 	Kind         string
 	Title        string
+	// LevelNumber is carried so a caller can tell whether this lesson's level has been
+	// opened by a proficiency test (see migrations/0007).
+	LevelNumber int
 }
 
 // PathLesson is a lesson as returned to the learner, with derived state.

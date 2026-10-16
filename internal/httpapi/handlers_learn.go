@@ -104,7 +104,17 @@ func (s *Server) deriveStates(ctx context.Context, userID uuid.UUID, version str
 			started[i] = p.Attempts > 0
 		}
 	}
-	derived := progress.DeriveLessonStates(comp, started)
+	// A level opened by a proficiency test makes its lessons available without any of
+	// them being completed — the one deliberate exception to the linear rule.
+	unlockedLevels, err := s.store.UnlockedLevelNumbers(ctx, userID, c.ID)
+	if err != nil {
+		return nil, err
+	}
+	opened := make([]bool, len(refs))
+	for i, ref := range refs {
+		opened[i] = unlockedLevels[ref.LevelNumber]
+	}
+	derived := progress.DeriveLessonStates(comp, started, opened)
 	out := make(map[uuid.UUID]string, len(refs))
 	for i, ref := range refs {
 		out[ref.LessonID] = derived[i]

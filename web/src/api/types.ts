@@ -167,6 +167,53 @@ export type LessonDetail = {
 
 export type AnswerPayload = Record<string, unknown>
 
+// --- proficiency tests -----------------------------------------------------
+// A scored paper that can open a level. Placement recommends and says so; this decides.
+// Passing records an unlock, never a completion: the level's lessons become available,
+// and nothing is marked learned.
+
+export type ProficiencyCard = {
+  level: number
+  title: string
+  /** Gradable questions this level can draw a paper from. */
+  questions: number
+  /** A proficiency test opened this level. Walking to a level creates no row of its own. */
+  unlocked_by_test: boolean
+  best_score: number | null
+  papers_taken: number
+  passed: boolean
+}
+
+export type ProficiencyCardsResponse = {
+  cards: ProficiencyCard[]
+  pass_threshold: number
+  paper_size: number
+}
+
+export type ProficiencyPaperResponse = {
+  paper_id: string
+  level: { number: number; title: string }
+  questions: Exercise[]
+  pass_threshold: number
+}
+
+export type ProficiencyPaperResult = {
+  id: string
+  level: number
+  score: number
+  percent: number
+  passed: boolean
+  graded_count: number
+  correct_count: number
+  pass_mark: number
+}
+
+export type ProficiencySubmitResponse = {
+  results: AttemptResult[]
+  paper: ProficiencyPaperResult
+  unlocked_now: boolean
+}
+
 // --- tone practice ---------------------------------------------------------
 // Drills on tone alone, from any level: not gated by the lesson path, and graded
 // without touching it (see migrations/0006). The prompt never carries an answer key,

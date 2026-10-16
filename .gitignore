@@ -24,3 +24,6 @@ integration/*.out
 
 # The workspace marker for the agent that built this repo
 .cache/
+
+# graphify knowledge graph (generated; rebuilt with graphify extract . --code-only)
+graphify-out/

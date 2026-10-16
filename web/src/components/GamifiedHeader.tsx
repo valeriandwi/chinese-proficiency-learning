@@ -59,14 +59,16 @@ export function GamifiedHeader() {
 
       <Link
         to="/progress"
-        aria-label={`Today's goal: ${percent}% ${streak.goal_met_today ? 'met' : 'to go'}. See your progress.`}
+        aria-label={`Today's goal: ${percent}% ${streak.goal_met_today ? 'met' : 'done'}. See your progress.`}
         className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-surface px-3 py-1.5 transition hover:border-reward-300"
       >
         <ProgressRing value={ratio} size={26} stroke={5} tone="reward" label={`${percent}% of today's goal`}>
           <Target size={13} aria-hidden className="text-reward-700" />
         </ProgressRing>
         <span className="text-lg font-extrabold leading-none text-ink">{percent}%</span>
-        <span className="text-xs font-bold text-ink-2">{streak.goal_met_today ? 'met' : 'to go'}</span>
+        {/* "0% to go" would read as "nothing left to do" when the ring is empty — the
+            number is progress toward the goal, so that is what the word says. */}
+        <span className="text-xs font-bold text-ink-2">{streak.goal_met_today ? 'met' : 'done'}</span>
       </Link>
 
       <Link

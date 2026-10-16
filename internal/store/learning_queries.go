@@ -89,12 +89,14 @@ func InsertAttemptTx(ctx context.Context, tx pgx.Tx, in AttemptInsert) (uuid.UUI
 // is always one call away from being correct.
 //
 // Order matters and is deliberate:
-// onPathAttempt is the predicate for "counts toward the path". A tone-practice attempt
-// is recorded in the same table so the learner's tone record survives, but it is
-// deliberately not part of the path: it must not move lesson status, award XP or
-// mastery, or feed the daily rollup the streak is derived from. One predicate, applied
-// wherever this file reads attempts, keeps that one idea in one place.
-const onPathAttempt = `a.mode <> 'tone'`
+// onPathAttempt is the predicate for "counts toward the path". Two kinds of attempt are
+// recorded in the same table so the learner's own record survives, and are deliberately
+// not part of the path: tone practice and proficiency papers. Both serve content the
+// learner has not reached — a tone drill from any level, a paper drawn across a level
+// nobody has walked — so neither may move lesson status, XP, mastery, the daily rollup
+// the streak is derived from, or the answer totals the dashboard shows. One predicate,
+// applied wherever this file reads attempts, keeps that one idea in one place.
+const onPathAttempt = `a.mode NOT IN ('tone', 'proficiency')`
 
 // 1. lesson_progress  (from attempts)
 // 2. xp_events        (from completed lessons; deduplicated by ref_id)
@@ -379,8 +381,8 @@ func (s *Store) SkillMasteryFor(ctx context.Context, userID uuid.UUID) ([]SkillM
 func (s *Store) Totals(ctx context.Context, userID uuid.UUID) (attempts, correct, lessonsDone, totalXP int, err error) {
 	err = s.Pool.QueryRow(ctx, `
 		SELECT
-			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid AND mode <> 'tone'),
-			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid AND mode <> 'tone' AND is_correct IS TRUE),
+			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid AND mode NOT IN ('tone', 'proficiency')),
+			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid AND mode NOT IN ('tone', 'proficiency') AND is_correct IS TRUE),
 			(SELECT count(*)::int FROM lesson_progress WHERE user_id = $1::uuid AND status = 'completed'),
 			(SELECT coalesce(sum(amount), 0)::int FROM xp_events WHERE user_id = $1::uuid)`,
 		userID).Scan(&attempts, &correct, &lessonsDone, &totalXP)

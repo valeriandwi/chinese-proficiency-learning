@@ -1098,6 +1098,194 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/proficiency/cards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Test-out cards for every level
+         * @description Placement recommends a level and says so; a proficiency paper decides. Passing one
+         *     at the pass mark records a level unlock — never a completion: no lesson is marked
+         *     done, no XP is awarded, and the level's lessons become *available*.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Curriculum version; defaults to the app default */
+                    version?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            cards?: components["schemas"]["ProficiencyCard"][];
+                            /** @description Fraction of graded answers needed to pass */
+                            pass_threshold?: number;
+                            paper_size?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/proficiency/{level}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Draw a paper for a level
+         * @description The paper is drawn by the server and stored before it is sat, so the submission can
+         *     be checked against it. Only mechanically gradable questions are drawn — meaning,
+         *     listening, tone, dictation — because a rubric item or an unassisted speaking prompt
+         *     could not decide whether a level opens.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    level: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uuid */
+                            paper_id?: string;
+                            level?: {
+                                [key: string]: unknown;
+                            };
+                            questions?: components["schemas"]["ToneDrill"][];
+                            pass_threshold?: number;
+                        };
+                    };
+                };
+                /** @description No gradable questions at this level */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/proficiency/{level}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Grade a drawn paper and open the level if it passes
+         * @description Every drawn question must be answered, and nothing outside the paper is graded.
+         *     Attempts are recorded with mode `proficiency` and excluded from every derived
+         *     value: a paper samples lessons the learner has not reached, so it must not move
+         *     lesson status, XP, mastery, the daily rollup or the streak.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    level: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: uuid */
+                        paper_id: string;
+                        answers: {
+                            /** Format: uuid */
+                            exercise_id: string;
+                            client_ref?: string;
+                            response: {
+                                [key: string]: unknown;
+                            };
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            results?: components["schemas"]["AttemptResult"][];
+                            paper?: {
+                                [key: string]: unknown;
+                            };
+                            /** @description True only for the paper that opened the level */
+                            unlocked_now?: boolean;
+                        };
+                    };
+                };
+                /** @description `already_submitted` when the paper has been sat */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `incomplete_paper` or `not_in_paper` when the submission does not match the drawn paper */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tones/queue": {
         parameters: {
             query?: never;
@@ -1519,6 +1707,17 @@ export interface components {
                 /** @description Provider taxonomy, e.g. None or Mispronunciation. */
                 error_type?: string;
             }[];
+        };
+        ProficiencyCard: {
+            level?: number;
+            title?: string;
+            /** @description Gradable questions this level can draw from */
+            questions?: number;
+            /** @description A proficiency test opened this level */
+            unlocked_by_test?: boolean;
+            best_score?: number | null;
+            papers_taken?: number;
+            passed?: boolean;
         };
         /** @description One tone question as the learner sees it — the prompt, the level it comes from, and no answer key. */
         ToneDrill: {

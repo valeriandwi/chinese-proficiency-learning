@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowLeft, BookOpenCheck, Flame, Sparkles, Target, Wrench } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, BookOpenCheck, Flame, Sparkles, Target, Wrench } from 'lucide-react'
 import { useCurricula, useOverview, useRefreshProgress, useSession } from '../../api/hooks'
 import { describeGoal, describeSkill, formatDay, formatPercent } from '../../lib/labels'
 import { goalProgress, goalRatio } from '../../lib/goal'
@@ -152,6 +152,24 @@ export function ProgressPage() {
           }
         />
       </div>
+
+      <Card className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-tile bg-brand-50 text-brand-700" aria-hidden>
+            <BadgeCheck size={20} />
+          </span>
+          <div>
+            <h2 className="font-extrabold text-ink">Test out of a level</h2>
+            <p className="text-sm text-ink-2">
+              Already know it? Sit a paper drawn across the level and score 80% or better to open it — passing opens
+              the level without claiming you learned it.
+            </p>
+          </div>
+        </div>
+        <Link to="/proficiency">
+          <Button variant="secondary">Test out</Button>
+        </Link>
+      </Card>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

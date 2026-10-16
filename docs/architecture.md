@@ -62,7 +62,7 @@ duration, mode. Everything a learner sees on the dashboard is derived from it:
 Because it is one code path, `POST /progress/refresh` is a legitimate answer to
 "these numbers look stale", and there is no incremental-update bug surface.
 
-**One exclusion: `mode = 'tone'`.** The tone practice page serves drills from any level,
+**One exclusion: `mode = 'tone'` and `mode = 'proficiency'`.** The tone practice page serves drills from any level,
 including lessons the learner has not reached, because a tone question is self-contained
 and the page exists precisely so tone can be drilled without walking a level first. That
 makes it the one surface whose attempts must not feed the derivation above: with no mode
@@ -76,6 +76,23 @@ row and no `daily_activity` row.
 
 The cost is stated plainly: tone practice earns no XP, no mastery and no streak credit.
 It is off-path by design, not by omission.
+
+### A level can be opened, not claimed
+
+The linear path is enforced on submission: a locked lesson refuses answers even when a
+client constructs the request by hand. Placement could never satisfy that rule — it is a
+self-report heuristic and says so — so a learner who already knows a level had no way
+through except to walk it.
+
+`level_unlocks` is the deliberate exception (migrations/0007). A proficiency paper is
+**drawn and stored by the server before it is sat**, the submission is checked against the
+drawn questions (every one answered, nothing outside graded), and a pass at 80% inserts one
+unlock row. `DeriveLessonStates` takes that as an explicit input: the lessons of an opened
+level are *available* while none of them is *completed* — the sequential pointer is
+consumed at the opened block so an unlock cannot leak into the next level, which is pinned
+by a unit test. Completion, XP, mastery, the daily rollup and the streak are untouched, so
+"you may start here" and "you already learned this" stay different claims, and the record
+of which one is true survives on the row.
 
 ### Curriculum as versioned data
 

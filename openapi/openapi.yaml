@@ -541,6 +541,104 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ProgressOverview' }
 
+  /api/v1/proficiency/cards:
+    get:
+      tags: [proficiency]
+      summary: Test-out cards for every level
+      description: |
+        Placement recommends a level and says so; a proficiency paper decides. Passing one
+        at the pass mark records a level unlock — never a completion: no lesson is marked
+        done, no XP is awarded, and the level's lessons become *available*.
+      parameters:
+        - { name: version, in: query, schema: { type: string }, description: 'Curriculum version; defaults to the app default' }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cards:
+                    type: array
+                    items: { $ref: '#/components/schemas/ProficiencyCard' }
+                  pass_threshold: { type: number, description: 'Fraction of graded answers needed to pass' }
+                  paper_size: { type: integer }
+
+  /api/v1/proficiency/{level}:
+    get:
+      tags: [proficiency]
+      summary: Draw a paper for a level
+      description: |
+        The paper is drawn by the server and stored before it is sat, so the submission can
+        be checked against it. Only mechanically gradable questions are drawn — meaning,
+        listening, tone, dictation — because a rubric item or an unassisted speaking prompt
+        could not decide whether a level opens.
+      parameters:
+        - { name: level, in: path, required: true, schema: { type: integer, minimum: 1, maximum: 9 } }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  paper_id: { type: string, format: uuid }
+                  level: { type: object, additionalProperties: true }
+                  questions:
+                    type: array
+                    items: { $ref: '#/components/schemas/ToneDrill' }
+                  pass_threshold: { type: number }
+        '404': { description: 'No gradable questions at this level' }
+
+  /api/v1/proficiency/{level}/submit:
+    post:
+      tags: [proficiency]
+      summary: Grade a drawn paper and open the level if it passes
+      description: |
+        Every drawn question must be answered, and nothing outside the paper is graded.
+        Attempts are recorded with mode `proficiency` and excluded from every derived
+        value: a paper samples lessons the learner has not reached, so it must not move
+        lesson status, XP, mastery, the daily rollup or the streak.
+      parameters:
+        - { name: level, in: path, required: true, schema: { type: integer, minimum: 1, maximum: 9 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paper_id, answers]
+              properties:
+                paper_id: { type: string, format: uuid }
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    required: [exercise_id, response]
+                    properties:
+                      exercise_id: { type: string, format: uuid }
+                      client_ref: { type: string }
+                      response: { type: object, additionalProperties: true }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items: { $ref: '#/components/schemas/AttemptResult' }
+                  paper:
+                    type: object
+                    additionalProperties: true
+                  unlocked_now: { type: boolean, description: 'True only for the paper that opened the level' }
+        '409': { description: '`already_submitted` when the paper has been sat' }
+        '422': { description: '`incomplete_paper` or `not_in_paper` when the submission does not match the drawn paper' }
+
   /api/v1/tones/queue:
     get:
       tags: [tones]
@@ -892,6 +990,17 @@ components:
               word: { type: string }
               accuracy: { type: number, minimum: 0, maximum: 1 }
               error_type: { type: string, description: 'Provider taxonomy, e.g. None or Mispronunciation.' }
+
+    ProficiencyCard:
+      type: object
+      properties:
+        level: { type: integer }
+        title: { type: string }
+        questions: { type: integer, description: 'Gradable questions this level can draw from' }
+        unlocked_by_test: { type: boolean, description: 'A proficiency test opened this level' }
+        best_score: { type: number, nullable: true }
+        papers_taken: { type: integer }
+        passed: { type: boolean }
 
     ToneDrill:
       description: One tone question as the learner sees it — the prompt, the level it comes from, and no answer key.

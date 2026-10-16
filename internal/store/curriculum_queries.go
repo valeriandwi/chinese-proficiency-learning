@@ -76,7 +76,7 @@ func (s *Store) Levels(ctx context.Context, curriculumID uuid.UUID) ([]Level, er
 // ordering is what lock state is derived from.
 func (s *Store) LessonRefsOrdered(ctx context.Context, curriculumID uuid.UUID) ([]LessonRef, error) {
 	rows, err := s.Pool.Query(ctx, `
-		SELECT ls.id, u.id, u.unit_number, ls.lesson_number, ls.kind, ls.title
+		SELECT ls.id, u.id, u.unit_number, ls.lesson_number, ls.kind, ls.title, l.level_number
 		FROM lessons ls
 		JOIN units u ON u.id = ls.unit_id
 		JOIN levels l ON l.id = u.level_id
@@ -90,7 +90,7 @@ func (s *Store) LessonRefsOrdered(ctx context.Context, curriculumID uuid.UUID) (
 	var out []LessonRef
 	for rows.Next() {
 		var r LessonRef
-		if err := rows.Scan(&r.LessonID, &r.UnitID, &r.UnitNumber, &r.LessonNumber, &r.Kind, &r.Title); err != nil {
+		if err := rows.Scan(&r.LessonID, &r.UnitID, &r.UnitNumber, &r.LessonNumber, &r.Kind, &r.Title, &r.LevelNumber); err != nil {
 			return nil, mapErr(err)
 		}
 		out = append(out, r)
