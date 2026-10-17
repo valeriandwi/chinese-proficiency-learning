@@ -4,6 +4,7 @@ import type {
   AnswerPayload,
   AttemptInput,
   Curriculum,
+  GrammarNote,
   LessonDetail,
   PathResponse,
   ProficiencyCardsResponse,
@@ -13,10 +14,16 @@ import type {
   ReviewQueue,
   SessionInfo,
   ProficiencySubmitResponse,
+  ReadingPassagesResponse,
+  StudioAnswerResponse,
+  StudioQueue,
+  StudyLexeme,
   ToneAnswersResponse,
   ToneQueue,
   SubmitSummary,
   User,
+  VocabularyPage,
+  BookmarkMutationResponse,
 } from './types'
 
 export const queryKeys = {
@@ -29,6 +36,14 @@ export const queryKeys = {
   proficiencyCards: ['proficiency', 'cards'] as const,
   proficiencyPaper: (level: number) => ['proficiency', 'paper', level] as const,
   curricula: ['curricula'] as const,
+  // The study surfaces: writing studio, speaking studio, guide, bookmarks.
+  // `null` for the writing/speaking queues means "whatever the server says my
+  // level is" — the same contract as the tone queue.
+  studioQueue: (kind: 'writing' | 'speaking', level: number | null) => ['study', kind, 'queue', level ?? 'mine'] as const,
+  reading: (level: number) => ['study', 'reading', level] as const,
+  vocabulary: (level: number, search: string, offset: number) => ['study', 'vocabulary', level, search, offset] as const,
+  grammar: (level: number) => ['study', 'grammar', level] as const,
+  bookmarks: ['study', 'bookmarks'] as const,
 }
 
 /** The boot query: who am I, and is there a live session? */
@@ -251,6 +266,103 @@ export function usePlacementQuestions(version: string, level = 1, limit = 20) {
       api<{ version: string; level: number; items: { id: string; simplified: string; pinyin: string; senses: { en?: string }[] }[]; self_report: string }>(
         `/api/v1/placement/questions?version=${version}&level=${level}&limit=${limit}`,
       ),
+  })
+}
+
+// --- study surfaces ---------------------------------------------------------
+// The writing studio, the speaking studio and the study guide. Queues are served
+// from any level (ungated by the path) and attempts are recorded with mode
+// "studio", excluded from every derived value — the same contract as tone practice.
+
+/**
+ * Writing or speaking drills for the studio. `null` lets the server pick the
+ * learner's own level — the same contract as the tone queue.
+ */
+export function useStudioQueue(kind: 'writing' | 'speaking', level: number | null) {
+  return useQuery({
+    queryKey: queryKeys.studioQueue(kind, level),
+    queryFn: () =>
+      api<StudioQueue>(`/api/v1/study/${kind}/queue${level === null ? '' : `?level=${level}`}`),
+  })
+}
+
+/** Grade one studio answer off-path (mode "studio"). */
+export function useAnswerStudio() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { exercise_id: string; client_ref: string; response: AnswerPayload }) =>
+      api<StudioAnswerResponse>('/api/v1/study/attempts', {
+        method: 'POST',
+        body: { answers: [input] },
+      }),
+    // Deliberately does not invalidate the overview: studio practice moves no
+    // derived value, so the strip's numbers are still true.
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['study'] })
+    },
+  })
+}
+
+/** The guide's vocabulary, filtered by level and an optional search. */
+export function useVocabulary(level: number, search: string, offset = 0) {
+  return useQuery({
+    queryKey: queryKeys.vocabulary(level, search, offset),
+    queryFn: () =>
+      api<VocabularyPage>(
+        `/api/v1/study/vocabulary?level=${level}&search=${encodeURIComponent(search)}&limit=50&offset=${offset}`,
+      ),
+    // Search-as-you-type should not hammer the server: a short settle window.
+    staleTime: 30_000,
+  })
+}
+
+/** The guide's authored grammar notes. */
+export function useGrammarNotes(level: number) {
+  return useQuery({
+    queryKey: queryKeys.grammar(level),
+    queryFn: () => api<{ items: GrammarNote[]; level: number }>(`/api/v1/study/grammar?level=${level}`),
+    staleTime: 60_000,
+  })
+}
+
+/** The reader's passages. Reading records no attempts: a passage is read, not answered. */
+export function useReadingPassages(level: number) {
+  return useQuery({
+    queryKey: queryKeys.reading(level),
+    queryFn: () => api<ReadingPassagesResponse>(`/api/v1/study/reading?level=${level}`),
+    staleTime: 60_000,
+  })
+}
+
+/** The learner's bookmarked words. */
+export function useBookmarks() {
+  return useQuery({
+    queryKey: queryKeys.bookmarks,
+    queryFn: () => api<{ items: StudyLexeme[] }>('/api/v1/bookmarks'),
+  })
+}
+
+/** Bookmark a word (idempotent upsert). */
+export function useAddBookmark() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (lexemeId: string) =>
+      api<BookmarkMutationResponse>(`/api/v1/bookmarks/${lexemeId}`, { method: 'POST' }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['study'] })
+    },
+  })
+}
+
+/** Remove a bookmark (idempotent). */
+export function useRemoveBookmark() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (lexemeId: string) =>
+      api<BookmarkMutationResponse>(`/api/v1/bookmarks/${lexemeId}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['study'] })
+    },
   })
 }
 

@@ -118,3 +118,31 @@ export function InkSeal({
     </span>
   )
 }
+
+/** The skills hub — three doors (writing, speaking, reading) behind one tab. A
+ *  rounded square with three dots descending, like a studio's controls. */
+export const SkillsGlyph: Glyph = (props) => (
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden {...props}>
+    <rect x="4" y="3.2" width="16" height="17.6" rx="4.2" fill="currentColor" opacity="0.4" />
+    <rect x="6.8" y="5.8" width="10.4" height="12.4" rx="2.6" fill="currentColor" />
+    <circle cx="9.6" cy="9.2" r="1.5" fill="#ffffff" opacity="0.9" />
+    <circle cx="12.4" cy="9.2" r="1.5" fill="#ffffff" opacity="0.55" />
+    <circle cx="12" cy="15" r="1.9" fill="#ffffff" opacity="0.9" />
+  </svg>
+)
+
+/** The study guide — a book carrying a bookmark, which is the guide's own
+ *  feature (a learner's list of words to come back to). */
+export const GuideGlyph: Glyph = (props) => (
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden {...props}>
+    <path
+      d="M5 5.6c0-1.5 1.2-2.6 2.7-2.6H19v15.8c0 .9-.7 1.6-1.6 1.6H7.1"
+      stroke="currentColor"
+      strokeWidth={2.6}
+      strokeLinecap="round"
+      opacity="0.55"
+    />
+    <path d="M5 5.6v13.6c0 1.4 1.1 2.6 2.5 2.6h2V5.6" fill="currentColor" />
+    <path d="M14.6 2.4h3.4v6.2l-1.7-1.9-1.7 1.9z" fill="currentColor" />
+  </svg>
+)

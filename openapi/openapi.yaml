@@ -764,6 +764,222 @@ paths:
                   due_total: { type: integer }
         '404': { description: That word is not in the learner's deck }
 
+  /api/v1/study/writing/queue:
+    get:
+      tags: [study]
+      summary: Writing drills for the studio, outside the lesson path
+      description: |
+        hanzi_trace and hanzi_recall drills from any level — deliberately NOT gated
+        by the path, because the studio exists so a learner can practise characters
+        before their path reaches them. Answer keys never appear here. Attempts are
+        recorded with mode `studio` and excluded from every derived value.
+      parameters:
+        - { name: level, in: query, schema: { type: integer, default: 0, minimum: 0, maximum: 5 }, description: '0 = every level; otherwise 1-5' }
+        - { name: limit, in: query, schema: { type: integer, default: 10, maximum: 50 } }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/StudyDrill' }
+                  level: { type: integer }
+                  stats:
+                    type: array
+                    items: { $ref: '#/components/schemas/ToneLevelStat' }
+
+  /api/v1/study/speaking/queue:
+    get:
+      tags: [study]
+      summary: Speaking drills for the studio, outside the lesson path
+      description: |
+        speak_repeat, read_aloud and speak_answer drills from any level. Speaking is
+        never judged for pronunciation without a provider: the drill records audio in
+        the browser and a self-rating, and the result says so.
+      parameters:
+        - { name: level, in: query, schema: { type: integer, default: 0, minimum: 0, maximum: 5 }, description: '0 = every level; otherwise 1-5' }
+        - { name: limit, in: query, schema: { type: integer, default: 10, maximum: 50 } }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/StudyDrill' }
+                  level: { type: integer }
+                  stats:
+                    type: array
+                    items: { $ref: '#/components/schemas/ToneLevelStat' }
+
+  /api/v1/study/attempts:
+    post:
+      tags: [study]
+      summary: Grade a studio answer
+      description: |
+        Graded by the same registry as every other exercise type, and recorded with
+        mode `studio`: the attempt log keeps the practice record, while lesson
+        status, XP, mastery, the daily rollup and the streak are all left untouched.
+        Writing and speaking drills only — the store's own predicate decides, so
+        this endpoint cannot grade drills its queues would never serve.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [answers]
+              properties:
+                answers:
+                  type: array
+                  maxItems: 20
+                  items:
+                    type: object
+                    required: [exercise_id, response]
+                    properties:
+                      exercise_id: { type: string, format: uuid }
+                      client_ref: { type: string }
+                      response: { type: object, additionalProperties: true }
+      responses:
+        '200':
+          description: Graded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items: { $ref: '#/components/schemas/AttemptResult' }
+                  stats:
+                    type: array
+                    items: { $ref: '#/components/schemas/ToneLevelStat' }
+        '422': { description: Not a studio drill, or a malformed answer }
+
+  /api/v1/study/vocabulary:
+    get:
+      tags: [study]
+      summary: Vocabulary for the study guide
+      description: |
+        The curriculum's words with the learner's bookmark state, filtered by level
+        and an optional search over the simplified form, pinyin and English senses.
+        Page-scoped with limit/offset and a total.
+      parameters:
+        - { name: version, in: query, schema: { type: string, default: hsk2.0 } }
+        - { name: level, in: query, schema: { type: integer, default: 0, minimum: 0, maximum: 5 }, description: '0 = every level; otherwise 1-5' }
+        - { name: search, in: query, schema: { type: string }, description: Matches simplified, pinyin or English senses }
+        - { name: limit, in: query, schema: { type: integer, default: 50, maximum: 200 } }
+        - { name: offset, in: query, schema: { type: integer, default: 0, minimum: 0 } }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/StudyLexeme' }
+                  total: { type: integer }
+                  level: { type: integer }
+                  limit: { type: integer }
+                  offset: { type: integer }
+
+  /api/v1/study/grammar:
+    get:
+      tags: [study]
+      summary: Authored grammar notes for the study guide
+      description: |
+        One note per authored grammar exercise: the explanation a person wrote, plus
+        the example drawn from the same exercise's own prompt. Levels 2-5 are
+        generated from word lists and carry no authored grammar, so they contribute
+        no notes — an honest empty state, not generated filler.
+      parameters:
+        - { name: version, in: query, schema: { type: string, default: hsk2.0 } }
+        - { name: level, in: query, schema: { type: integer, default: 0, minimum: 0, maximum: 5 }, description: '0 = every level; otherwise 1-5' }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/GrammarNote' }
+                  level: { type: integer }
+
+  /api/v1/study/reading:
+    get:
+      tags: [study]
+      summary: Reading passages for the reader
+      description: |
+        The curriculum's reading passages, filtered by level. Reading records no
+        attempts: a passage is read, not answered, so there is nothing to exclude
+        and nothing to record.
+      parameters:
+        - { name: version, in: query, schema: { type: string, default: hsk2.0 } }
+        - { name: level, in: query, schema: { type: integer, default: 0, minimum: 0, maximum: 5 }, description: '0 = every level; otherwise 1-5' }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/ReadingPassage' }
+                  level: { type: integer }
+
+  /api/v1/bookmarks:
+    get:
+      tags: [study]
+      summary: The learner's bookmarked words
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/StudyLexeme' }
+
+  /api/v1/bookmarks/{lexeme_id}:
+    post:
+      tags: [study]
+      summary: Bookmark a word (idempotent upsert)
+      parameters:
+        - name: lexeme_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Bookmarked (or already was) }
+    delete:
+      tags: [study]
+      summary: Remove a bookmark (idempotent)
+      parameters:
+        - name: lexeme_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Removed (or was not there) }
+
 components:
   schemas:
     ErrorEnvelope:
@@ -1141,3 +1357,60 @@ components:
         reps: { type: integer }
         lapses: { type: integer }
         due_at: { type: string, format: date-time }
+
+    StudyDrill:
+      description: One studio drill as the learner sees it — the prompt, the level it comes from, and no answer key.
+      type: object
+      required: [id, type, prompt]
+      properties:
+        id: { type: string, format: uuid }
+        number: { type: integer }
+        type: { type: string, enum: [hanzi_trace, hanzi_recall, speak_repeat, read_aloud, speak_answer] }
+        skill: { type: string }
+        difficulty: { type: integer }
+        level: { type: integer }
+        prompt: { type: object, additionalProperties: true }
+
+    StudyLexeme:
+      description: One word as the study guide shows it — the lexeme plus its level and bookmark state.
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        simplified: { type: string }
+        traditional: { type: string }
+        pinyin: { type: string }
+        parts_of_speech: { type: array, items: { type: string } }
+        senses: { type: array, items: { type: object, additionalProperties: true } }
+        audio_key: { type: string }
+        hsk_level: { type: integer }
+        level: { type: integer }
+        bookmarked: { type: boolean }
+
+    GrammarNote:
+      description: One authored grammar point with its example drawn from the same exercise's prompt.
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        level: { type: integer }
+        unit_title: { type: string }
+        lesson_title: { type: string }
+        explanation: { type: string }
+        example: { type: string }
+        example_pinyin: { type: string }
+        example_type: { type: string }
+
+    ReadingPassage:
+      description: One reading passage as the reader shows it, with its level.
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string }
+        title: { type: string }
+        instruction: { type: string }
+        body: { type: string }
+        sentences:
+          type: array
+          items: { type: object, additionalProperties: true }
+        word_count: { type: integer }
+        minutes: { type: integer }
+        level: { type: integer }

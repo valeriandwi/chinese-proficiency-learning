@@ -167,6 +167,56 @@ export type LessonDetail = {
 
 export type AnswerPayload = Record<string, unknown>
 
+// --- study surfaces -------------------------------------------------------
+// The writing studio, the speaking studio and the study guide. Like tone practice,
+// they serve content from any level — ungated by the path — and their attempts are
+// recorded with mode "studio", excluded from every derived value (migrations/0008).
+
+export type StudyDrill = Exercise & { level: number }
+
+export type StudyLexeme = Lexeme & { level: number; bookmarked: boolean }
+
+export type ReadingPassage = Passage & { level: number }
+
+export type ReadingPassagesResponse = { items: ReadingPassage[]; level: number }
+
+export type GrammarNote = {
+  id: string
+  level: number
+  unit_title: string
+  lesson_title: string
+  explanation: string
+  example: string
+  example_pinyin: string
+  example_type: string
+}
+
+export type StudioQueue = {
+  items: StudyDrill[]
+  level: number
+  stats: ToneLevelStat[]
+}
+
+export type StudioAnswerResponse = {
+  results: AttemptResult[]
+  stats: ToneLevelStat[]
+}
+
+export type VocabularyPage = {
+  items: StudyLexeme[]
+  total: number
+  level: number
+  limit: number
+  offset: number
+}
+
+export type BookmarkMutationResponse = {
+  lexeme_id: string
+  bookmarked: boolean
+  created?: boolean
+  removed?: boolean
+}
+
 // --- proficiency tests -----------------------------------------------------
 // A scored paper that can open a level. Placement recommends and says so; this decides.
 // Passing records an unlock, never a completion: the level's lessons become available,

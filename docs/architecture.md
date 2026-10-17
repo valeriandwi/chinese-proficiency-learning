@@ -50,14 +50,14 @@ and mixing them silently drops the session.
 `attempts` is append-only: user, exercise, response, correctness, score, grader,
 duration, mode. Everything a learner sees on the dashboard is derived from it:
 
-| Derived value | Where it is computed | When |
-|---|---|---|
-| `lesson_progress` (status, best score, completion) | SQL over attempts | every submission, in-transaction |
-| `xp_events` | one award per completed lesson, deduplicated by `(user, source, ref_id)` | same |
-| `skill_mastery` | mean score per skill, including partial credit | same |
-| `daily_activity` | bucketed by the learner's IANA timezone | same |
-| `user_streaks` | Go walk over goal-met days (pure, unit-tested) | same |
-| `review_items` | deck seeded from completed lessons' vocabulary | same |
+| Derived value                                      | Where it is computed                                                     | When                             |
+| -------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------- |
+| `lesson_progress` (status, best score, completion) | SQL over attempts                                                        | every submission, in-transaction |
+| `xp_events`                                        | one award per completed lesson, deduplicated by `(user, source, ref_id)` | same                             |
+| `skill_mastery`                                    | mean score per skill, including partial credit                           | same                             |
+| `daily_activity`                                   | bucketed by the learner's IANA timezone                                  | same                             |
+| `user_streaks`                                     | Go walk over goal-met days (pure, unit-tested)                           | same                             |
+| `review_items`                                     | deck seeded from completed lessons' vocabulary                           | same                             |
 
 Because it is one code path, `POST /progress/refresh` is a legitimate answer to
 "these numbers look stale", and there is no incremental-update bug surface.
@@ -88,7 +88,7 @@ through except to walk it.
 **drawn and stored by the server before it is sat**, the submission is checked against the
 drawn questions (every one answered, nothing outside graded), and a pass at 80% inserts one
 unlock row. `DeriveLessonStates` takes that as an explicit input: the lessons of an opened
-level are *available* while none of them is *completed* — the sequential pointer is
+level are _available_ while none of them is _completed_ — the sequential pointer is
 consumed at the opened block so an unlock cannot leak into the next level, which is pinned
 by a unit test. Completion, XP, mastery, the daily rollup and the streak are untouched, so
 "you may start here" and "you already learned this" stay different claims, and the record
@@ -110,7 +110,7 @@ A curriculum version owns levels → units → lessons → exercises. The import
 upserts on natural keys and identifies exercises by a stable `content_key`, which
 matters more than it looks: `attempts.exercise_id` is `ON DELETE CASCADE`, so an
 import that deleted and re-inserted exercises would quietly destroy learner
-history. Exercises removed from the file are *reported*, never deleted.
+history. Exercises removed from the file are _reported_, never deleted.
 
 Content is validated before it is written: every payload is checked by the
 exercise registry, vocabulary references must resolve, blank markers must exist,
@@ -136,6 +136,7 @@ so the UI can preview it.
 
 ### Time
 
+v
 Streaks, goals and activity are bucketed by the learner's IANA timezone, resolved
 by Postgres (`now() AT TIME ZONE timezone`) so the answer does not depend on the Go
 binary's tzdata. The streak walker requires calendar-adjacent days and tolerates an
@@ -157,13 +158,13 @@ they no longer live in.
 
 ## Development topology
 
-| Component | Port | Note |
-|---|---|---|
-| API | 8081 | deliberately not 8080 |
-| SPA (Vite) | 5174 | proxies `/api` to the API |
-| Postgres | 5435 | separate from any other local cluster |
-| Redis | 6380 | provisioned; used for caching and distributed rate limiting in M2 |
-| Postgres (data) | .local/pgdata | local cluster, not a container |
+| Component       | Port          | Note                                                              |
+| --------------- | ------------- | ----------------------------------------------------------------- |
+| API             | 8081          | deliberately not 8080                                             |
+| SPA (Vite)      | 5174          | proxies `/api` to the API                                         |
+| Postgres        | 5435          | separate from any other local cluster                             |
+| Redis           | 6380          | provisioned; used for caching and distributed rate limiting in M2 |
+| Postgres (data) | .local/pgdata | local cluster, not a container                                    |
 
 Object storage is still absent, and deliberately so: reference audio is generated
 at import time and served by the API from `MEDIA_DIR` (see `internal/media`), which
@@ -180,7 +181,7 @@ the shape of the feature follows from that:
 - **The audio is transient.** `POST /recordings` reads it into memory, hands it to the
   configured provider and drops it — no audio column, no temp file, nothing to purge.
   What persists is the assessment (`speaking_scores`): numbers, and the per-word
-  detail a learner can act on. The recorder tells them so *before* they record.
+  detail a learner can act on. The recorder tells them so _before_ they record.
 - **The score is server-side.** The client names a recording it owns
   (`recording_id`); grading reads the score from storage. The attempts service strips
   every scoring field from a client payload before grading and restores them only from
@@ -201,7 +202,7 @@ the shape of the feature follows from that:
 ### Motion is emphasis, never information
 
 Every animation exists to reinforce words that are already on screen: the verdict band
-says "Correct!" and is *also* green; the shake is added to "Not quite" and is not the
+says "Correct!" and is _also_ green; the shake is added to "Not quite" and is not the
 message. Two consequences are enforced rather than intended. The stylesheet collapses
 every animation and transition under `prefers-reduced-motion` (duration, iteration count
 and scroll behaviour), and the confetti component does not render at all in that mode —
@@ -215,7 +216,7 @@ of the animation still sees the right score.
 ### The unit palette
 
 One accent per unit, cycling through five families, so a learner can tell one stretch of
-the path from the next. The unit colour dresses the *unit* — its band, connector,
+the path from the next. The unit colour dresses the _unit_ — its band, connector,
 checkpoint and progress badge — and never a lesson node, which keeps the four semantic
 state colours meaning exactly one thing each. The palette is held to the same WCAG
 thresholds as the rest (700 carries white text, 50/100 tints carry 700 text, 600 is only

@@ -16,53 +16,64 @@
  * surface and fails on a pale one.
  */
 @theme {
-  /* brand — primary actions, links, active navigation, selection */
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-300: #a5b4fc;
-  --color-brand-500: #4f46e5;
-  --color-brand-600: #4338ca;
-  --color-brand-700: #3730a3;
+  /* brand — primary actions, links, active navigation, selection. A vibrant
+     green ramp: the learner's "go" colour, on a warm off-white ground. The 600/700
+     shades are darker than they look like they should be because fills sit on the
+     warm track, not on white — every value is contrast-verified by
+     src/lib/design-tokens.test.ts, which fails the build otherwise. */
+  --color-brand-50: #eefbf1;
+  --color-brand-100: #d7f5de;
+  --color-brand-300: #86df9d;
+  --color-brand-500: #12904a;
+  --color-brand-600: #128540;
+  --color-brand-700: #146c35;
 
-  /* success — completed lessons, correct answers, progress fills */
-  --color-success-50: #ecfdf5;
-  --color-success-100: #d1fae5;
-  --color-success-300: #6ee7b7;
-  --color-success-500: #10b981;
-  --color-success-600: #059669;
-  --color-success-700: #047857;
+  /* success — completed lessons, correct answers, progress fills. Converges
+     with brand into the same green family (a deliberate choice: state is told
+     apart by fill, shape and glyph — a tick, a padlock, a play sign — never by
+     hue alone, which is already this design language's rule). */
+  --color-success-50: #ecfdf3;
+  --color-success-100: #d3f8e0;
+  --color-success-300: #7fe3a3;
+  --color-success-500: #1f9d50;
+  --color-success-600: #128041;
+  --color-success-700: #136c36;
 
-  /* reward — XP, streaks, daily goal, celebration */
-  --color-reward-50: #fffbeb;
-  --color-reward-100: #fef3c7;
-  --color-reward-300: #fcd34d;
-  --color-reward-500: #f59e0b;
-  --color-reward-600: #d97706;
-  --color-reward-700: #b45309;
+  /* reward — XP, streaks, daily goal, celebration. Warm amber on the warm
+     ground, kept far from the brand green. 700 is darker than the original ramp
+     because it carries its own text on the 50/100 tints. */
+  --color-reward-50: #fff9ec;
+  --color-reward-100: #fdeecb;
+  --color-reward-300: #f8d37e;
+  --color-reward-500: #e9a53a;
+  --color-reward-600: #cf8a24;
+  --color-reward-700: #8f5c14;
 
-  /* danger — wrong answers, destructive actions */
-  --color-danger-50: #fef2f2;
-  --color-danger-100: #fee2e2;
-  --color-danger-300: #fca5a5;
-  --color-danger-500: #ef4444;
-  --color-danger-600: #dc2626;
-  --color-danger-700: #b91c1c;
+  /* danger — wrong answers, destructive actions. A warm red, not a cold one. */
+  --color-danger-50: #fff0ee;
+  --color-danger-100: #ffdcd7;
+  --color-danger-300: #f7a79b;
+  --color-danger-500: #e15b48;
+  --color-danger-600: #c73e2c;
+  --color-danger-700: #a83728;
 
   /* ink — the text ramp. Text never uses opacity: `ink/40` measured 2.47:1 and
-     failed AA, which is why these are named steps. */
-  --color-ink: #14181f;
-  --color-ink-2: #4b5563;
-  --color-ink-3: #5f6875;
-  --color-ink-4: #6b7280;
+     failed AA, which is why these are named steps. Slightly warm to sit on the
+     warm paper. */
+  --color-ink: #1a211b;
+  --color-ink-2: #4d5a50;
+  --color-ink-3: #5f6b62;
+  --color-ink-4: #6b746c;
 
-  /* neutral — surfaces, dividers, control borders, bar tracks */
-  --color-paper: #f6f7f9;
-  --color-surface: #ffffff;
-  --color-surface-2: #eef0f4;
-  --color-track: #eceef2;
-  --color-line: #dde1e7;
-  /* A control boundary must be perceivable on its own (1.4.11): 3.03:1 on white. */
-  --color-line-strong: #8b95a3;
+  /* neutral — surfaces, dividers, control borders, bar tracks. Warm off-white
+     paper, the ground of the whole app. */
+  --color-paper: #faf7ef;
+  --color-surface: #fffdf8;
+  --color-surface-2: #f3eee0;
+  --color-track: #eee9db;
+  --color-line: #e2dcc9;
+  /* A control boundary must be perceivable on its own (1.4.11): 3.07:1 on white. */
+  --color-line-strong: #8a8a76;
 
   /* type: rounded sans for the interface, serif for Hanzi so characters look like
      the printed form learners meet in textbooks. The sans is self-hosted
@@ -85,32 +96,34 @@
   /* unit — one accent per unit, cycling through five families, so a learner can tell
      one stretch of the path from the next at a glance. Duolingo's trick, our colours.
      Same discipline as the rest: 700 carries white text (>= 4.5:1) and tints use 50/100
-     with 700 text, while 600 is only ever a FILL on the track (>= 3:1). */
-  --color-unit-1-50: #f0fdfa;
-  --color-unit-1-100: #ccfbf1;
-  --color-unit-1-300: #5eead4;
-  --color-unit-1-600: #0d9488;
-  --color-unit-1-700: #0f766e;
-  --color-unit-2-50: #eff6ff;
-  --color-unit-2-100: #dbeafe;
-  --color-unit-2-300: #93c5fd;
-  --color-unit-2-600: #2563eb;
-  --color-unit-2-700: #1d4ed8;
-  --color-unit-3-50: #f5f3ff;
-  --color-unit-3-100: #ede9fe;
-  --color-unit-3-300: #c4b5fd;
-  --color-unit-3-600: #7c3aed;
-  --color-unit-3-700: #6d28d9;
-  --color-unit-4-50: #fff7ed;
-  --color-unit-4-100: #ffedd5;
-  --color-unit-4-300: #fdba74;
-  --color-unit-4-600: #ea580c;
-  --color-unit-4-700: #c2410c;
-  --color-unit-5-50: #fff1f2;
-  --color-unit-5-100: #ffe4e6;
-  --color-unit-5-300: #fda4af;
-  --color-unit-5-600: #e11d48;
-  --color-unit-5-700: #be123c;
+     with 700 text, while 600 is only ever a FILL on the track (>= 3:1).
+     Re-picked for the green/warm world: none of the five reads as brand-green,
+     reward-amber or danger-red — the unit band is scenery, never a state. */
+  --color-unit-1-50: #eff6ff;
+  --color-unit-1-100: #dbeafe;
+  --color-unit-1-300: #93c5fd;
+  --color-unit-1-600: #2563eb;
+  --color-unit-1-700: #1d4ed8;
+  --color-unit-2-50: #f5f3ff;
+  --color-unit-2-100: #ede9fe;
+  --color-unit-2-300: #c4b5fd;
+  --color-unit-2-600: #7c3aed;
+  --color-unit-2-700: #6d28d9;
+  --color-unit-3-50: #fdf4ff;
+  --color-unit-3-100: #fae8ff;
+  --color-unit-3-300: #f0abfc;
+  --color-unit-3-600: #c026d3;
+  --color-unit-3-700: #a21caf;
+  --color-unit-4-50: #ecfeff;
+  --color-unit-4-100: #cffafe;
+  --color-unit-4-300: #67e8f9;
+  --color-unit-4-600: #0891b2;
+  --color-unit-4-700: #0e7490;
+  --color-unit-5-50: #f5f5f4;
+  --color-unit-5-100: #e7e5e4;
+  --color-unit-5-300: #d6d3d1;
+  --color-unit-5-600: #57534e;
+  --color-unit-5-700: #44403c;
 
   /* motion: purposeful feedback only. Every animation below carries nothing that the
      words do not also say — under prefers-reduced-motion they collapse to their end
@@ -214,10 +227,10 @@
 @keyframes breathe {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgb(79 70 229 / 0.4);
+    box-shadow: 0 0 0 0 rgb(30 158 76 / 0.4);
   }
   50% {
-    box-shadow: 0 0 0 0.7rem rgb(79 70 229 / 0);
+    box-shadow: 0 0 0 0.7rem rgb(30 158 76 / 0);
   }
 }
 

@@ -96,7 +96,11 @@ func InsertAttemptTx(ctx context.Context, tx pgx.Tx, in AttemptInsert) (uuid.UUI
 // nobody has walked — so neither may move lesson status, XP, mastery, the daily rollup
 // the streak is derived from, or the answer totals the dashboard shows. One predicate,
 // applied wherever this file reads attempts, keeps that one idea in one place.
-const onPathAttempt = `a.mode NOT IN ('tone', 'proficiency')`
+// onPathAttempt is the predicate that decides which attempts a derived value is
+// computed from. tone, proficiency and studio practice are all off the path by
+// design (migrations 0006–0008): they serve content from levels the learner has
+// not reached, so counting them would let practice erode the linear path.
+const onPathAttempt = `a.mode NOT IN ('tone', 'proficiency', 'studio')`
 
 // 1. lesson_progress  (from attempts)
 // 2. xp_events        (from completed lessons; deduplicated by ref_id)
@@ -381,8 +385,8 @@ func (s *Store) SkillMasteryFor(ctx context.Context, userID uuid.UUID) ([]SkillM
 func (s *Store) Totals(ctx context.Context, userID uuid.UUID) (attempts, correct, lessonsDone, totalXP int, err error) {
 	err = s.Pool.QueryRow(ctx, `
 		SELECT
-			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid AND mode NOT IN ('tone', 'proficiency')),
-			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid AND mode NOT IN ('tone', 'proficiency') AND is_correct IS TRUE),
+			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid AND mode NOT IN ('tone', 'proficiency', 'studio')),
+			(SELECT count(*)::int FROM attempts WHERE user_id = $1::uuid AND mode NOT IN ('tone', 'proficiency', 'studio') AND is_correct IS TRUE),
 			(SELECT count(*)::int FROM lesson_progress WHERE user_id = $1::uuid AND status = 'completed'),
 			(SELECT coalesce(sum(amount), 0)::int FROM xp_events WHERE user_id = $1::uuid)`,
 		userID).Scan(&attempts, &correct, &lessonsDone, &totalXP)

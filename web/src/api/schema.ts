@@ -1505,6 +1505,417 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/study/writing/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Writing drills for the studio, outside the lesson path
+         * @description hanzi_trace and hanzi_recall drills from any level — deliberately NOT gated
+         *     by the path, because the studio exists so a learner can practise characters
+         *     before their path reaches them. Answer keys never appear here. Attempts are
+         *     recorded with mode `studio` and excluded from every derived value.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description 0 = every level; otherwise 1-5 */
+                    level?: number;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items?: components["schemas"]["StudyDrill"][];
+                            level?: number;
+                            stats?: components["schemas"]["ToneLevelStat"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/speaking/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Speaking drills for the studio, outside the lesson path
+         * @description speak_repeat, read_aloud and speak_answer drills from any level. Speaking is
+         *     never judged for pronunciation without a provider: the drill records audio in
+         *     the browser and a self-rating, and the result says so.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description 0 = every level; otherwise 1-5 */
+                    level?: number;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items?: components["schemas"]["StudyDrill"][];
+                            level?: number;
+                            stats?: components["schemas"]["ToneLevelStat"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Grade a studio answer
+         * @description Graded by the same registry as every other exercise type, and recorded with
+         *     mode `studio`: the attempt log keeps the practice record, while lesson
+         *     status, XP, mastery, the daily rollup and the streak are all left untouched.
+         *     Writing and speaking drills only — the store's own predicate decides, so
+         *     this endpoint cannot grade drills its queues would never serve.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        answers: {
+                            /** Format: uuid */
+                            exercise_id: string;
+                            client_ref?: string;
+                            response: {
+                                [key: string]: unknown;
+                            };
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Graded */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            results?: components["schemas"]["AttemptResult"][];
+                            stats?: components["schemas"]["ToneLevelStat"][];
+                        };
+                    };
+                };
+                /** @description Not a studio drill */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/vocabulary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Vocabulary for the study guide
+         * @description The curriculum's words with the learner's bookmark state, filtered by level
+         *     and an optional search over the simplified form, pinyin and English senses.
+         *     Page-scoped with limit/offset and a total.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    version?: string;
+                    /** @description 0 = every level; otherwise 1-5 */
+                    level?: number;
+                    /** @description Matches simplified */
+                    search?: string;
+                    limit?: number;
+                    offset?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items?: components["schemas"]["StudyLexeme"][];
+                            total?: number;
+                            level?: number;
+                            limit?: number;
+                            offset?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/grammar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Authored grammar notes for the study guide
+         * @description One note per authored grammar exercise: the explanation a person wrote, plus
+         *     the example drawn from the same exercise's own prompt. Levels 2-5 are
+         *     generated from word lists and carry no authored grammar, so they contribute
+         *     no notes — an honest empty state, not generated filler.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    version?: string;
+                    /** @description 0 = every level; otherwise 1-5 */
+                    level?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items?: components["schemas"]["GrammarNote"][];
+                            level?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/reading": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reading passages for the reader
+         * @description The curriculum's reading passages, filtered by level. Reading records no
+         *     attempts: a passage is read, not answered, so there is nothing to exclude
+         *     and nothing to record.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    version?: string;
+                    /** @description 0 = every level; otherwise 1-5 */
+                    level?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items?: components["schemas"]["ReadingPassage"][];
+                            level?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bookmarks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The learner's bookmarked words */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items?: components["schemas"]["StudyLexeme"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bookmarks/{lexeme_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bookmark a word (idempotent upsert) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    lexeme_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bookmarked (or already was) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        /** Remove a bookmark (idempotent) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    lexeme_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Removed (or was not there) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1848,6 +2259,63 @@ export interface components {
             lapses?: number;
             /** Format: date-time */
             due_at?: string;
+        };
+        /** @description One studio drill as the learner sees it — the prompt, the level it comes from, and no answer key. */
+        StudyDrill: {
+            /** Format: uuid */
+            id: string;
+            number?: number;
+            /** @enum {string} */
+            type: "hanzi_trace" | "hanzi_recall" | "speak_repeat" | "read_aloud" | "speak_answer";
+            skill?: string;
+            difficulty?: number;
+            level?: number;
+            prompt: {
+                [key: string]: unknown;
+            };
+        };
+        /** @description One word as the study guide shows it — the lexeme plus its level and bookmark state. */
+        StudyLexeme: {
+            /** Format: uuid */
+            id?: string;
+            simplified?: string;
+            traditional?: string;
+            pinyin?: string;
+            parts_of_speech?: string[];
+            senses?: {
+                [key: string]: unknown;
+            }[];
+            audio_key?: string;
+            hsk_level?: number;
+            level?: number;
+            bookmarked?: boolean;
+        };
+        /** @description One authored grammar point with its example drawn from the same exercise's prompt. */
+        GrammarNote: {
+            /** Format: uuid */
+            id?: string;
+            level?: number;
+            unit_title?: string;
+            lesson_title?: string;
+            explanation?: string;
+            example?: string;
+            example_pinyin?: string;
+            example_type?: string;
+        };
+        /** @description One reading passage as the reader shows it, with its level. */
+        ReadingPassage: {
+            /** Format: uuid */
+            id?: string;
+            kind?: string;
+            title?: string;
+            instruction?: string;
+            body?: string;
+            sentences?: {
+                [key: string]: unknown;
+            }[];
+            word_count?: number;
+            minutes?: number;
+            level?: number;
         };
     };
     responses: never;

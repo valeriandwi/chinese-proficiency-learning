@@ -140,6 +140,19 @@ func (s *Server) Routes() http.Handler {
 			r.Get("/proficiency/cards", s.handleProficiencyCards)
 			r.Get("/proficiency/{level}", s.handleProficiencyPaper)
 			r.Post("/proficiency/{level}/submit", s.handleProficiencySubmit)
+
+			// The study surfaces: the writing studio, the speaking studio, the
+			// passage reader and the study guide. Served from any level and graded
+			// without touching the path (see handlers_study.go and migrations/0008).
+			r.Get("/study/writing/queue", s.handleStudioQueue)
+			r.Get("/study/speaking/queue", s.handleSpeakingQueue)
+			r.Post("/study/attempts", s.handleStudioAttempt)
+			r.Get("/study/vocabulary", s.handleVocabularyList)
+			r.Get("/study/grammar", s.handleGrammarNotes)
+			r.Get("/study/reading", s.handleReadingPassages)
+			r.Get("/bookmarks", s.handleBookmarksList)
+			r.Post("/bookmarks/{lexeme_id}", s.handleBookmarkAdd)
+			r.Delete("/bookmarks/{lexeme_id}", s.handleBookmarkRemove)
 		})
 	})
 

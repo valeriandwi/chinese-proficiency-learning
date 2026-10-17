@@ -102,10 +102,12 @@ func badModeError() error {
 
 // ValidModes mirrors the attempts.mode CHECK constraint. "tone" is practice that is
 // deliberately off the path (see migrations/0006_tone_practice.sql): it is recorded in
-// the same log and excluded from every derived value.
+// the same log and excluded from every derived value. So are "proficiency"
+// (migrations/0007) and "studio" (migrations/0008) for the same reason: both surfaces
+// serve content from levels the learner has not reached.
 var ValidModes = map[string]bool{
 	"practice": true, "review": true, "exam": true, "placement": true,
-	"tone": true, "proficiency": true,
+	"tone": true, "proficiency": true, "studio": true,
 }
 
 // Submit grades and records a batch, then recomputes derived state in the same
@@ -297,7 +299,7 @@ func (s *Service) submit(ctx context.Context, userID uuid.UUID, mode string, inp
 			var attemptsCount, correctCount, total int
 			if err := tx.QueryRow(ctx, `
 				SELECT count(*)::int, count(*) FILTER (WHERE is_correct)::int
-				FROM attempts a WHERE a.user_id = $1::uuid AND a.mode <> 'tone'
+				FROM attempts a WHERE a.user_id = $1::uuid AND a.mode NOT IN ('tone', 'proficiency', 'studio')
 				  AND a.exercise_id IN (SELECT id FROM exercises WHERE lesson_id = $2::uuid)`,
 				userID, lessonID).Scan(&attemptsCount, &correctCount); err != nil {
 				return err

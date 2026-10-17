@@ -57,7 +57,7 @@ export function HanziPanel({
       delayBetweenStrokes: 180,
       strokeColor: '#14181f',
       outlineColor: '#c6ccd6',
-      drawingColor: '#4338ca',
+      drawingColor: '#1e9e4c',
       charDataLoader: (char, onComplete, onError) => {
         fetch(`/hanzi/${encodeURIComponent(char)}.json`)
           .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`no stroke data for ${char}`))))
