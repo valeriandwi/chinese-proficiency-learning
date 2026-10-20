@@ -39,7 +39,12 @@ type StudyDrill struct {
 // StudioQueue returns writing/speaking drills for one level (0 means every level),
 // ordered by a hash of the content key and the learner's id: stable across reloads
 // so a session does not reshuffle mid-practice, different per learner.
-func (s *Store) StudioQueue(ctx context.Context, userID uuid.UUID, types []string, level, limit int) ([]StudyDrill, error) {
+//
+// `prefer` is the learner's own level. When the queue is not confined to a level, that
+// level's drills come first and the rest of the round is filled from the others — so a
+// beginner practises characters they have met first, and still gets a full round even
+// though level 1 is small.
+func (s *Store) StudioQueue(ctx context.Context, userID uuid.UUID, types []string, level, limit, prefer int) ([]StudyDrill, error) {
 	rows, err := s.Pool.Query(ctx, `
 		SELECT e.id, e.exercise_number, e.type, e.skill, e.difficulty, e.prompt, l.level_number
 		FROM exercises e
@@ -48,8 +53,8 @@ func (s *Store) StudioQueue(ctx context.Context, userID uuid.UUID, types []strin
 		JOIN levels l ON l.id = u.level_id
 		WHERE e.type = ANY($1)
 		  AND ($2 = 0 OR l.level_number = $2)
-		ORDER BY md5(e.content_key || $3::text)
-		LIMIT $4`, types, level, userID, limit)
+		ORDER BY (l.level_number = $5) DESC, md5(e.content_key || $3::text)
+		LIMIT $4`, types, level, userID, limit, prefer)
 	if err != nil {
 		return nil, mapErr(err)
 	}

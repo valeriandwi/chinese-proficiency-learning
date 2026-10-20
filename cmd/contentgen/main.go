@@ -510,7 +510,17 @@ func buildLesson(
 				}))
 		}
 	}
-	for idx := start; idx < end; idx++ {
+	// Writing drills. Every single-character word in the lesson gets one — a lesson
+	// that teaches 你, 好 and 谢 should let the learner write all three, not just the
+	// first. The lesson's first character is ALSO asked from memory, because tracing
+	// with an outline in front of you is a different skill from producing the character
+	// (the recall grader halves the credit for a hint, see gradeHanzi strict).
+	//
+	// Capped so one character-rich lesson cannot crowd out its own reading, listening
+	// and speaking drills.
+	const maxWritingPerLesson = 5
+	writing := 0
+	for idx := start; idx < end && writing < maxWritingPerLesson; idx++ {
 		word := words[idx].Simplified
 		if utf8.RuneCountInString(word) != 1 {
 			continue
@@ -520,9 +530,10 @@ func buildLesson(
 			return curriculum.LessonDef{}, fmt.Errorf("writing drill for %q: %w", word, err)
 		}
 		n := idx - start + 1
+		py := pinyin(words[idx])
 		lesson.Exercises = append(lesson.Exercises, exercise(
 			fmt.Sprintf("%s-hanzi%d", prefix, n), "hanzi_trace", "writing", difficulty,
-			fmt.Sprintf("Trace %s (%s) in stroke order: %d strokes.", word, pinyin(words[idx]), count),
+			fmt.Sprintf("Trace %s (%s) in stroke order: %d strokes.", word, py, count),
 			map[string]any{
 				"character":    word,
 				"mode":         "guided",
@@ -533,7 +544,22 @@ func buildLesson(
 				"character":    word,
 				"stroke_count": count,
 			}))
-		break // one writing drill per lesson is enough alongside the per-word drills
+		if writing == 0 {
+			lesson.Exercises = append(lesson.Exercises, exercise(
+				fmt.Sprintf("%s-recall%d", prefix, n), "hanzi_recall", "writing", difficulty,
+				fmt.Sprintf("Write %s (%s) from memory: %d strokes.", word, py, count),
+				map[string]any{
+					"character":    word,
+					"mode":         "recall",
+					"stroke_count": count,
+					"instruction":  fmt.Sprintf("Write %s from memory. No outline this time.", word),
+				},
+				map[string]any{
+					"character":    word,
+					"stroke_count": count,
+				}))
+		}
+		writing++
 	}
 
 	// Discrimination drills for words that differ only in tone. They belong to the

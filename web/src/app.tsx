@@ -2,7 +2,7 @@ import { Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-rou
 import type { ReactNode } from 'react'
 import { Languages, LogOut } from 'lucide-react'
 import type { ReactElement, SVGProps } from 'react'
-import { LearnGlyph, ReviewsGlyph, SettingsGlyph, TonesGlyph } from './components/icons'
+import { LearnGlyph, ReviewsGlyph, SettingsGlyph, SkillsGlyph, TonesGlyph } from './components/icons'
 import { useLogout, useOverview, useSession } from './api/hooks'
 import { Button, IconButton, Spinner } from './components/ui'
 import { GamifiedHeader } from './components/GamifiedHeader'
@@ -16,6 +16,11 @@ import { TonePage } from './features/tone/TonePage'
 import { LessonPage } from './features/lesson/LessonPage'
 import { ReviewPage } from './features/review/ReviewPage'
 import { ProfilePage } from './features/profile/ProfilePage'
+import { SkillsPage } from './features/skills/SkillsPage'
+import { ReadPage } from './features/read/ReadPage'
+import { WritePage } from './features/write/WritePage'
+import { SpeakPage } from './features/speak/SpeakPage'
+import { GuidePage } from './features/guide/GuidePage'
 import { PlacementPage } from './features/profile/PlacementPage'
 
 export function App() {
@@ -47,6 +52,49 @@ export function App() {
           }
         />
         <Route path="/path" element={<Navigate to="/" replace />} />
+        {/* The skills hub and the four studios it leads to. These pages shipped in
+            ef75a84 with no route, so they could not be opened at all; each one is a
+            real surface with server-graded drills, so each gets a URL. */}
+        <Route
+          path="/skills"
+          element={
+            <RequireAuth authenticated={authenticated}>
+              <SkillsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/read"
+          element={
+            <RequireAuth authenticated={authenticated}>
+              <ReadPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/write"
+          element={
+            <RequireAuth authenticated={authenticated}>
+              <WritePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/speak"
+          element={
+            <RequireAuth authenticated={authenticated}>
+              <SpeakPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/guide"
+          element={
+            <RequireAuth authenticated={authenticated}>
+              <GuidePage />
+            </RequireAuth>
+          }
+        />
         <Route
           path="/progress"
           element={
@@ -129,6 +177,9 @@ type Destination = { to: string; label: string; icon: (props: SVGProps<SVGSVGEle
 // reads as pressable rather than as a library default.
 const DESTINATIONS: Destination[] = [
   { to: '/', label: 'Learn', icon: LearnGlyph, end: true },
+  // Practice is the skills hub: the door to the reading, writing and speaking studios
+  // and the study guide. Without this the studio pages exist but nothing reaches them.
+  { to: '/skills', label: 'Practice', icon: SkillsGlyph },
   { to: '/reviews', label: 'Reviews', icon: ReviewsGlyph },
   { to: '/tones', label: 'Tones', icon: TonesGlyph },
   { to: '/settings', label: 'Settings', icon: SettingsGlyph },

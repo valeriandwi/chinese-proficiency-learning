@@ -37,29 +37,38 @@ export function StudioCanvas({ character, strokeCount, mode, outlineColor, onStr
   const [hintsUsed, setHintsUsed] = useState(0)
   const [replayKey, setReplayKey] = useState(0)
 
-  const report = useCallback(
-    (next: StudioStroke[], completed: boolean) => {
-      setStrokes(next)
-      onStrokesChange(next)
-      if (completed) onCompleted()
-    },
-    [onStrokesChange, onCompleted],
-  )
+  // The studio re-renders on every answer, and both callbacks arrive as inline arrows, so
+  // depending on their identities would restart the quiz on every render: a second writer
+  // stacked on the field, the first one never cancelled. The ref keeps the handlers fresh
+  // without making them a reason to redraw.
+  const handlers = useRef({ onStrokesChange, onCompleted })
+  useEffect(() => {
+    handlers.current = { onStrokesChange, onCompleted }
+  }, [onStrokesChange, onCompleted])
+
+  const report = useCallback((next: StudioStroke[], completed: boolean) => {
+    setStrokes(next)
+    handlers.current.onStrokesChange(next)
+    if (completed) handlers.current.onCompleted()
+  }, [])
 
   useEffect(() => {
     setStrokes([])
     setHintsUsed(0)
   }, [character, mode])
 
-  // The field is mounted once; the quiz is created when the character or mode
-  // changes. hanzi-writer destroys the previous instance itself when the
-  // element is replaced.
+  // The field is re-dealt when the character, the mode or the replay changes.
+  // hanzi-writer APPENDS its own <svg> to the element and never removes it, so the field
+  // has to be cleared first — otherwise the previous character's drawing stays on screen
+  // and the learner is looking at two characters at once.
   useEffect(() => {
-    if (!fieldRef.current) return
+    const field = fieldRef.current
+    if (!field) return
+    field.replaceChildren()
     const collected: StudioStroke[] = []
     let completed = false
 
-    const writer = HanziWriter.create(fieldRef.current, character, {
+    const writer = HanziWriter.create(field, character, {
       // The studio's field is larger than a lesson drill's: 288px vs 208px,
       // because practice deserves room to write.
       width: 288,

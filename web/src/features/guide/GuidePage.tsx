@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { BookMarked, Search } from 'lucide-react'
 import { useBookmarks, useGrammarNotes, useVocabulary } from '../../api/hooks'
-import { Button, Card, Chip, EmptyState, ErrorNote, ProgressBar, Skeleton, Spinner } from '../../components/ui'
+import { Button, Card, Chip, EmptyState, ErrorNote, Skeleton, Spinner } from '../../components/ui'
 import { usePrefs } from '../../stores/prefs'
 import { BookmarkButton } from '../read/BookmarkButton'
 

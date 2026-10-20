@@ -194,7 +194,7 @@ export function WritePage() {
     submit(drill, strokes, completed)
   }
 
-  function hintsOf(drill: StudyDrill, strokes: StudioStroke[]): number {
+  function hintsOf(_drill: StudyDrill, strokes: StudioStroke[]): number {
     return strokes.filter((s) => s.mistaken).length >= 3 ? 1 : 0
   }
 }

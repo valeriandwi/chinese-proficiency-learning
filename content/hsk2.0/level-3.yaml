@@ -3719,7 +3719,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 1–6.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - a1yi2
                 - a1
@@ -4234,12 +4234,51 @@ levels:
                   answer_key:
                     character: 啊
                     stroke_count: 10
+                - key: l3-w1-recall2
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 啊 (ā) from memory: 10 strokes.'
+                  prompt:
+                    character: 啊
+                    instruction: Write 啊 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 10
+                  answer_key:
+                    character: 啊
+                    stroke_count: 10
+                - key: l3-w1-hanzi3
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 矮 (ǎi) in stroke order: 13 strokes.'
+                  prompt:
+                    character: 矮
+                    instruction: Trace 矮 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 13
+                  answer_key:
+                    character: 矮
+                    stroke_count: 13
+                - key: l3-w1-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 把 (bǎ) in stroke order: 7 strokes.'
+                  prompt:
+                    character: 把
+                    instruction: Trace 把 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 7
+                  answer_key:
+                    character: 把
+                    stroke_count: 7
             - lesson: 2
               title: 词汇 7–12
               kind: lesson
               goal: Recognise and say words 7–12.
               xp_reward: 14
-              estimated_minutes: 12
+              estimated_minutes: 13
               vocabulary:
                 - Ban1
                 - ban1
@@ -4754,6 +4793,45 @@ levels:
                   answer_key:
                     character: 班
                     stroke_count: 10
+                - key: l3-w2-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 班 (Bān) from memory: 10 strokes.'
+                  prompt:
+                    character: 班
+                    instruction: Write 班 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 10
+                  answer_key:
+                    character: 班
+                    stroke_count: 10
+                - key: l3-w2-hanzi2
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 搬 (bān) in stroke order: 13 strokes.'
+                  prompt:
+                    character: 搬
+                    instruction: Trace 搬 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 13
+                  answer_key:
+                    character: 搬
+                    stroke_count: 13
+                - key: l3-w2-hanzi5
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 半 (bàn) in stroke order: 5 strokes.'
+                  prompt:
+                    character: 半
+                    instruction: Trace 半 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 5
+                  answer_key:
+                    character: 半
+                    stroke_count: 5
                 - key: l3-w2-pair1
                   type: listening_mcq
                   skill: listening
@@ -4777,7 +4855,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 13–18.
               xp_reward: 14
-              estimated_minutes: 12
+              estimated_minutes: 13
               vocabulary:
                 - Bao1
                 - bao3
@@ -5292,6 +5370,45 @@ levels:
                   answer_key:
                     character: 包
                     stroke_count: 5
+                - key: l3-w3-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 包 (Bāo) from memory: 5 strokes.'
+                  prompt:
+                    character: 包
+                    instruction: Write 包 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 5
+                  answer_key:
+                    character: 包
+                    stroke_count: 5
+                - key: l3-w3-hanzi2
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 饱 (bǎo) in stroke order: 8 strokes.'
+                  prompt:
+                    character: 饱
+                    instruction: Trace 饱 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 8
+                  answer_key:
+                    character: 饱
+                    stroke_count: 8
+                - key: l3-w3-hanzi4
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 被 (bèi) in stroke order: 10 strokes.'
+                  prompt:
+                    character: 被
+                    instruction: Trace 被 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 10
+                  answer_key:
+                    character: 被
+                    stroke_count: 10
                 - key: l3-w3-pair1
                   type: listening_mcq
                   skill: listening
@@ -5820,7 +5937,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 25–30.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - bin1guan3
                 - bing1xiang1
@@ -6333,12 +6450,38 @@ levels:
                   answer_key:
                     character: 才
                     stroke_count: 3
+                - key: l3-w5-recall3
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 才 (cái) from memory: 3 strokes.'
+                  prompt:
+                    character: 才
+                    instruction: Write 才 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 3
+                  answer_key:
+                    character: 才
+                    stroke_count: 3
+                - key: l3-w5-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 草 (cǎo) in stroke order: 9 strokes.'
+                  prompt:
+                    character: 草
+                    instruction: Trace 草 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 9
+                  answer_key:
+                    character: 草
+                    stroke_count: 9
             - lesson: 6
               title: 词汇 31–36
               kind: lesson
               goal: Recognise and say words 31–36.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - ceng2
                 - cha1
@@ -6851,12 +6994,38 @@ levels:
                   answer_key:
                     character: 层
                     stroke_count: 7
+                - key: l3-w6-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 层 (céng) from memory: 7 strokes.'
+                  prompt:
+                    character: 层
+                    instruction: Write 层 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 7
+                  answer_key:
+                    character: 层
+                    stroke_count: 7
+                - key: l3-w6-hanzi2
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 差 (chā) in stroke order: 9 strokes.'
+                  prompt:
+                    character: 差
+                    instruction: Trace 差 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 9
+                  answer_key:
+                    character: 差
+                    stroke_count: 9
             - lesson: 7
               title: 词汇 37–42
               kind: lesson
               goal: Recognise and say words 37–42.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - chi2dao4
                 - chu1xian4
@@ -7367,12 +7536,25 @@ levels:
                   answer_key:
                     character: 春
                     stroke_count: 9
+                - key: l3-w7-recall5
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 春 (chūn) from memory: 9 strokes.'
+                  prompt:
+                    character: 春
+                    instruction: Write 春 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 9
+                  answer_key:
+                    character: 春
+                    stroke_count: 9
             - lesson: 8
               title: 词汇 43–48
               kind: lesson
               goal: Recognise and say words 43–48.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - cong1ming5
                 - da3sao3
@@ -7883,6 +8065,19 @@ levels:
                   answer_key:
                     character: 带
                     stroke_count: 9
+                - key: l3-w8-recall4
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 带 (dài) from memory: 9 strokes.'
+                  prompt:
+                    character: 带
+                    instruction: Write 带 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 9
+                  answer_key:
+                    character: 带
+                    stroke_count: 9
         - unit: 3
           title: 词汇 49–72
           description: Words 49–72 of the published HSK 2.0 level-3 list, in frequency order.
@@ -7892,7 +8087,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 49–54.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - dang1ran2
                 - de5
@@ -8405,12 +8600,38 @@ levels:
                   answer_key:
                     character: 地
                     stroke_count: 6
+                - key: l3-w9-recall2
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 地 (de) from memory: 6 strokes.'
+                  prompt:
+                    character: 地
+                    instruction: Write 地 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 6
+                  answer_key:
+                    character: 地
+                    stroke_count: 6
+                - key: l3-w9-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 灯 (dēng) in stroke order: 6 strokes.'
+                  prompt:
+                    character: 灯
+                    instruction: Trace 灯 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 6
+                  answer_key:
+                    character: 灯
+                    stroke_count: 6
             - lesson: 10
               title: 词汇 55–60
               kind: lesson
               goal: Recognise and say words 55–60.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - di1
                 - dian4ti1
@@ -8925,12 +9146,51 @@ levels:
                   answer_key:
                     character: 低
                     stroke_count: 7
+                - key: l3-w10-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 低 (dī) from memory: 7 strokes.'
+                  prompt:
+                    character: 低
+                    instruction: Write 低 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 7
+                  answer_key:
+                    character: 低
+                    stroke_count: 7
+                - key: l3-w10-hanzi4
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 东 (Dōng) in stroke order: 5 strokes.'
+                  prompt:
+                    character: 东
+                    instruction: Trace 东 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 5
+                  answer_key:
+                    character: 东
+                    stroke_count: 5
+                - key: l3-w10-hanzi5
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 冬 (dōng) in stroke order: 5 strokes.'
+                  prompt:
+                    character: 冬
+                    instruction: Trace 冬 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 5
+                  answer_key:
+                    character: 冬
+                    stroke_count: 5
             - lesson: 11
               title: 词汇 61–66
               kind: lesson
               goal: Recognise and say words 61–66.
               xp_reward: 14
-              estimated_minutes: 12
+              estimated_minutes: 13
               vocabulary:
                 - duan3
                 - Duan4
@@ -9445,6 +9705,45 @@ levels:
                   answer_key:
                     character: 短
                     stroke_count: 12
+                - key: l3-w11-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 短 (duǎn) from memory: 12 strokes.'
+                  prompt:
+                    character: 短
+                    instruction: Write 短 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 12
+                  answer_key:
+                    character: 短
+                    stroke_count: 12
+                - key: l3-w11-hanzi2
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 段 (Duàn) in stroke order: 9 strokes.'
+                  prompt:
+                    character: 段
+                    instruction: Trace 段 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 9
+                  answer_key:
+                    character: 段
+                    stroke_count: 9
+                - key: l3-w11-hanzi5
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 饿 (è) in stroke order: 10 strokes.'
+                  prompt:
+                    character: 饿
+                    instruction: Trace 饿 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 10
+                  answer_key:
+                    character: 饿
+                    stroke_count: 10
                 - key: l3-w11-pair1
                   type: listening_mcq
                   skill: listening
@@ -9468,7 +9767,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 67–72.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - er3duo5
                 - fa1shao1
@@ -9979,6 +10278,19 @@ levels:
                   answer_key:
                     character: 放
                     stroke_count: 8
+                - key: l3-w12-recall5
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 放 (fàng) from memory: 8 strokes.'
+                  prompt:
+                    character: 放
+                    instruction: Write 放 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 8
+                  answer_key:
+                    character: 放
+                    stroke_count: 8
         - unit: 4
           title: 词汇 73–96
           description: Words 73–96 of the published HSK 2.0 level-3 list, in frequency order.
@@ -9988,7 +10300,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 73–78.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - fen1
                 - fu4jin4
@@ -10501,12 +10813,38 @@ levels:
                   answer_key:
                     character: 分
                     stroke_count: 4
+                - key: l3-w13-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 分 (fēn) from memory: 4 strokes.'
+                  prompt:
+                    character: 分
+                    instruction: Write 分 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 4
+                  answer_key:
+                    character: 分
+                    stroke_count: 4
+                - key: l3-w13-hanzi4
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 敢 (gǎn) in stroke order: 11 strokes.'
+                  prompt:
+                    character: 敢
+                    instruction: Trace 敢 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 11
+                  answer_key:
+                    character: 敢
+                    stroke_count: 11
             - lesson: 14
               title: 词汇 79–84
               kind: lesson
               goal: Recognise and say words 79–84.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - gang1cai2
                 - gen1ju4
@@ -11019,12 +11357,38 @@ levels:
                   answer_key:
                     character: 跟
                     stroke_count: 13
+                - key: l3-w14-recall3
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 跟 (gēn) from memory: 13 strokes.'
+                  prompt:
+                    character: 跟
+                    instruction: Write 跟 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 13
+                  answer_key:
+                    character: 跟
+                    stroke_count: 13
+                - key: l3-w14-hanzi4
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 更 (gēng) in stroke order: 7 strokes.'
+                  prompt:
+                    character: 更
+                    instruction: Trace 更 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 7
+                  answer_key:
+                    character: 更
+                    stroke_count: 7
             - lesson: 15
               title: 词汇 85–90
               kind: lesson
               goal: Recognise and say words 85–90.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - gua1
                 - Guan1
@@ -11537,12 +11901,38 @@ levels:
                   answer_key:
                     character: 刮
                     stroke_count: 8
+                - key: l3-w15-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 刮 (guā) from memory: 8 strokes.'
+                  prompt:
+                    character: 刮
+                    instruction: Write 刮 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 8
+                  answer_key:
+                    character: 刮
+                    stroke_count: 8
+                - key: l3-w15-hanzi2
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 关 (Guān) in stroke order: 6 strokes.'
+                  prompt:
+                    character: 关
+                    instruction: Trace 关 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 6
+                  answer_key:
+                    character: 关
+                    stroke_count: 6
             - lesson: 16
               title: 词汇 91–96
               kind: lesson
               goal: Recognise and say words 91–96.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - guo3zhi1
                 - guo4qu4
@@ -12053,6 +12443,19 @@ levels:
                   answer_key:
                     character: 河
                     stroke_count: 8
+                - key: l3-w16-recall5
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 河 (hé) from memory: 8 strokes.'
+                  prompt:
+                    character: 河
+                    instruction: Write 河 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 8
+                  answer_key:
+                    character: 河
+                    stroke_count: 8
         - unit: 5
           title: 词汇 97–120
           description: Words 97–120 of the published HSK 2.0 level-3 list, in frequency order.
@@ -12062,7 +12465,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 97–102.
               xp_reward: 14
-              estimated_minutes: 12
+              estimated_minutes: 13
               vocabulary:
                 - hu4zhao4
                 - Hua1
@@ -12577,6 +12980,45 @@ levels:
                   answer_key:
                     character: 花
                     stroke_count: 7
+                - key: l3-w17-recall2
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 花 (Huā) from memory: 7 strokes.'
+                  prompt:
+                    character: 花
+                    instruction: Write 花 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 7
+                  answer_key:
+                    character: 花
+                    stroke_count: 7
+                - key: l3-w17-hanzi4
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 画 (huà) in stroke order: 8 strokes.'
+                  prompt:
+                    character: 画
+                    instruction: Trace 画 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 8
+                  answer_key:
+                    character: 画
+                    stroke_count: 8
+                - key: l3-w17-hanzi5
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 坏 (huài) in stroke order: 7 strokes.'
+                  prompt:
+                    character: 坏
+                    instruction: Trace 坏 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 7
+                  answer_key:
+                    character: 坏
+                    stroke_count: 7
                 - key: l3-w17-pair1
                   type: listening_mcq
                   skill: listening
@@ -12600,7 +13042,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 103–108.
               xp_reward: 14
-              estimated_minutes: 12
+              estimated_minutes: 13
               vocabulary:
                 - huan4
                 - Huang2
@@ -13115,6 +13557,45 @@ levels:
                   answer_key:
                     character: 换
                     stroke_count: 10
+                - key: l3-w18-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 换 (huàn) from memory: 10 strokes.'
+                  prompt:
+                    character: 换
+                    instruction: Write 换 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 10
+                  answer_key:
+                    character: 换
+                    stroke_count: 10
+                - key: l3-w18-hanzi2
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 黄 (Huáng) in stroke order: 11 strokes.'
+                  prompt:
+                    character: 黄
+                    instruction: Trace 黄 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 11
+                  answer_key:
+                    character: 黄
+                    stroke_count: 11
+                - key: l3-w18-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 极 (jí) in stroke order: 7 strokes.'
+                  prompt:
+                    character: 极
+                    instruction: Trace 极 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 7
+                  answer_key:
+                    character: 极
+                    stroke_count: 7
                 - key: l3-w18-pair1
                   type: listening_mcq
                   skill: listening
@@ -13639,7 +14120,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 115–120.
               xp_reward: 14
-              estimated_minutes: 12
+              estimated_minutes: 14
               vocabulary:
                 - jian4kang1
                 - jiang3
@@ -14158,6 +14639,71 @@ levels:
                   answer_key:
                     character: 讲
                     stroke_count: 6
+                - key: l3-w20-recall2
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 讲 (jiǎng) from memory: 6 strokes.'
+                  prompt:
+                    character: 讲
+                    instruction: Write 讲 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 6
+                  answer_key:
+                    character: 讲
+                    stroke_count: 6
+                - key: l3-w20-hanzi3
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 角 (Jué) in stroke order: 7 strokes.'
+                  prompt:
+                    character: 角
+                    instruction: Trace 角 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 7
+                  answer_key:
+                    character: 角
+                    stroke_count: 7
+                - key: l3-w20-hanzi4
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 脚 (jiǎo) in stroke order: 11 strokes.'
+                  prompt:
+                    character: 脚
+                    instruction: Trace 脚 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 11
+                  answer_key:
+                    character: 脚
+                    stroke_count: 11
+                - key: l3-w20-hanzi5
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 教 (Jiào) in stroke order: 11 strokes.'
+                  prompt:
+                    character: 教
+                    instruction: Trace 教 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 11
+                  answer_key:
+                    character: 教
+                    stroke_count: 11
+                - key: l3-w20-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 接 (jiē) in stroke order: 11 strokes.'
+                  prompt:
+                    character: 接
+                    instruction: Trace 接 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 11
+                  answer_key:
+                    character: 接
+                    stroke_count: 11
                 - key: l3-w20-pair1
                   type: listening_mcq
                   skill: listening
@@ -14704,7 +15250,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 127–132.
               xp_reward: 14
-              estimated_minutes: 12
+              estimated_minutes: 13
               vocabulary:
                 - jie4
                 - jing1chang2
@@ -15219,6 +15765,45 @@ levels:
                   answer_key:
                     character: 借
                     stroke_count: 10
+                - key: l3-w22-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 借 (jiè) from memory: 10 strokes.'
+                  prompt:
+                    character: 借
+                    instruction: Write 借 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 10
+                  answer_key:
+                    character: 借
+                    stroke_count: 10
+                - key: l3-w22-hanzi5
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 久 (jiǔ) in stroke order: 3 strokes.'
+                  prompt:
+                    character: 久
+                    instruction: Trace 久 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 3
+                  answer_key:
+                    character: 久
+                    stroke_count: 3
+                - key: l3-w22-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 旧 (jiù) in stroke order: 5 strokes.'
+                  prompt:
+                    character: 旧
+                    instruction: Trace 旧 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 5
+                  answer_key:
+                    character: 旧
+                    stroke_count: 5
                 - key: l3-w22-pair1
                   type: listening_mcq
                   skill: listening
@@ -15755,6 +16340,32 @@ levels:
                   answer_key:
                     character: 渴
                     stroke_count: 12
+                - key: l3-w23-recall5
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 渴 (kě) from memory: 12 strokes.'
+                  prompt:
+                    character: 渴
+                    instruction: Write 渴 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 12
+                  answer_key:
+                    character: 渴
+                    stroke_count: 12
+                - key: l3-w23-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 刻 (kè) in stroke order: 8 strokes.'
+                  prompt:
+                    character: 刻
+                    instruction: Trace 刻 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 8
+                  answer_key:
+                    character: 刻
+                    stroke_count: 8
                 - key: l3-w23-pair1
                   type: listening_mcq
                   skill: listening
@@ -15778,7 +16389,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 139–144.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - ke4ren2
                 - kong1tiao2
@@ -16291,6 +16902,32 @@ levels:
                   answer_key:
                     character: 口
                     stroke_count: 3
+                - key: l3-w24-recall3
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 口 (kǒu) from memory: 3 strokes.'
+                  prompt:
+                    character: 口
+                    instruction: Write 口 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 3
+                  answer_key:
+                    character: 口
+                    stroke_count: 3
+                - key: l3-w24-hanzi4
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 哭 (kū) in stroke order: 10 strokes.'
+                  prompt:
+                    character: 哭
+                    instruction: Trace 哭 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 10
+                  answer_key:
+                    character: 哭
+                    stroke_count: 10
         - unit: 7
           title: 词汇 145–168
           description: Words 145–168 of the published HSK 2.0 level-3 list, in frequency order.
@@ -16300,7 +16937,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 145–150.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - Lan2
                 - lao3
@@ -16813,12 +17450,38 @@ levels:
                   answer_key:
                     character: 蓝
                     stroke_count: 13
+                - key: l3-w25-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 蓝 (Lán) from memory: 13 strokes.'
+                  prompt:
+                    character: 蓝
+                    instruction: Write 蓝 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 13
+                  answer_key:
+                    character: 蓝
+                    stroke_count: 13
+                - key: l3-w25-hanzi2
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 老 (lǎo) in stroke order: 6 strokes.'
+                  prompt:
+                    character: 老
+                    instruction: Trace 老 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 6
+                  answer_key:
+                    character: 老
+                    stroke_count: 6
             - lesson: 26
               title: 词汇 151–156
               kind: lesson
               goal: Recognise and say words 151–156.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 13
               vocabulary:
                 - lian3
                 - lian4xi2
@@ -17335,12 +17998,64 @@ levels:
                   answer_key:
                     character: 脸
                     stroke_count: 11
+                - key: l3-w26-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 脸 (liǎn) from memory: 11 strokes.'
+                  prompt:
+                    character: 脸
+                    instruction: Write 脸 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 11
+                  answer_key:
+                    character: 脸
+                    stroke_count: 11
+                - key: l3-w26-hanzi3
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 辆 (liàng) in stroke order: 11 strokes.'
+                  prompt:
+                    character: 辆
+                    instruction: Trace 辆 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 11
+                  answer_key:
+                    character: 辆
+                    stroke_count: 11
+                - key: l3-w26-hanzi5
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 楼 (Lóu) in stroke order: 13 strokes.'
+                  prompt:
+                    character: 楼
+                    instruction: Trace 楼 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 13
+                  answer_key:
+                    character: 楼
+                    stroke_count: 13
+                - key: l3-w26-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 绿 (lǜ) in stroke order: 11 strokes.'
+                  prompt:
+                    character: 绿
+                    instruction: Trace 绿 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 11
+                  answer_key:
+                    character: 绿
+                    stroke_count: 11
             - lesson: 27
               title: 词汇 157–162
               kind: lesson
               goal: Recognise and say words 157–162.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - Ma3
                 - ma3shang4
@@ -17853,12 +18568,38 @@ levels:
                   answer_key:
                     character: 马
                     stroke_count: 3
+                - key: l3-w27-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 马 (Mǎ) from memory: 3 strokes.'
+                  prompt:
+                    character: 马
+                    instruction: Write 马 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 3
+                  answer_key:
+                    character: 马
+                    stroke_count: 3
+                - key: l3-w27-hanzi5
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 米 (Mǐ) in stroke order: 6 strokes.'
+                  prompt:
+                    character: 米
+                    instruction: Trace 米 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 6
+                  answer_key:
+                    character: 米
+                    stroke_count: 6
             - lesson: 28
               title: 词汇 163–168
               kind: lesson
               goal: Recognise and say words 163–168.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - mian4tiao2
                 - ming2bai5
@@ -18373,6 +19114,45 @@ levels:
                   answer_key:
                     character: 拿
                     stroke_count: 10
+                - key: l3-w28-recall3
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 拿 (ná) from memory: 10 strokes.'
+                  prompt:
+                    character: 拿
+                    instruction: Write 拿 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 10
+                  answer_key:
+                    character: 拿
+                    stroke_count: 10
+                - key: l3-w28-hanzi5
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 南 (Nán) in stroke order: 9 strokes.'
+                  prompt:
+                    character: 南
+                    instruction: Trace 南 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 9
+                  answer_key:
+                    character: 南
+                    stroke_count: 9
+                - key: l3-w28-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 难 (nán) in stroke order: 10 strokes.'
+                  prompt:
+                    character: 难
+                    instruction: Trace 难 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 10
+                  answer_key:
+                    character: 难
+                    stroke_count: 10
         - unit: 8
           title: 词汇 169–192
           description: Words 169–192 of the published HSK 2.0 level-3 list, in frequency order.
@@ -18382,7 +19162,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 169–174.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - nan2guo4
                 - nian2ji2
@@ -18893,12 +19673,25 @@ levels:
                   answer_key:
                     character: 鸟
                     stroke_count: 5
+                - key: l3-w29-recall4
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 鸟 (diǎo) from memory: 5 strokes.'
+                  prompt:
+                    character: 鸟
+                    instruction: Write 鸟 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 5
+                  answer_key:
+                    character: 鸟
+                    stroke_count: 5
             - lesson: 30
               title: 词汇 175–180
               kind: lesson
               goal: Recognise and say words 175–180.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - pan2zi5
                 - pan2
@@ -19409,12 +20202,25 @@ levels:
                   answer_key:
                     character: 胖
                     stroke_count: 9
+                - key: l3-w30-recall2
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 胖 (pán) from memory: 9 strokes.'
+                  prompt:
+                    character: 胖
+                    instruction: Write 胖 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 9
+                  answer_key:
+                    character: 胖
+                    stroke_count: 9
             - lesson: 31
               title: 词汇 181–186
               kind: lesson
               goal: Recognise and say words 181–186.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - qi2ta1
                 - qi2guai4
@@ -19927,6 +20733,32 @@ levels:
                   answer_key:
                     character: 骑
                     stroke_count: 11
+                - key: l3-w31-recall3
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 骑 (jì) from memory: 11 strokes.'
+                  prompt:
+                    character: 骑
+                    instruction: Write 骑 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 11
+                  answer_key:
+                    character: 骑
+                    stroke_count: 11
+                - key: l3-w31-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 秋 (Qiū) in stroke order: 9 strokes.'
+                  prompt:
+                    character: 秋
+                    instruction: Trace 秋 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 9
+                  answer_key:
+                    character: 秋
+                    stroke_count: 9
             - lesson: 32
               title: 词汇 187–192
               kind: lesson
@@ -20437,7 +21269,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 193–198.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - ru2guo3
                 - san3
@@ -20950,12 +21782,38 @@ levels:
                   answer_key:
                     character: 伞
                     stroke_count: 6
+                - key: l3-w33-recall2
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 伞 (sǎn) from memory: 6 strokes.'
+                  prompt:
+                    character: 伞
+                    instruction: Write 伞 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 6
+                  answer_key:
+                    character: 伞
+                    stroke_count: 6
+                - key: l3-w33-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 使 (shǐ) in stroke order: 8 strokes.'
+                  prompt:
+                    character: 使
+                    instruction: Trace 使 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 8
+                  answer_key:
+                    character: 使
+                    stroke_count: 8
             - lesson: 34
               title: 词汇 199–204
               kind: lesson
               goal: Recognise and say words 199–204.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - shi4jie4
                 - shou4
@@ -21468,12 +22326,38 @@ levels:
                   answer_key:
                     character: 瘦
                     stroke_count: 14
+                - key: l3-w34-recall2
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 瘦 (shòu) from memory: 14 strokes.'
+                  prompt:
+                    character: 瘦
+                    instruction: Write 瘦 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 14
+                  answer_key:
+                    character: 瘦
+                    stroke_count: 14
+                - key: l3-w34-hanzi5
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 树 (shù) in stroke order: 9 strokes.'
+                  prompt:
+                    character: 树
+                    instruction: Trace 树 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 9
+                  answer_key:
+                    character: 树
+                    stroke_count: 9
             - lesson: 35
               title: 词汇 205–210
               kind: lesson
               goal: Recognise and say words 205–210.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - shua1
                 - Shuang1
@@ -21986,12 +22870,38 @@ levels:
                   answer_key:
                     character: 刷
                     stroke_count: 8
+                - key: l3-w35-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 刷 (shuā) from memory: 8 strokes.'
+                  prompt:
+                    character: 刷
+                    instruction: Write 刷 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 8
+                  answer_key:
+                    character: 刷
+                    stroke_count: 8
+                - key: l3-w35-hanzi2
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 双 (Shuāng) in stroke order: 4 strokes.'
+                  prompt:
+                    character: 双
+                    instruction: Trace 双 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 4
+                  answer_key:
+                    character: 双
+                    stroke_count: 4
             - lesson: 36
               title: 词汇 211–216
               kind: lesson
               goal: Recognise and say words 211–216.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - tang2
                 - te4bie2
@@ -22506,6 +23416,45 @@ levels:
                   answer_key:
                     character: 糖
                     stroke_count: 16
+                - key: l3-w36-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 糖 (táng) from memory: 16 strokes.'
+                  prompt:
+                    character: 糖
+                    instruction: Write 糖 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 16
+                  answer_key:
+                    character: 糖
+                    stroke_count: 16
+                - key: l3-w36-hanzi3
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 疼 (téng) in stroke order: 10 strokes.'
+                  prompt:
+                    character: 疼
+                    instruction: Trace 疼 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 10
+                  answer_key:
+                    character: 疼
+                    stroke_count: 10
+                - key: l3-w36-hanzi6
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 甜 (tián) in stroke order: 11 strokes.'
+                  prompt:
+                    character: 甜
+                    instruction: Trace 甜 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 11
+                  answer_key:
+                    character: 甜
+                    stroke_count: 11
         - unit: 10
           title: 词汇 217–240
           description: Words 217–240 of the published HSK 2.0 level-3 list, in frequency order.
@@ -22515,7 +23464,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 217–222.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - tiao2
                 - tong2shi4
@@ -23026,12 +23975,25 @@ levels:
                   answer_key:
                     character: 条
                     stroke_count: 7
+                - key: l3-w37-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 条 (tiáo) from memory: 7 strokes.'
+                  prompt:
+                    character: 条
+                    instruction: Write 条 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 7
+                  answer_key:
+                    character: 条
+                    stroke_count: 7
             - lesson: 38
               title: 词汇 223–228
               kind: lesson
               goal: Recognise and say words 223–228.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - tui3
                 - wan2cheng2
@@ -23546,12 +24508,51 @@ levels:
                   answer_key:
                     character: 腿
                     stroke_count: 13
+                - key: l3-w38-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 腿 (tuǐ) from memory: 13 strokes.'
+                  prompt:
+                    character: 腿
+                    instruction: Write 腿 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 13
+                  answer_key:
+                    character: 腿
+                    stroke_count: 13
+                - key: l3-w38-hanzi3
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 碗 (wǎn) in stroke order: 13 strokes.'
+                  prompt:
+                    character: 碗
+                    instruction: Trace 碗 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 13
+                  answer_key:
+                    character: 碗
+                    stroke_count: 13
+                - key: l3-w38-hanzi4
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 万 (mò) in stroke order: 3 strokes.'
+                  prompt:
+                    character: 万
+                    instruction: Trace 万 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 3
+                  answer_key:
+                    character: 万
+                    stroke_count: 3
             - lesson: 39
               title: 词汇 229–234
               kind: lesson
               goal: Recognise and say words 229–234.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - wei4shen2me5
                 - wei4
@@ -24062,12 +25063,25 @@ levels:
                   answer_key:
                     character: 位
                     stroke_count: 7
+                - key: l3-w39-recall2
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 位 (wèi) from memory: 7 strokes.'
+                  prompt:
+                    character: 位
+                    instruction: Write 位 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 7
+                  answer_key:
+                    character: 位
+                    stroke_count: 7
             - lesson: 40
               title: 词汇 235–240
               kind: lesson
               goal: Recognise and say words 235–240.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - Xi1
                 - Xia4
@@ -24582,6 +25596,45 @@ levels:
                   answer_key:
                     character: 西
                     stroke_count: 6
+                - key: l3-w40-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 西 (Xī) from memory: 6 strokes.'
+                  prompt:
+                    character: 西
+                    instruction: Write 西 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 6
+                  answer_key:
+                    character: 西
+                    stroke_count: 6
+                - key: l3-w40-hanzi2
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 夏 (Xià) in stroke order: 10 strokes.'
+                  prompt:
+                    character: 夏
+                    instruction: Trace 夏 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 10
+                  answer_key:
+                    character: 夏
+                    stroke_count: 10
+                - key: l3-w40-hanzi3
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 先 (xiān) in stroke order: 6 strokes.'
+                  prompt:
+                    character: 先
+                    instruction: Trace 先 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 6
+                  answer_key:
+                    character: 先
+                    stroke_count: 6
         - unit: 11
           title: 词汇 241–264
           description: Words 241–264 of the published HSK 2.0 level-3 list, in frequency order.
@@ -24591,7 +25644,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 241–246.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - xiang4
                 - xiao3xin1
@@ -25104,12 +26157,38 @@ levels:
                   answer_key:
                     character: 像
                     stroke_count: 13
+                - key: l3-w41-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 像 (xiàng) from memory: 13 strokes.'
+                  prompt:
+                    character: 像
+                    instruction: Write 像 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 13
+                  answer_key:
+                    character: 像
+                    stroke_count: 13
+                - key: l3-w41-hanzi4
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 鞋 (xié) in stroke order: 15 strokes.'
+                  prompt:
+                    character: 鞋
+                    instruction: Trace 鞋 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 15
+                  answer_key:
+                    character: 鞋
+                    stroke_count: 15
             - lesson: 42
               title: 词汇 247–252
               kind: lesson
               goal: Recognise and say words 247–252.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - xin4
                 - xing2li5xiang1
@@ -25616,6 +26695,19 @@ levels:
                     character: 信
                     instruction: Trace 信 in the correct stroke order.
                     mode: guided
+                    stroke_count: 9
+                  answer_key:
+                    character: 信
+                    stroke_count: 9
+                - key: l3-w42-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 信 (xìn) from memory: 9 strokes.'
+                  prompt:
+                    character: 信
+                    instruction: Write 信 from memory. No outline this time.
+                    mode: recall
                     stroke_count: 9
                   answer_key:
                     character: 信
@@ -26631,7 +27723,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 265–270.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - yi3wei2
                 - yin1yue4
@@ -27142,12 +28234,25 @@ levels:
                   answer_key:
                     character: 用
                     stroke_count: 5
+                - key: l3-w45-recall6
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 用 (yòng) from memory: 5 strokes.'
+                  prompt:
+                    character: 用
+                    instruction: Write 用 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 5
+                  answer_key:
+                    character: 用
+                    stroke_count: 5
             - lesson: 46
               title: 词汇 271–276
               kind: lesson
               goal: Recognise and say words 271–276.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - you2xi4
                 - you3ming2
@@ -27658,12 +28763,25 @@ levels:
                   answer_key:
                     character: 又
                     stroke_count: 2
+                - key: l3-w46-recall3
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 又 (yòu) from memory: 2 strokes.'
+                  prompt:
+                    character: 又
+                    instruction: Write 又 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 2
+                  answer_key:
+                    character: 又
+                    stroke_count: 2
             - lesson: 47
               title: 词汇 277–282
               kind: lesson
               goal: Recognise and say words 277–282.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - Yue4
                 - yun2
@@ -28178,12 +29296,51 @@ levels:
                   answer_key:
                     character: 越
                     stroke_count: 12
+                - key: l3-w47-recall1
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 越 (Yuè) from memory: 12 strokes.'
+                  prompt:
+                    character: 越
+                    instruction: Write 越 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 12
+                  answer_key:
+                    character: 越
+                    stroke_count: 12
+                - key: l3-w47-hanzi2
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 云 (yún) in stroke order: 4 strokes.'
+                  prompt:
+                    character: 云
+                    instruction: Trace 云 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 4
+                  answer_key:
+                    character: 云
+                    stroke_count: 4
+                - key: l3-w47-hanzi3
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 站 (zhàn) in stroke order: 10 strokes.'
+                  prompt:
+                    character: 站
+                    instruction: Trace 站 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 10
+                  answer_key:
+                    character: 站
+                    stroke_count: 10
             - lesson: 48
               title: 词汇 283–288
               kind: lesson
               goal: Recognise and say words 283–288.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - zhao2ji2
                 - zhi3
@@ -28696,6 +29853,32 @@ levels:
                   answer_key:
                     character: 只
                     stroke_count: 5
+                - key: l3-w48-recall2
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 只 (zhǐ) from memory: 5 strokes.'
+                  prompt:
+                    character: 只
+                    instruction: Write 只 from memory. No outline this time.
+                    mode: recall
+                    stroke_count: 5
+                  answer_key:
+                    character: 只
+                    stroke_count: 5
+                - key: l3-w48-hanzi5
+                  type: hanzi_trace
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Trace 种 (zhǒng) in stroke order: 9 strokes.'
+                  prompt:
+                    character: 种
+                    instruction: Trace 种 in the correct stroke order.
+                    mode: guided
+                    stroke_count: 9
+                  answer_key:
+                    character: 种
+                    stroke_count: 9
         - unit: 13
           title: 词汇 289–298
           description: Words 289–298 of the published HSK 2.0 level-3 list, in frequency order.
@@ -28705,7 +29888,7 @@ levels:
               kind: lesson
               goal: Recognise and say words 289–294.
               xp_reward: 14
-              estimated_minutes: 11
+              estimated_minutes: 12
               vocabulary:
                 - zhou1mo4
                 - zhu3yao4
@@ -29212,6 +30395,19 @@ levels:
                     character: 祝
                     instruction: Trace 祝 in the correct stroke order.
                     mode: guided
+                    stroke_count: 9
+                  answer_key:
+                    character: 祝
+                    stroke_count: 9
+                - key: l3-w49-recall4
+                  type: hanzi_recall
+                  skill: writing
+                  difficulty: 2
+                  explanation: 'Write 祝 (Zhù) from memory: 9 strokes.'
+                  prompt:
+                    character: 祝
+                    instruction: Write 祝 from memory. No outline this time.
+                    mode: recall
                     stroke_count: 9
                   answer_key:
                     character: 祝

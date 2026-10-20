@@ -65,12 +65,24 @@ func (s *Server) serveStudioQueue(w http.ResponseWriter, r *http.Request, types 
 	user, _ := userFrom(r.Context())
 	limit := parseLimit(r, studioDefaultLimit, studioMaxLimit)
 
-	level, ok := studyLevel(w, r, toneDefaultLevel(*user))
+	// The studios are ungated practice, so a round is not confined to the level the
+	// learner happens to be on: the default is every level, and the page's level control
+	// narrows it on request. The openapi spec has always documented `level` defaulting to
+	// 0; defaulting to the learner's own level instead meant a beginner's writing round
+	// was the three drills level 1 happens to contain.
+	level, ok := studyLevel(w, r, 0)
 	if !ok {
 		return
 	}
 
-	drills, err := s.store.StudioQueue(r.Context(), user.ID, types, level, limit)
+	// With no level asked for, the learner's own level is served first and the round is
+	// filled from the rest: a full round of practice that still starts where they are.
+	prefer := 0
+	if level == 0 {
+		prefer = toneDefaultLevel(*user)
+	}
+
+	drills, err := s.store.StudioQueue(r.Context(), user.ID, types, level, limit, prefer)
 	if err != nil {
 		s.respondStoreError(w, r, err)
 		return
