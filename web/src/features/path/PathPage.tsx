@@ -186,17 +186,18 @@ function LessonNode({
     .filter(Boolean)
     .join(" · ");
 
-  // Four states, told apart by shape and icon as well as colour — a learner who
-  // cannot separate green from indigo still sees a tick, a padlock and a play sign.
-  // A deeper lip than before: the trail should look like something you can press, and
-  // the four states stay distinguishable by shape and glyph as well as colour.
+  // Four states, told apart by shape and icon as well as colour — a learner who cannot
+  // separate green from grey still sees a tick, a padlock and a play sign. The solid lip
+  // under each node is the package's signature: a node looks pressed out of clay, and the
+  // glyph sits on the darkened step (white on #58cc02 would be 2.09:1; on success-600 it
+  // is 4.64:1).
   const nodeSkin = {
     completed:
       "bg-success-600 text-white shadow-[0_6px_0_var(--color-success-700)]",
     in_progress:
       "bg-brand-600 text-white shadow-[0_6px_0_var(--color-brand-700)] animate-breathe",
-    available: "border-4 border-brand-500 bg-surface text-brand-700 shadow-[0_6px_0_var(--color-brand-100)]",
-    locked: "border-2 border-line bg-surface-2 text-ink-3",
+    available: "border-[3px] border-brand-500 bg-surface text-brand-700 shadow-[0_5px_0_var(--color-brand-100)]",
+    locked: "border-2 border-line bg-surface-2 text-ink-4",
   }[lesson.state];
 
   const icon =

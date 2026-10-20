@@ -6,6 +6,7 @@ import { isAnswered } from '../../lib/answers'
 import { Button, Card, Chip, EmptyState, ErrorNote, Spinner } from '../../components/ui'
 import { ExerciseCard } from '../lesson/ExerciseCard'
 import { usePrefs } from '../../stores/prefs'
+import { notifyGraded } from '../../lib/sound'
 
 // The speaking studio: speak outside the path, from any level.
 //
@@ -75,7 +76,10 @@ export function SpeakPage() {
       {
         onSuccess: (res) => {
           const result = res.results?.[0]
-          if (result) setResults((r) => ({ ...r, [drill.id]: result }))
+          if (result) {
+            setResults((r) => ({ ...r, [drill.id]: result }))
+            notifyGraded(result)
+          }
         },
       },
     )

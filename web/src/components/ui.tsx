@@ -23,7 +23,7 @@ export function Chip({ tone = 'neutral', children }: { tone?: Tone; children: Re
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-card border border-line bg-surface p-5 shadow-card ${className}`}>{children}</section>
+    <section className={`rounded-card border-2 border-line bg-surface p-4 shadow-card ${className}`}>{children}</section>
   )
 }
 
@@ -42,7 +42,7 @@ export function StatTile({
   tone?: Tone
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-card border border-line bg-surface p-4 shadow-tile">
+    <div className="flex items-start gap-3 rounded-card border-2 border-line bg-surface p-4 shadow-tile">
       {icon ? (
         <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-tile ${toneClasses[tone]}`} aria-hidden>
           {icon}
@@ -81,16 +81,19 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const base =
-    'inline-flex select-none items-center justify-center gap-2 rounded-tile px-4 py-2.5 text-sm font-extrabold tracking-wide transition active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50'
+    'inline-flex select-none items-center justify-center gap-2 rounded-tile px-5 py-3 text-sm font-extrabold tracking-wide transition active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50'
   const variants = {
-    // A raised primary: the one obvious action on a screen, with a physical press.
-    primary: 'bg-brand-600 text-white shadow-[0_3px_0_var(--color-brand-700)] hover:bg-brand-500 active:shadow-none',
-    secondary: 'border-2 border-line-strong bg-surface text-ink hover:bg-surface-2',
+    // The package's signature: the fill, and a solid lip in a darker shade of the same
+    // colour (its `accent-active`). The lip is why a button reads as pressed clay rather
+    // than as a floating rectangle — and the fill is the darkened step, because white
+    // label text on the signature #58cc02 measures 2.09:1.
+    primary: 'bg-brand-600 text-white shadow-[0_4px_0_var(--color-brand-700)] hover:bg-brand-500 active:shadow-none',
+    secondary: 'border-2 border-line bg-surface text-ink hover:bg-surface-2',
     ghost: 'text-ink-2 hover:bg-surface-2',
-    danger: 'bg-danger-600 text-white shadow-[0_3px_0_var(--color-danger-700)] hover:bg-danger-500 active:shadow-none',
+    danger: 'bg-danger-600 text-white shadow-[0_4px_0_var(--color-danger-700)] hover:bg-danger-500 active:shadow-none',
     // "I knew it" is a positive commitment, so it wears the success colour, not the
     // brand colour reserved for navigation and the primary action of a screen.
-    success: 'bg-success-700 text-white hover:bg-success-600',
+    success: 'bg-success-600 text-white shadow-[0_4px_0_var(--color-success-700)] hover:bg-success-500 active:shadow-none',
   } as const
   return (
     <button
@@ -125,7 +128,7 @@ export function IconButton({
       title={label}
       onClick={onClick}
       disabled={disabled}
-      className="grid h-10 w-10 place-items-center rounded-tile border border-line bg-surface text-ink-2 transition hover:bg-surface-2 hover:text-ink disabled:opacity-50"
+      className="grid h-10 w-10 place-items-center rounded-tile border-2 border-line bg-surface text-ink-2 transition hover:bg-surface-2 hover:text-ink disabled:opacity-50"
     >
       {children}
     </button>
@@ -251,7 +254,7 @@ export function Skeleton({ className = '' }: { className?: string }) {
 
 export function EmptyState({ title, hint, icon }: { title: string; hint?: string; icon?: ReactNode }) {
   return (
-    <div className="grid place-items-center gap-2 rounded-card border border-dashed border-line-strong p-8 text-center">
+    <div className="grid place-items-center gap-2 rounded-card border-2 border-dashed border-line-strong p-8 text-center">
       {icon ? (
         <span className="grid h-12 w-12 place-items-center rounded-full bg-brand-50 text-brand-700" aria-hidden>
           {icon}

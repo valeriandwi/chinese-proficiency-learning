@@ -10,6 +10,7 @@ import { ChunkyCheck, ChunkyCross, InkSeal } from '../../components/icons'
 import { Confetti } from '../../components/Confetti'
 import { useCountUp } from '../../lib/motion'
 import { useLessonDraft, usePrefs } from '../../stores/prefs'
+import { notifyGraded } from '../../lib/sound'
 import { ExerciseCard } from './ExerciseCard'
 
 export function LessonPage() {
@@ -100,6 +101,9 @@ export function LessonPage() {
     const result = outcome.results[0]
     if (result) {
       setResults((all) => ({ ...all, [current.id]: result }))
+      // The verdict is already words and colour; the tone is the third channel, and an
+      // answer awaiting review stays silent because it has no verdict yet.
+      notifyGraded(result)
       // Only a definite wrong answer breaks a run; free-form writing awaiting review is
       // not the learner's mistake.
       setCombo((run) => (result.is_correct === false ? 0 : run + 1))

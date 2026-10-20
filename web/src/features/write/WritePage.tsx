@@ -5,6 +5,7 @@ import type { AnswerPayload, AttemptResult, StudyDrill } from '../../api/types'
 import { hanziPayload, type StrokeReport } from '../../lib/answers'
 import { Button, Card, Chip, EmptyState, ErrorNote, Spinner } from '../../components/ui'
 import { usePrefs } from '../../stores/prefs'
+import { notifyGraded } from '../../lib/sound'
 import { StudioCanvas, type StudioStroke } from './StudioCanvas'
 
 // The writing studio: a large canvas for practising characters outside the path.
@@ -76,7 +77,10 @@ export function WritePage() {
       {
         onSuccess: (res) => {
           const result = res.results?.[0]
-          if (result) setResults((r) => ({ ...r, [drill.id]: result }))
+          if (result) {
+            setResults((r) => ({ ...r, [drill.id]: result }))
+            notifyGraded(result)
+          }
         },
       },
     )

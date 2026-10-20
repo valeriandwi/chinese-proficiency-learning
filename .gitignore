@@ -27,3 +27,6 @@ integration/*.out
 
 # graphify knowledge graph (generated; rebuilt with graphify extract . --code-only)
 graphify-out/
+
+# OpenDesign brand packages (fetched, reproducible — see design/open-design/README.md)
+design/open-design/

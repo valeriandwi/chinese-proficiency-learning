@@ -1,6 +1,6 @@
 import { Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { Languages, LogOut } from 'lucide-react'
+import { Languages, LogOut, Volume2, VolumeX } from 'lucide-react'
 import type { ReactElement, SVGProps } from 'react'
 import { LearnGlyph, ReviewsGlyph, SettingsGlyph, SkillsGlyph, TonesGlyph } from './components/icons'
 import { useLogout, useOverview, useSession } from './api/hooks'
@@ -230,10 +230,23 @@ function LearnerShell() {
           the content room without stretching prose to an unreadable measure. */}
       {/* No rail any more, so the content column no longer needs a 7xl row to hold it. */}
       <div className="mx-auto flex w-full max-w-5xl gap-6 px-4 lg:px-6">
-        <Sidebar due={due} pinyinOn={prefs.pinyinVisible} onTogglePinyin={prefs.togglePinyin} onSignOut={signOut} />
+        <Sidebar
+          due={due}
+          pinyinOn={prefs.pinyinVisible}
+          onTogglePinyin={prefs.togglePinyin}
+          soundOn={prefs.soundEnabled}
+          onToggleSound={prefs.toggleSound}
+          onSignOut={signOut}
+        />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <MobileBar pinyinOn={prefs.pinyinVisible} onTogglePinyin={prefs.togglePinyin} onSignOut={signOut} />
+          <MobileBar
+            pinyinOn={prefs.pinyinVisible}
+            onTogglePinyin={prefs.togglePinyin}
+            soundOn={prefs.soundEnabled}
+            onToggleSound={prefs.toggleSound}
+            onSignOut={signOut}
+          />
           {/* pb-24 keeps the last control clear of the fixed bottom bar. */}
           <main className="flex-1 pb-24 pt-4 lg:pb-10 lg:pt-6">
             {/* The one place the numbers appear. It used to be a tile row on the home
@@ -268,11 +281,15 @@ function Sidebar({
   due,
   pinyinOn,
   onTogglePinyin,
+  soundOn,
+  onToggleSound,
   onSignOut,
 }: {
   due: number
   pinyinOn: boolean
   onTogglePinyin: () => void
+  soundOn: boolean
+  onToggleSound: () => void
   onSignOut: () => void
 }) {
   return (
@@ -287,6 +304,7 @@ function Sidebar({
 
       <div className="mt-auto flex flex-col gap-2 pt-6">
         <PinyinToggle on={pinyinOn} onToggle={onTogglePinyin} />
+        <SoundToggle on={soundOn} onToggle={onToggleSound} />
         <Button variant="ghost" onClick={onSignOut} className="justify-start">
           <LogOut size={16} aria-hidden /> Sign out
         </Button>
@@ -303,7 +321,9 @@ function SidebarLink({ destination, badge }: { destination: Destination; badge: 
       end={destination.end}
       className={({ isActive }) =>
         `flex items-center gap-3 rounded-tile px-3 py-2.5 text-sm font-bold transition ${
-          isActive ? 'bg-brand-50 text-brand-700' : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
+          isActive
+            ? 'bg-brand-600 text-white shadow-[0_3px_0_var(--color-brand-700)]'
+            : 'text-ink-2 hover:bg-brand-50 hover:text-brand-700'
         }`
       }
     >
@@ -331,17 +351,22 @@ function PublicLink({ to, children }: { to: string; children: ReactNode }) {
 function MobileBar({
   pinyinOn,
   onTogglePinyin,
+  soundOn,
+  onToggleSound,
   onSignOut,
 }: {
   pinyinOn: boolean
   onTogglePinyin: () => void
+  soundOn: boolean
+  onToggleSound: () => void
   onSignOut: () => void
 }) {
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-paper/90 px-1 py-3 backdrop-blur lg:hidden">
+    <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b-2 border-line bg-paper px-1 py-2 lg:hidden">
       <Brand />
       <div className="flex items-center gap-2">
         <PinyinToggle on={pinyinOn} onToggle={onTogglePinyin} />
+        <SoundToggle on={soundOn} onToggle={onToggleSound} />
         <IconButton label="Sign out" onClick={onSignOut}>
           <LogOut size={18} aria-hidden />
         </IconButton>
@@ -356,7 +381,7 @@ function BottomNav({ due }: { due: number }) {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] shadow-raised lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 border-t-2 border-line bg-surface pb-[env(safe-area-inset-bottom)] shadow-raised lg:hidden"
     >
       <ul className="mx-auto flex max-w-md">
         {DESTINATIONS.map((destination) => {
@@ -367,8 +392,10 @@ function BottomNav({ due }: { due: number }) {
                 to={destination.to}
                 end={destination.end}
                 className={({ isActive }) =>
-                  `relative flex flex-col items-center gap-1 px-2 py-2.5 text-[0.7rem] font-bold transition ${
-                    isActive ? 'text-brand-700' : 'text-ink-2'
+                  `relative flex flex-col items-center gap-1 px-2 py-2 text-[0.7rem] font-extrabold transition ${
+                    isActive
+                      ? 'bg-brand-600 text-white shadow-[0_3px_0_var(--color-brand-700)]'
+                      : 'text-ink-4 hover:text-ink-2'
                   }`
                 }
               >
@@ -403,6 +430,23 @@ function PinyinToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
     >
       <Languages size={14} aria-hidden />
       拼音 {on ? 'on' : 'off'}
+    </button>
+  )
+}
+
+function SoundToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={on}
+      title="Toggle the correct-answer sound"
+      className={`inline-flex items-center gap-1.5 rounded-pill border-2 px-3 py-1.5 text-xs font-extrabold transition ${
+        on ? 'border-brand-600 bg-brand-600 text-white' : 'border-line bg-surface text-ink-3 hover:text-ink'
+      }`}
+    >
+      {on ? <Volume2 size={14} aria-hidden /> : <VolumeX size={14} aria-hidden />}
+      音效 {on ? 'on' : 'off'}
     </button>
   )
 }

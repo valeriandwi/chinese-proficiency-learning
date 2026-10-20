@@ -2,103 +2,114 @@
 
 /* hanpath design tokens — the single source of the visual language.
  *
- * ONE RULE: a component names a ROLE, never a hue. Use `brand` for anything the
- * learner acts on, `success` for what they have completed, `reward` for what they
- * earned (XP, streak, goal), `danger` for mistakes, `ink` for text and `neutral`
- * for surfaces. Raw Tailwind hues (`bg-indigo-500`, `text-amber-600`) are banned
- * outside this file, and that ban is a test rather than a convention:
- * src/lib/design-tokens.test.ts fails on a stray hue class or on any text pair
- * below its WCAG AA threshold.
+ * ONE RULE: a component names a ROLE, never a hue. Raw Tailwind hues
+ * (`bg-green-500`, `text-amber-700`) are banned outside this file, and the ban is a
+ * test rather than a convention: src/lib/design-tokens.test.ts fails on a stray hue
+ * class or on any text pair below its WCAG AA threshold.
  *
- * Every text colour here is verified at >= 4.5:1 and every meaning-carrying fill
- * or border at >= 3:1 (WCAG 1.4.3 / 1.4.11). Fills use 600/700 shades because they
- * sit on the light `track` rather than on white: a 500 shade looks right on a dark
- * surface and fails on a pale one.
+ * BRAND: the OpenDesign package `design-systems/duolingo` (Apache-2.0, fetched into
+ * design/open-design/duolingo/). Its contract: Owl Green #58cc02 as the action colour,
+ * Eel Black #3c3c3c text on Snow #ffffff surfaces, Swan #e5e5e5 borders, Bee Yellow
+ * #ffc800 for what you earn, Cardinal #ff4b4b for mistakes — and one signature gesture:
+ * every action sits on a solid darker LIP (its `accent-active`) so a button looks
+ * pressed out of clay rather than floated as glass.
+ *
+ * WHAT WAS CORRECTED, AND WHY: the package's own pairings fail WCAG AA. White on
+ * #58cc02 measures 2.09:1, white on #ff4b4b 3.30:1, white on #ffc800 1.55:1, and its
+ * muted #777777 on white 4.48:1 — all below this project's 4.5:1 floor. So the signature
+ * hues stay, but only where they carry no white label text: large shapes, icons, the
+ * current-lesson node, the avatar. Anything carrying white text uses the darkened step
+ * (brand-600 #398501 = 4.64:1, danger-600 #cc3c3c = 4.91:1), and yellow pills carry
+ * DARK text (#3c3c3c on #ffc800 = 7.1:1) exactly as the package does.
+ *
+ * Tightest pairs, measured by that test: text 4.76:1, white-on-fill 4.64:1, boundary
+ * 3.45:1.
  */
 @theme {
-  /* brand — primary actions, links, active navigation, selection. A vibrant
-     green ramp: the learner's "go" colour, on a warm off-white ground. The 600/700
-     shades are darker than they look like they should be because fills sit on the
-     warm track, not on white — every value is contrast-verified by
-     src/lib/design-tokens.test.ts, which fails the build otherwise. */
-  --color-brand-50: #eefbf1;
-  --color-brand-100: #d7f5de;
-  --color-brand-300: #86df9d;
-  --color-brand-500: #12904a;
-  --color-brand-600: #128540;
-  --color-brand-700: #146c35;
+  /* brand — what the learner acts on: primary buttons, active navigation, links,
+     focus, the level bar. Owl Green, with a 400 "signature" step that is the package's
+     real accent (large shapes only) and 600/700 for anything carrying white text. */
+  --color-brand-50: #effbe2;
+  --color-brand-100: #dff5bf;
+  --color-brand-300: #89e219;
+  --color-brand-400: #58cc02;
+  --color-brand-500: #3f9301;
+  --color-brand-600: #398501;
+  --color-brand-700: #2b6b00;
 
-  /* success — completed lessons, correct answers, progress fills. Converges
-     with brand into the same green family (a deliberate choice: state is told
-     apart by fill, shape and glyph — a tick, a padlock, a play sign — never by
-     hue alone, which is already this design language's rule). */
-  --color-success-50: #ecfdf3;
-  --color-success-100: #d3f8e0;
-  --color-success-300: #7fe3a3;
-  --color-success-500: #1f9d50;
-  --color-success-600: #128041;
-  --color-success-700: #136c36;
+  /* success — completed lessons, correct answers, progress fills. The package maps
+     "correct answer" onto the brand green itself, so state is carried by shape and
+     glyph (tick / padlock / play, plus the chip's word) rather than by a second hue. */
+  --color-success-50: #effbe2;
+  --color-success-100: #dff5bf;
+  --color-success-300: #89e219;
+  --color-success-500: #58cc02;
+  --color-success-600: #398501;
+  --color-success-700: #2b6b00;
 
-  /* reward — XP, streaks, daily goal, celebration. Warm amber on the warm
-     ground, kept far from the brand green. 700 is darker than the original ramp
-     because it carries its own text on the 50/100 tints. */
-  --color-reward-50: #fff9ec;
-  --color-reward-100: #fdeecb;
-  --color-reward-300: #f8d37e;
-  --color-reward-500: #e9a53a;
-  --color-reward-600: #cf8a24;
-  --color-reward-700: #8f5c14;
+  /* reward — XP, streak, the daily goal, celebration. Bee Yellow; always with dark
+     text, because white on yellow is the one pairing that can never pass. */
+  --color-reward-50: #fffaeb;
+  --color-reward-100: #fff2c2;
+  --color-reward-300: #ffdb4d;
+  --color-reward-500: #ffc800;
+  --color-reward-600: #c99c00;
+  --color-reward-700: #6f5600;
 
-  /* danger — wrong answers, destructive actions. A warm red, not a cold one. */
-  --color-danger-50: #fff0ee;
-  --color-danger-100: #ffdcd7;
-  --color-danger-300: #f7a79b;
-  --color-danger-500: #e15b48;
-  --color-danger-600: #c73e2c;
-  --color-danger-700: #a83728;
+  /* danger — wrong answers, destructive actions. Cardinal Red. */
+  --color-danger-50: #fff0f0;
+  --color-danger-100: #ffdede;
+  --color-danger-300: #ff9b9b;
+  --color-danger-500: #ff4b4b;
+  --color-danger-600: #cc3c3c;
+  --color-danger-700: #a83232;
 
-  /* ink — the text ramp. Text never uses opacity: `ink/40` measured 2.47:1 and
-     failed AA, which is why these are named steps. Slightly warm to sit on the
-     warm paper. */
-  --color-ink: #1a211b;
-  --color-ink-2: #4d5a50;
-  --color-ink-3: #5f6b62;
-  --color-ink-4: #6b746c;
+  /* ink — the text ramp (Eel Black and its steps). Text never uses opacity: an alpha
+     modifier is not contrast-measured, and this ramp is. */
+  --color-ink: #3c3c3c;
+  --color-ink-2: #4f4f4f;
+  --color-ink-3: #666666;
+  --color-ink-4: #6f6f6f;
 
-  /* neutral — surfaces, dividers, control borders, bar tracks. Warm off-white
-     paper, the ground of the whole app. */
-  --color-paper: #faf7ef;
-  --color-surface: #fffdf8;
-  --color-surface-2: #f3eee0;
-  --color-track: #eee9db;
-  --color-line: #e2dcc9;
-  /* A control boundary must be perceivable on its own (1.4.11): 3.07:1 on white. */
-  --color-line-strong: #8a8a76;
+  /* neutral — the package's surfaces: Snow pages, white cards, Swan borders. */
+  --color-paper: #f7f7f7;
+  --color-surface: #ffffff;
+  --color-surface-2: #efefef;
+  --color-track: #e5e5e5;
+  --color-line: #e5e5e5;
+  /* A control boundary must be perceivable on its own (1.4.11): 3.45:1 on white. */
+  --color-line-strong: #8a8a8a;
 
-  /* type: rounded sans for the interface, serif for Hanzi so characters look like
-     the printed form learners meet in textbooks. The sans is self-hosted
-     (Fontsource, OFL) — nothing is fetched from a third party at runtime. */
+  /* type: rounded sans for the interface, serif for Hanzi so characters look like the
+     printed form learners meet in textbooks. The package asks for Feather Bold / Mona
+     Sans; neither is bundled and neither is self-hosted here, so the rounded sans the
+     project already ships (Nunito Variable, OFL) stands in — a documented substitution,
+     not a silent swap. Nothing is fetched from a third party at runtime. */
   --font-sans:
-    'Nunito Variable', ui-rounded, -apple-system, BlinkMacSystemFont, 'Segoe UI Variable', 'Segoe UI', system-ui,
-    sans-serif;
+    'Nunito Variable', Nunito, ui-rounded, -apple-system, BlinkMacSystemFont, 'Segoe UI Variable', 'Segoe UI',
+    system-ui, sans-serif;
   --font-hanzi: 'Noto Serif SC', 'Songti SC', 'STSong', 'Source Han Serif SC', serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 
-  /* shape: generously rounded, so card, button and chip read as one family */
+  /* shape: the package's own scale — 12px controls, 16px cards, 20px containers. */
   --radius-tile: 0.75rem;
-  --radius-card: 1.25rem;
+  --radius-card: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 9999px;
 
-  /* elevation: three levels, all soft */
-  --shadow-tile: 0 1px 2px rgb(20 24 31 / 0.06);
-  --shadow-card: 0 2px 8px rgb(20 24 31 / 0.06);
-  --shadow-raised: 0 8px 24px rgb(20 24 31 / 0.12);
+  /* elevation: the signature is the LIP (`0 4px 0` in a darker shade of the fill),
+     applied per component because its colour belongs to the fill. These are the ambient
+     shadows; nothing floats as glass. */
+  --shadow-tile: 0 1px 2px rgb(60 60 60 / 0.08);
+  --shadow-card: 0 2px 6px rgb(60 60 60 / 0.06);
+  --shadow-raised: 0 10px 26px rgb(60 60 60 / 0.16);
+  --shadow-float: 0 -2px 4px rgb(60 60 60 / 0.04), 0 10px 28px rgb(60 60 60 / 0.16);
 
   /* unit — one accent per unit, cycling through five families, so a learner can tell
-     one stretch of the path from the next at a glance. Duolingo's trick, our colours.
-     Same discipline as the rest: 700 carries white text (>= 4.5:1) and tints use 50/100
-     with 700 text, while 600 is only ever a FILL on the track (>= 3:1).
-     Re-picked for the green/warm world: none of the five reads as brand-green,
-     reward-amber or danger-red — the unit band is scenery, never a state. */
+     one stretch of the path from the next at a glance. The unit colour dresses the UNIT
+     signpost only; a lesson node keeps the semantic state colours, so colour never has
+     to carry two meanings at once. 700 carries white text (>= 4.5:1), tints use 50/100
+     with 700 text, and 600 is only ever a FILL on the track. */
   --color-unit-1-50: #eff6ff;
   --color-unit-1-100: #dbeafe;
   --color-unit-1-300: #93c5fd;
@@ -117,7 +128,10 @@
   --color-unit-4-50: #ecfeff;
   --color-unit-4-100: #cffafe;
   --color-unit-4-300: #67e8f9;
-  --color-unit-4-600: #0891b2;
+  /* Step 600 is a FILL on the track. The track is the package's Swan #e5e5e5, a step
+     darker than the old warm track, so the cyan fill moved down one step to stay above
+     the 3:1 fill floor (it measured 2.92:1 before, 3.40:1 now). */
+  --color-unit-4-600: #0785a4;
   --color-unit-4-700: #0e7490;
   --color-unit-5-50: #f5f5f4;
   --color-unit-5-100: #e7e5e4;
@@ -125,16 +139,16 @@
   --color-unit-5-600: #57534e;
   --color-unit-5-700: #44403c;
 
-  /* motion: purposeful feedback only. Every animation below carries nothing that the
-     words do not also say — under prefers-reduced-motion they collapse to their end
-     state (see the media query at the bottom of this file). */
+  /* motion: purposeful feedback only, 150–250ms per the package's own guidance. Every
+     animation below carries nothing the words do not also say, and they all collapse
+     under prefers-reduced-motion (see the media query at the bottom of this file). */
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --animate-pop: pop 0.28s var(--ease-bounce);
-  --animate-rise: rise 0.24s ease-out;
+  --animate-pop: pop 0.24s var(--ease-bounce);
+  --animate-rise: rise 0.22s ease-out;
   --animate-breathe: breathe 2.4s ease-in-out infinite;
-  --animate-slide-up: slide-up 0.26s var(--ease-bounce);
+  --animate-slide-up: slide-up 0.24s var(--ease-bounce);
   --animate-shake: shake 0.4s ease-in-out;
-  --animate-bounce-in: bounce-in 0.44s var(--ease-bounce) backwards;
+  --animate-bounce-in: bounce-in 0.4s var(--ease-bounce) backwards;
   --animate-fall: fall 1.5s ease-in forwards;
 }
 
@@ -223,14 +237,15 @@
   }
 }
 
-/* The "it is your turn" pulse on the current lesson node. */
+/* The "it is your turn" pulse on the current lesson node: the brand green's own ring, so
+   the invitation reads before the label does. */
 @keyframes breathe {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgb(30 158 76 / 0.4);
+    box-shadow: 0 0 0 0 rgb(88 204 2 / 0.5);
   }
   50% {
-    box-shadow: 0 0 0 0.7rem rgb(30 158 76 / 0);
+    box-shadow: 0 0 0 0.8rem rgb(88 204 2 / 0);
   }
 }
 
@@ -246,11 +261,21 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-  /* One focus treatment everywhere: a keyboard user gets the affordance a mouse
-     user gets from hover. */
+  /* One focus treatment everywhere: a keyboard user gets the affordance a mouse user
+     gets from hover. */
   :focus-visible {
     outline: 2px solid var(--color-brand-500);
     outline-offset: 2px;
+  }
+  /* Hanzi, pinyin and translations wrap rather than clip at any viewport, and a long
+     Chinese phrase breaks at any character rather than pushing the layout. */
+  .hanzi,
+  .pinyin {
+    overflow-wrap: anywhere;
+  }
+  ::selection {
+    background: var(--color-brand-100);
+    color: var(--color-brand-700);
   }
   /* Honour the OS setting: feedback still happens, it simply stops moving. */
   @media (prefers-reduced-motion: reduce) {
@@ -271,13 +296,13 @@
   line-height: 1.15;
 }
 
-/* One input treatment for every form control, so a field cannot look different
-   from the field beside it. */
+/* One input treatment for every form control, so a field cannot look different from
+   the field beside it. */
 @layer components {
   .input {
     width: 100%;
     border-radius: var(--radius-tile);
-    border: 1px solid var(--color-line-strong);
+    border: 2px solid var(--color-line);
     background: var(--color-surface);
     color: var(--color-ink);
     padding: 0.6rem 0.85rem;

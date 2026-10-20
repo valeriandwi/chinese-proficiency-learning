@@ -40,6 +40,7 @@ const TOKENS = [
   'brand-50',
   'brand-100',
   'brand-300',
+  'brand-400',
   'brand-500',
   'brand-600',
   'brand-700',
@@ -105,6 +106,10 @@ describe('design tokens', () => {
       ['danger-700', 'danger-50', 'error note'],
       ['danger-700', 'danger-100', 'danger chip'],
       ['danger-600', 'surface', 'danger text on a card'],
+      // The signature hues carry no white text (white on #58cc02 is 2.09:1, on #ffc800
+      // 1.55:1), so anything written on them is Eel Black — and that pair is pinned here.
+      ['ink', 'brand-400', 'dark label on the signature Owl Green'],
+      ['ink', 'reward-500', 'XP pill: dark text on Bee Yellow'],
     ]
     const failures = pairs
       .map(([fg, bg, label]) => ({ label, ratio: Number(contrast(token(fg), token(bg)).toFixed(2)) }))

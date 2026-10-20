@@ -7,10 +7,15 @@ import { persist } from 'zustand/middleware'
 type PrefsState = {
   /** Pinyin is shown by default for a beginner and can be toggled per session. */
   pinyinVisible: boolean
+  /** The correct-answer chime. On by default in a learning app, and always the
+   *  learner's to turn off; persisted with the other preferences. */
+  soundEnabled: boolean
   /** Exam mode suppresses per-answer feedback until the paper is submitted. */
   examMode: boolean
   setPinyinVisible: (visible: boolean) => void
   togglePinyin: () => void
+  setSoundEnabled: (enabled: boolean) => void
+  toggleSound: () => void
   setExamMode: (exam: boolean) => void
 }
 
@@ -18,9 +23,12 @@ export const usePrefs = create<PrefsState>()(
   persist(
     (set) => ({
       pinyinVisible: true,
+      soundEnabled: true,
       examMode: false,
       setPinyinVisible: (pinyinVisible) => set({ pinyinVisible }),
       togglePinyin: () => set((s) => ({ pinyinVisible: !s.pinyinVisible })),
+      setSoundEnabled: (soundEnabled) => set({ soundEnabled }),
+      toggleSound: () => set((s) => ({ soundEnabled: !s.soundEnabled })),
       setExamMode: (examMode) => set({ examMode }),
     }),
     { name: 'hanpath-prefs' },

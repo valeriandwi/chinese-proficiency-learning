@@ -5,6 +5,7 @@ import type { AnswerPayload, AttemptResult, ToneDrill, ToneLevelStat, ToneTallyR
 import { Button, Card, Chip, EmptyState, ErrorNote, ProgressBar, Spinner } from '../../components/ui'
 import { ExerciseCard } from '../lesson/ExerciseCard'
 import { usePrefs } from '../../stores/prefs'
+import { notifyGraded } from '../../lib/sound'
 
 // Tone practice: a page that drills tone and nothing else.
 //
@@ -91,7 +92,10 @@ export function TonePage() {
       {
         onSuccess: (res) => {
           const result = res.results?.[0]
-          if (result) setResults((r) => ({ ...r, [drill.id]: result }))
+          if (result) {
+            setResults((r) => ({ ...r, [drill.id]: result }))
+            notifyGraded(result)
+          }
           setTally((rows) => mergeTally(rows, res.tone_tally ?? []))
           if (res.stats?.length) setStats(res.stats)
         },
