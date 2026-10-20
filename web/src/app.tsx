@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Languages, LogOut, Volume2, VolumeX } from 'lucide-react'
 import type { ReactElement, SVGProps } from 'react'
 import { LearnGlyph, ReviewsGlyph, SettingsGlyph, SkillsGlyph, TonesGlyph } from './components/icons'
+import { MascotMark } from './components/Mascot'
 import { useLogout, useOverview, useSession } from './api/hooks'
 import { Button, IconButton, Spinner } from './components/ui'
 import { GamifiedHeader } from './components/GamifiedHeader'
@@ -268,11 +269,14 @@ function LearnerShell() {
 
 function Brand() {
   return (
-    <NavLink to="/" className="flex items-baseline gap-2">
-      <span aria-hidden className="hanzi text-2xl font-bold text-brand-700">
-        汉语
+    <NavLink to="/" className="flex items-center gap-1.5">
+      <MascotMark size={32} />
+      <span className="flex flex-col leading-none">
+        <span className="text-sm font-extrabold tracking-wide text-ink">hanpath</span>
+        <span aria-hidden className="hanzi mt-1 text-[0.7rem] font-extrabold tracking-[0.06em] text-ink-2">
+          汉语
+        </span>
       </span>
-      <span className="text-sm font-extrabold tracking-wide text-ink">hanpath</span>
     </NavLink>
   )
 }

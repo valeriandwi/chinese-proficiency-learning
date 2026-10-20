@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { ApiError } from '../../api/client'
 import { useLogin, useRegister } from '../../api/hooks'
 import { Button, Card, ErrorNote } from '../../components/ui'
+import { MascotMark } from '../../components/Mascot'
 
 // Client-side validation is for the person typing, not for the server: every rule
 // here is re-checked server-side, and a server rejection is rendered against the
@@ -60,6 +61,7 @@ export function LoginPage() {
   return (
     <div className="mx-auto w-full max-w-md">
       <Card>
+        <MascotMark size={64} className="mb-3" />
         <h1 className="hanzi text-4xl font-extrabold text-ink">你好！</h1>
         <p className="mt-1 text-sm text-ink-2">Sign in to keep your streak going.</p>
         <form className="mt-5 flex flex-col gap-4" onSubmit={onSubmit}>
@@ -113,6 +115,7 @@ export function RegisterPage() {
   return (
     <div className="mx-auto w-full max-w-md">
       <Card>
+        <MascotMark size={64} className="mb-3" />
         <h1 className="text-3xl font-extrabold tracking-tight text-ink">Start learning Mandarin</h1>
         <p className="mt-1 text-sm text-ink-2">
           Three fields and you are in. Placement and preferences come next, not first.
