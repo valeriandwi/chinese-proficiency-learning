@@ -209,9 +209,9 @@ certificate plumbing to babysit:
 docker compose up -d
 
 # public: Caddy obtains and renews the certificate itself
-HANPATH_SITE_ADDRESS=hanpath.valerian.my.id \
+HANPATH_SITE_ADDRESS=hanpath.valeriandwi.my.id \
 HANPATH_APP_ENV=production \
-HANPATH_PUBLIC_BASE_URL=https://hanpath.valerian.my.id \
+HANPATH_PUBLIC_BASE_URL=https://hanpath.valeriandwi.my.id \
 HANPATH_SESSION_COOKIE_SECURE=true \
 docker compose -f docker-compose.yml -f docker-compose.tls.yml up -d
 ```

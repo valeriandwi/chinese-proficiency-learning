@@ -9,12 +9,12 @@
 # whether to obtain a certificate.
 #
 # HANPATH_SITE_ADDRESS must be a bare hostname (no scheme) for automatic HTTPS —
-# e.g. hanpath.valerian.my.id. The `:?` below makes an unset value a hard error rather than
+# e.g. hanpath.valeriandwi.my.id. The `:?` below makes an unset value a hard error rather than
 # a stack that quietly serves http on the wrong name.
 #
 # The application's own settings must agree (.env.compose):
 #   HANPATH_APP_ENV=production
-#   HANPATH_PUBLIC_BASE_URL=https://hanpath.valerian.my.id
+#   HANPATH_PUBLIC_BASE_URL=https://hanpath.valeriandwi.my.id
 #   HANPATH_SESSION_COOKIE_SECURE=true
 # CORS_ALLOWED_ORIGINS follows PUBLIC_BASE_URL, so it needs nothing here.
 

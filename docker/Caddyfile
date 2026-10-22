@@ -3,7 +3,7 @@
 # The site address decides the mode, so the same file serves a laptop and a VPS:
 #
 #   SITE_ADDRESS unset / http://localhost:8080   → plain http on 8080, no TLS attempt
-#   SITE_ADDRESS=hanpath.valerian.my.id          → automatic HTTPS (ACME), 80 → 443 redirect
+#   SITE_ADDRESS=hanpath.valeriandwi.my.id          → automatic HTTPS (ACME), 80 → 443 redirect
 #
 # Whatever the mode, the browser only ever sees ONE origin: the SPA at / and the API at /api
 # are served by the same host, which is what keeps the session cookie first-party. Caddy
