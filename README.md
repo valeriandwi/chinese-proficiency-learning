@@ -155,9 +155,9 @@ make run-worker     # optional: async jobs
 ```
 
 Open **http://localhost:5174**, not the API port. The SPA and the API must share an origin —
-that is what the Vite proxy provides in development, and what Caddy provides in production.
-Pointing the SPA at `127.0.0.1:8081` directly makes the session cookie third-party and the
-browser silently drops it.
+that is what the Vite proxy provides in development, and what a reverse proxy in front of the
+API must provide in production. Pointing the SPA at `127.0.0.1:8081` directly makes the
+session cookie third-party and the browser silently drops it.
 
 Requirements: the Go toolchain pinned in `go.mod`, Node + pnpm, and Postgres 15 or 16
 (`brew install postgresql@16`). No container runtime is needed. Redis and mail are optional:

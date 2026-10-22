@@ -5,7 +5,7 @@
 One Go module, three binaries, one Postgres database, one SPA.
 
 ```
-browser ──SPA (React/TS, same origin)──► Caddy (prod) / Vite proxy (dev) ──► cmd/api ──► Postgres
+browser ──SPA (React/TS, same origin)──► reverse proxy (prod) / Vite proxy (dev) ──► cmd/api ──► Postgres
                                                                               │        └── (Redis: cache, distributed rate limiting)
                                                                               └── jobs table ──► cmd/worker
 cmd/contentctl: author YAML ──► validate ──► idempotent upsert ──► Postgres
