@@ -165,6 +165,33 @@ the rate limiter runs in-process and mail prints to the log unless `SMTP_ADDR` i
 
 `make help` lists every target.
 
+### Or: the whole stack in one compose file
+
+`docker-compose.yml` brings up Postgres, the API, the worker and nginx serving the built
+SPA on one origin (that last part is not optional — the session cookie is same-origin).
+
+```bash
+docker compose up -d --build     # db → migrate (one shot) → api + worker + web on :8080
+docker compose logs -f api
+docker compose down              # add -v to drop the database too
+```
+
+Three things it does not do for you, all documented at the top of the file:
+
+1. **The database starts empty of curriculum.** Seeding needs `cmd/contentctl import`,
+   which resolves reference audio through a synthesiser, and the only one implemented is
+   macOS `say` — so a Linux container cannot import content even though the 2,375 audio
+   files are committed under `var/media`. Seed from a machine with `say`, against the
+   compose database, then start the rest.
+2. **TLS is not terminated here.** Set `HANPATH_APP_ENV=production`,
+   `HANPATH_PUBLIC_BASE_URL=https://…` and `HANPATH_SESSION_COOKIE_SECURE=true` together
+   behind a TLS proxy; the config refuses any inconsistent combination.
+3. **Audio is bind-mounted** from `./var/media`, not baked into the image.
+
+Settings come from `HANPATH_*`-prefixed variables (`docker/.env.compose.example`); the
+prefix keeps the development `.env` — which Compose loads automatically — from
+reconfiguring the stack. Everything has a default for a local run.
+
 ## What's in the curriculum
 
 | | |

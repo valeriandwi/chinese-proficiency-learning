@@ -1,0 +1,185 @@
+# hanpath — a self-contained stack: Postgres, the API, the worker, and nginx serving the
+# built SPA on one origin.
+#
+#   docker compose up -d --build        # db → migrate → api + worker + web
+#   docker compose logs -f api          # what the server is doing
+#   docker compose down                 # stop (add -v to also drop the database)
+#
+# Every value below is read from a HANPATH_*-prefixed variable with a working default.
+# The prefix is deliberate: Compose automatically loads the repo's development `.env`
+# (created by `make dev`), and an unprefixed PUBLIC_BASE_URL or APP_ENV in there would
+# silently reconfigure this stack for the Vite dev server on :5174.
+#
+# THREE THINGS THIS FILE CANNOT DO FOR YOU
+#
+# 1. The database starts EMPTY of curriculum. Seeding it needs `cmd/contentctl import`,
+#    which resolves reference audio through a synthesiser — and the only one implemented
+#    is macOS `say` (internal/media.NewSayProvider fails without it). A Linux container
+#    therefore cannot import content, even though the 2,375 audio files it would resolve
+#    are already committed under var/media. Seed from a machine that has `say`, against
+#    this database:
+#
+#      docker compose up -d db
+#      DATABASE_URL="postgres://hanpath:PASSWORD@127.0.0.1:5435/hanpath?sslmode=disable" \
+#      MEDIA_DIR=./var/media make content-import
+#
+#    …or restore a dump of an already-seeded database. Until then the app boots and shows
+#    an empty path.
+#
+# 2. TLS is not terminated here — this stack speaks plain http on HANPATH_WEB_PORT. Put it
+#    behind a proxy that terminates TLS, and set these three together:
+#
+#      HANPATH_APP_ENV=production
+#      HANPATH_PUBLIC_BASE_URL=https://your.domain
+#      HANPATH_SESSION_COOKIE_SECURE=true
+#
+#    The config refuses `production` without a secure cookie, and refuses a secure cookie
+#    over an `http://` PUBLIC_BASE_URL. Both mistakes surface as "login silently does
+#    nothing", which is why they are validated at boot rather than discovered.
+#
+# 3. Reference audio is bind-mounted from ./var/media, not baked into the image. On a
+#    server without the repo, copy var/media there, or implement an object-store
+#    media.Store (the S3_* settings are already read by the config, unused today).
+
+name: hanpath
+
+x-db-credentials: &db-credentials
+  POSTGRES_USER: ${HANPATH_DB_USER:-hanpath}
+  POSTGRES_PASSWORD: ${HANPATH_DB_PASSWORD:-hanpath_dev_pw}
+  POSTGRES_DB: ${HANPATH_DB_NAME:-hanpath}
+
+x-app-env: &app-env
+  APP_ENV: ${HANPATH_APP_ENV:-development}
+  LOG_LEVEL: ${HANPATH_LOG_LEVEL:-info}
+  # Inside a container the API must not bind to loopback: nginx reaches it over the
+  # compose network, and 127.0.0.1 there would be the container itself.
+  HTTP_ADDR: 0.0.0.0:8081
+  PUBLIC_BASE_URL: ${HANPATH_PUBLIC_BASE_URL:-http://localhost:8080}
+  DATABASE_URL: postgres://${HANPATH_DB_USER:-hanpath}:${HANPATH_DB_PASSWORD:-hanpath_dev_pw}@db:5432/${HANPATH_DB_NAME:-hanpath}?sslmode=disable
+  SESSION_COOKIE_NAME: ${HANPATH_SESSION_COOKIE_NAME:-hanpath_session}
+  SESSION_COOKIE_SECURE: ${HANPATH_SESSION_COOKIE_SECURE:-false}
+  MEDIA_DIR: /data/media
+  MEDIA_URL_PREFIX: /media
+  # Streaks and daily rollups are bucketed by the learner's own timezone; this is the
+  # server's clock, used for logs and as the default for new accounts.
+  TZ: ${HANPATH_TZ:-Asia/Jakarta}
+  # Redis is optional and nothing dials it yet (the rate limiter is in-process). Bring it
+  # up with `--profile redis` and uncomment:
+  # REDIS_ADDR: redis:6379
+  # With SMTP_ADDR unset, mail prints to the log — including the verification link.
+  SMTP_FROM: ${HANPATH_SMTP_FROM:-hanpath <no-reply@hanpath.local>}
+  # Pronunciation scoring is off unless a provider is configured. `fake` is refused in
+  # production on purpose: a fake score shown to a learner is a lie.
+  SPEECH_PROVIDER: ${HANPATH_SPEECH_PROVIDER:-}
+  SPEECH_MAX_UPLOAD_BYTES: ${HANPATH_SPEECH_MAX_UPLOAD_BYTES:-1048576}
+
+x-go-image: &go-image
+  build:
+    context: .
+    dockerfile: docker/api.Dockerfile
+  image: hanpath/api:local
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      <<: *db-credentials
+      TZ: ${HANPATH_TZ:-Asia/Jakarta}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      # Loopback only: enough for `make content-import` from the host, nothing more.
+      # Raise HANPATH_DB_PORT if a local dev cluster already holds 5435.
+      - "127.0.0.1:${HANPATH_DB_PORT:-5435}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${HANPATH_DB_USER:-hanpath} -d ${HANPATH_DB_NAME:-hanpath}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  # One shot: applies the embedded goose migrations and exits. Anything that touches the
+  # schema waits for it, so the API never races a migration.
+  migrate:
+    <<: *go-image
+    restart: "no"
+    entrypoint: ["/usr/local/bin/api", "-migrate"]
+    environment: *app-env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *go-image
+    restart: unless-stopped
+    environment: *app-env
+    volumes:
+      # Reference audio is read-only to the server: written by content import, only read
+      # at runtime.
+      - ./var/media:/data/media:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    expose:
+      - "8081"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:8081/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    # The server drains in-flight requests on SIGTERM; a submission transaction deserves
+    # the chance to finish.
+    stop_grace_period: 20s
+
+  worker:
+    <<: *go-image
+    restart: unless-stopped
+    entrypoint: ["/usr/local/bin/worker"]
+    environment: *app-env
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    stop_grace_period: 20s
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    image: hanpath/web:local
+    restart: unless-stopped
+    ports:
+      - "${HANPATH_WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+  # Optional and unused today: the config reads REDIS_ADDR but nothing dials it. Start it
+  # with `docker compose --profile redis up`.
+  redis:
+    image: redis:7-alpine
+    profiles: ["redis"]
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "no"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db-data:
+  redis-data:

@@ -1,6 +1,8 @@
 # Local environment
 .env
 .env.local
+# Compose overrides — see docker/.env.compose.example
+.env.compose
 *.local
 # The local Postgres cluster's data directory and log
 /.local/
