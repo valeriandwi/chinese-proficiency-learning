@@ -16,15 +16,15 @@
 #    which resolves reference audio through a synthesiser — and the only one implemented
 #    is macOS `say` (internal/media.NewSayProvider fails without it). A Linux container
 #    therefore cannot import content, even though the 2,375 audio files it would resolve
-#    are already committed under var/media. Seed from a machine that has `say`, against
-#    this database:
+#    are already committed under var/media. Seed from a machine that has `say`:
 #
-#      docker compose up -d db
-#      DATABASE_URL="postgres://hanpath:PASSWORD@127.0.0.1:5435/hanpath?sslmode=disable" \
-#      MEDIA_DIR=./var/media make content-import
+#      ./scripts/seed-content.sh dump                 # seeded dev DB → hanpath-content.sql
+#      scp hanpath-content.sql vps:/tmp/
+#      ./scripts/seed-content.sh restore /tmp/hanpath-content.sql    # run on the server
+#      ./scripts/seed-content.sh verify
 #
-#    …or restore a dump of an already-seeded database. Until then the app boots and shows
-#    an empty path.
+#    (Or, on the seeding machine: `make content-import` against this database directly.)
+#    Until then the app boots and answers 404 "unknown curriculum version".
 #
 # 2. TLS is not terminated here — this stack speaks plain http on HANPATH_WEB_PORT. Put it
 #    behind a proxy that terminates TLS, and set these three together:

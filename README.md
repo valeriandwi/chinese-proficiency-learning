@@ -181,8 +181,15 @@ Three things it does not do for you, all documented at the top of the file:
 1. **The database starts empty of curriculum.** Seeding needs `cmd/contentctl import`,
    which resolves reference audio through a synthesiser, and the only one implemented is
    macOS `say` — so a Linux container cannot import content even though the 2,375 audio
-   files are committed under `var/media`. Seed from a machine with `say`, against the
-   compose database, then start the rest.
+   files are committed under `var/media`. Use the seed script from a machine that has
+   `say`:
+
+   ```bash
+   ./scripts/seed-content.sh dump          # seeded dev database → hanpath-content.sql
+   scp hanpath-content.sql vps:/tmp/
+   ./scripts/seed-content.sh restore /tmp/hanpath-content.sql   # on the server
+   ./scripts/seed-content.sh verify
+   ```
 2. **TLS is not terminated here.** Set `HANPATH_APP_ENV=production`,
    `HANPATH_PUBLIC_BASE_URL=https://…` and `HANPATH_SESSION_COOKIE_SECURE=true` together
    behind a TLS proxy; the config refuses any inconsistent combination.
