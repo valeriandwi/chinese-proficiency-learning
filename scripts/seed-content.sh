@@ -3,22 +3,21 @@
 # Seed the hanpath curriculum into a database — the one in docker compose, or any
 # DATABASE_URL you point it at.
 #
-# Why this script exists: `make content-import` (cmd/contentctl) resolves reference audio
-# through the synthesiser, and the only provider implemented is macOS `say`
-# (internal/media.NewSayProvider fails without it). So importing *inside* a Linux
-# container is impossible even though the 2,375 mp3s it would look up are committed under
-# var/media. This script provides the two paths that do work:
+# Two ways to get content in, and they need different things:
 #
-#   import   run contentctl against $DATABASE_URL          — needs a synthesiser (macOS)
-#   dump     write the curriculum out of a seeded database  — needs pg_dump
-#   restore  load that dump into the compose database       — needs docker compose
-#   verify   print what the target database actually holds
+#   import   run contentctl against $DATABASE_URL. It resolves reference audio through a
+#            synthesiser; where none exists (Linux, a container) it falls back to resolving
+#            only the audio that already ships under var/media, so this works on a server
+#            too — provided var/media is there. Audio that is genuinely missing still fails,
+#            naming the exercise.
+#   dump     write the curriculum out of an already-seeded database (pg_dump) and restore it
+#            into another one. Faster on a fresh server, and needs no Go toolchain there.
 #
 # Usage:
 #   ./scripts/seed-content.sh verify
+#   ./scripts/seed-content.sh import
 #   ./scripts/seed-content.sh dump [--out FILE]
 #   ./scripts/seed-content.sh restore [FILE] [--force]
-#   ./scripts/seed-content.sh import
 #
 set -euo pipefail
 
@@ -197,14 +196,15 @@ cmd_dump() {
     rm -f "$out"
     die "that database has no lessons: the dump was deleted rather than shipped.
 
-       Run this on the machine that already holds the curriculum (your Mac, after
-       'make content-import' there), then restore the file here:
+       Run this on a machine that already holds the curriculum, then restore the file
+       where you need it:
 
-         ./scripts/seed-content.sh dump        # on the Mac
+         ./scripts/seed-content.sh dump        # e.g. on your Mac
          scp hanpath-content.sql vps:/tmp/
          ./scripts/seed-content.sh restore /tmp/hanpath-content.sql   # on the server
 
-       Importing on a Linux server cannot work while the only synthesiser is macOS 'say'."
+       Or seed the server directly — 'import' resolves the audio that ships in var/media
+       when no synthesiser is available."
   fi
 
   say "wrote $out ($(wc -c <"$out" | tr -d ' ') bytes) using $("$pgdump" --version)"
@@ -255,12 +255,11 @@ cmd_restore() {
 cmd_import() {
   local url
   url=$(local_dburl)
-  # The synthesiser is required here: content with audio_text fails loudly rather than
-  # importing silence. On Linux, seed from a dump instead (see the header).
   export DATABASE_URL=$url
   local files=()
   for f in content/hsk2.0/*.yaml; do files+=(--file "$f"); done
   say "importing ${#files[@]} file(s) into the database behind DATABASE_URL"
+  say "(reference audio is resolved from MEDIA_DIR; a missing asset fails by name)"
   go run ./cmd/contentctl import "${files[@]}"
   say "done — verify with ./scripts/seed-content.sh verify"
 }

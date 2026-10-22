@@ -95,11 +95,22 @@ func run() error {
 		}
 		tts, err := media.NewTTS(cfg.TTSProvider, cfg.TTSVoice, cfg.FFmpegPath)
 		if err != nil {
-			// Not fatal here: a deployment that only serves existing content
-			// needs no synthesiser. It becomes fatal the moment content with
-			// audio_text is imported, where media.EnsureAudio refuses.
-			log.Warn("no text-to-speech provider; importing content with audio will fail", "error", err)
-			tts = nil
+			switch cfg.TTSProvider {
+			case "none":
+				// An explicit "none" is a deliberate decision to ship no audio: importing
+				// listening content must fail loudly rather than resolve files the operator
+				// said they do not want.
+				log.Warn("TTS_PROVIDER=none: content with audio cannot be imported", "error", err)
+				tts = nil
+			default:
+				// No synthesiser in this environment (a Linux server, a container), but the
+				// audio for the whole curriculum ships in the media directory. Resolving
+				// what already exists is what lets the import run there at all; audio that
+				// is genuinely missing still fails, with the exercise named.
+				tts = media.NewExistingAudioProvider(cfg.TTSVoice)
+				log.Warn("no synthesiser available; resolving only the reference audio that already exists",
+					"error", err, "provider", tts.Name(), "voice", tts.Voice(), "format", tts.Format())
+			}
 		} else {
 			log.Info("audio synthesis ready", "provider", tts.Name(), "voice", tts.Voice(), "format", tts.Format())
 		}

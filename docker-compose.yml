@@ -12,18 +12,16 @@
 #
 # THREE THINGS THIS FILE CANNOT DO FOR YOU
 #
-# 1. The database starts EMPTY of curriculum. Seeding it needs `cmd/contentctl import`,
-#    which resolves reference audio through a synthesiser — and the only one implemented
-#    is macOS `say` (internal/media.NewSayProvider fails without it). A Linux container
-#    therefore cannot import content, even though the 2,375 audio files it would resolve
-#    are already committed under var/media. Seed from a machine that has `say`:
+# 1. The curriculum itself: the database starts EMPTY. Either seed it directly on the
+#    server — `docker compose exec api contentctl import --file /app/content/hsk2.0/…`
+#    resolves the audio that ships in var/media, no synthesiser needed — or copy a dump
+#    from a machine that already has it:
 #
-#      ./scripts/seed-content.sh dump                 # seeded dev DB → hanpath-content.sql
+#      ./scripts/seed-content.sh dump                 # seeded DB → hanpath-content.sql
 #      scp hanpath-content.sql vps:/tmp/
 #      ./scripts/seed-content.sh restore /tmp/hanpath-content.sql    # run on the server
 #      ./scripts/seed-content.sh verify
 #
-#    (Or, on the seeding machine: `make content-import` against this database directly.)
 #    Until then the app boots and answers 404 "unknown curriculum version".
 #
 # 2. TLS is not terminated here — this stack speaks plain http on HANPATH_WEB_PORT. Put it

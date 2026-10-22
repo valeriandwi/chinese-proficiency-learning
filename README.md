@@ -178,11 +178,11 @@ docker compose down              # add -v to drop the database too
 
 Three things it does not do for you, all documented at the top of the file:
 
-1. **The database starts empty of curriculum.** Seeding needs `cmd/contentctl import`,
-   which resolves reference audio through a synthesiser, and the only one implemented is
-   macOS `say` — so a Linux container cannot import content even though the 2,375 audio
-   files are committed under `var/media`. Use the seed script from a machine that has
-   `say`:
+1. **The database starts empty of curriculum.** The audio for it ships in the repo
+   (`var/media`, 2,375 files), so the import resolves that audio instead of synthesising:
+   `docker compose exec api contentctl import --file /app/content/hsk2.0/level-1.yaml …`
+   works on a Linux server with no synthesiser. Alternatively copy a dump from a machine
+   that already has content:
 
    ```bash
    ./scripts/seed-content.sh dump          # seeded dev database → hanpath-content.sql
