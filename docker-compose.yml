@@ -1,4 +1,4 @@
-# hanpath — a self-contained stack: Postgres, the API, the worker, and nginx serving the
+# hanpath — a self-contained stack: Postgres, the API, the worker, and Caddy serving the
 # built SPA on one origin.
 #
 #   docker compose up -d --build        # db → migrate → api + worker + web
@@ -24,8 +24,9 @@
 #
 #    Until then the app boots and answers 404 "unknown curriculum version".
 #
-# 2. TLS is not terminated here — this stack speaks plain http on HANPATH_WEB_PORT. Put it
-#    behind a proxy that terminates TLS, and set these three together:
+# 2. TLS is Caddy's job, not yours. The default site address is plain http on 8080; add
+#    docker-compose.tls.yml with HANPATH_SITE_ADDRESS set to your hostname and Caddy
+#    obtains and renews the certificate by itself. The application settings must agree:
 #
 #      HANPATH_APP_ENV=production
 #      HANPATH_PUBLIC_BASE_URL=https://your.domain
@@ -49,7 +50,7 @@ x-db-credentials: &db-credentials
 x-app-env: &app-env
   APP_ENV: ${HANPATH_APP_ENV:-development}
   LOG_LEVEL: ${HANPATH_LOG_LEVEL:-info}
-  # Inside a container the API must not bind to loopback: nginx reaches it over the
+  # Inside a container the API must not bind to loopback: Caddy reaches it over the
   # compose network, and 127.0.0.1 there would be the container itself.
   HTTP_ADDR: 0.0.0.0:8081
   PUBLIC_BASE_URL: ${HANPATH_PUBLIC_BASE_URL:-http://localhost:8080}
@@ -151,27 +152,30 @@ services:
         condition: service_completed_successfully
     stop_grace_period: 20s
 
+  # Caddy: serves the built SPA and proxies /api, /media and /healthz to the API — one
+  # origin, one container. Certificates are its own job (see docker/Caddyfile); with
+  # SITE_ADDRESS left at the default it speaks plain http on 8080 and never calls ACME.
   web:
     build:
       context: .
       dockerfile: docker/web.Dockerfile
     image: hanpath/web:local
     restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${HANPATH_SITE_ADDRESS:-http://localhost:8080}
+      API_UPSTREAM: api:8081
+    volumes:
+      # Certificates and ACME account state live here, so a rebuild does not re-request
+      # them (and does not burn Let's Encrypt rate limits).
+      - caddy-data:/data
+      - caddy-config:/config
     ports:
-      # Loopback only when a host reverse proxy terminates TLS in front (the usual VPS
-      # setup): publishing on 0.0.0.0 would let anyone bypass the proxy over plain http
-      # and reach the app on :8080 directly. Change to "0.0.0.0:8080:80" only if this
-      # stack is the public entry point (e.g. a local run or a proxy on another host).
-      - "127.0.0.1:${HANPATH_WEB_PORT:-8080}:80"
+      # Loopback in local mode: the app is reached through whatever is in front of it, not
+      # directly. The TLS mapping (80/443) lives in docker-compose.tls.yml.
+      - "127.0.0.1:${HANPATH_WEB_PORT:-8080}:8080"
     depends_on:
       api:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1/"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 5s
 
   # Optional and unused today: the config reads REDIS_ADDR but nothing dials it. Start it
   # with `docker compose --profile redis up`.
@@ -191,3 +195,5 @@ services:
 volumes:
   db-data:
   redis-data:
+  caddy-data:
+  caddy-config:

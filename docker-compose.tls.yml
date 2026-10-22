@@ -1,0 +1,30 @@
+# Public TLS for the Caddy container.
+#
+#   docker compose --env-file .env.compose \
+#     -f docker-compose.yml -f docker-compose.tls.yml up -d
+#
+# The base file keeps `web` on 127.0.0.1:8080 and plain http, so a laptop run never binds
+# port 80 or talks to ACME. This override is what makes the stack reachable from outside:
+# it publishes 80/443 and tells Caddy which site address to serve, from which Caddy derives
+# whether to obtain a certificate.
+#
+# HANPATH_SITE_ADDRESS must be a bare hostname (no scheme) for automatic HTTPS —
+# e.g. hanpath.valerian.my.id. The `:?` below makes an unset value a hard error rather than
+# a stack that quietly serves http on the wrong name.
+#
+# The application's own settings must agree (.env.compose):
+#   HANPATH_APP_ENV=production
+#   HANPATH_PUBLIC_BASE_URL=https://hanpath.valerian.my.id
+#   HANPATH_SESSION_COOKIE_SECURE=true
+# CORS_ALLOWED_ORIGINS follows PUBLIC_BASE_URL, so it needs nothing here.
+
+name: hanpath
+
+services:
+  web:
+    environment:
+      SITE_ADDRESS: ${HANPATH_SITE_ADDRESS:?set HANPATH_SITE_ADDRESS to your bare hostname, e.g. hanpath.example.com}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3

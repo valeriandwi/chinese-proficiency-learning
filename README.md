@@ -167,7 +167,7 @@ the rate limiter runs in-process and mail prints to the log unless `SMTP_ADDR` i
 
 ### Or: the whole stack in one compose file
 
-`docker-compose.yml` brings up Postgres, the API, the worker and nginx serving the built
+`docker-compose.yml` brings up Postgres, the API, the worker and Caddy serving the built
 SPA on one origin (that last part is not optional — the session cookie is same-origin).
 
 ```bash
@@ -198,6 +198,30 @@ Three things it does not do for you, all documented at the top of the file:
 Settings come from `HANPATH_*`-prefixed variables (`docker/.env.compose.example`); the
 prefix keeps the development `.env` — which Compose loads automatically — from
 reconfiguring the stack. Everything has a default for a local run.
+
+### TLS, also in Docker
+
+`web` is Caddy, so HTTPS is one override away — no nginx on the host, no certbot, no
+certificate plumbing to babysit:
+
+```bash
+# local: plain http on 127.0.0.1:8080, no ACME traffic
+docker compose up -d
+
+# public: Caddy obtains and renews the certificate itself
+HANPATH_SITE_ADDRESS=hanpath.valerian.my.id \
+HANPATH_APP_ENV=production \
+HANPATH_PUBLIC_BASE_URL=https://hanpath.valerian.my.id \
+HANPATH_SESSION_COOKIE_SECURE=true \
+docker compose -f docker-compose.yml -f docker-compose.tls.yml up -d
+```
+
+`docker-compose.tls.yml` publishes 80/443 and requires `HANPATH_SITE_ADDRESS` — unset is a
+hard error, not a stack quietly serving the wrong name. Caddy keeps certificates in the
+`caddy-data` volume, so rebuilding the image does not re-request them.
+
+The site address decides the mode: `http://localhost:8080` (the default) serves plain http
+and never contacts a CA; a bare hostname switches on automatic HTTPS with an 80→443 redirect.
 
 ## What's in the curriculum
 

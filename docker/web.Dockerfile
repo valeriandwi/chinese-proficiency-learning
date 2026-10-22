@@ -1,18 +1,22 @@
 # syntax=docker/dockerfile:1
 #
-# The SPA, built once and served by nginx — which is also the reverse proxy.
+# The SPA and the edge, in one image: Caddy serves the build and proxies /api, /media and
+# /healthz to the API.
 #
-# That second job is the important one: the SPA and the API must share an origin, because
-# the session cookie is issued for the SPA's host. nginx serves the static build and
-# proxies /api, /media and /healthz to the API container, so the browser only ever sees
-# one origin and the cookie is never third-party.
+# One container rather than nginx plus a separate TLS proxy, because Caddy obtains and
+# renews the certificate itself — no certbot service, no webroot volume, and none of the
+# ordering trouble where a proxy refuses to start before a certificate exists.
+#
+# Why the SPA and the API must share this origin at all: the session cookie is issued for
+# the SPA's host, so a second hostname for the API would make it third-party and browsers
+# would drop it silently.
 
 FROM node:24-alpine AS build
 
 # The repo layout is reproduced inside the image: web/scripts/copy-hanzi-data.mjs walks
 # `../content` to find the authored characters, so `content/` has to be a sibling of the
 # web directory here too. Without it the script reports "No `character:` fields found"
-# and the build stops — which is what happened the first time.
+# and the build stops.
 WORKDIR /src/web
 
 RUN corepack enable
@@ -31,9 +35,16 @@ COPY content/ /src/content/
 RUN pnpm run hanzi-data && pnpm build
 
 
-FROM nginx:1.27-alpine
+FROM caddy:2-alpine
 
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /src/web/dist /usr/share/nginx/html
+# Caddy reads /etc/caddy/Caddyfile by default and keeps certificates in /data, which the
+# compose file mounts as a volume so a rebuild does not re-request them.
+COPY docker/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /src/web/dist /srv
 
-EXPOSE 80
+# SITE_ADDRESS decides the mode: http://localhost:8080 for a local run, a bare hostname for
+# automatic HTTPS. API_UPSTREAM is the API on the compose network.
+ENV SITE_ADDRESS=http://localhost:8080
+ENV API_UPSTREAM=api:8081
+
+EXPOSE 8080 80 443
