@@ -40,6 +40,23 @@ CONTENT_TABLES=(
 say() { printf '  %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
+# "postgres://user:secret@host:port/db" → "user@host:port/db", so the target of a dump or a
+# restore is never a guess (and the secret never lands in a log).
+describe_url() {
+  printf '%s' "$1" | sed -E 's#^(postgres(ql)?)://([^:/@]+)(:[^@]*)?@#\1://\3@#'
+}
+
+# Rows a pg_dump COPY block carries, read straight out of the .sql so a restore can judge
+# the file without a database.
+count_rows() {
+  awk -v tag="COPY public.$2 " '
+    index($0, tag) == 1 { inside = 1; next }
+    inside && $0 == "\\." { inside = 0 }
+    inside { n++ }
+    END { print n + 0 }
+  ' "$1"
+}
+
 compose() {
   if [[ -f .env.compose ]]; then
     docker compose --env-file .env.compose "$@"
@@ -165,6 +182,25 @@ cmd_dump() {
 
   mv "$tmp" "$out"
   trap - EXIT
+
+  # Report what was captured, table by table, and refuse a dump that could only seed an
+  # empty curriculum: an import that died partway leaves a curriculum row with no lessons
+  # behind, and restoring that looks like success while the app still answers 404.
+  local table rows lessons=0
+  say "source: $(describe_url "$url")"
+  for table in "${CONTENT_TABLES[@]}"; do
+    rows=$(count_rows "$out" "$table")
+    [[ $table == lessons ]] && lessons=$rows
+    printf '  %-16s %6s\n' "$table" "$rows"
+  done
+  if [[ $lessons -eq 0 ]]; then
+    rm -f "$out"
+    die "that database has no lessons: the dump was deleted rather than shipped.
+       An import that failed partway leaves a curriculum row but no lessons behind —
+       seed a complete database (`make content-import` on a machine with macOS `say`),
+       or point DATABASE_URL at one and dump again."
+  fi
+
   say "wrote $out ($(wc -c <"$out" | tr -d ' ') bytes) using $("$pgdump" --version)"
   say "restore it on the server with: ./scripts/seed-content.sh restore $out"
 }
@@ -179,6 +215,16 @@ cmd_restore() {
     esac
   done
   [[ -f $file ]] || die "restore: no such file $file"
+
+  # Judge the file before touching the target: a dump without lessons seeds nothing usable,
+  # and would otherwise look like a successful restore.
+  local file_lessons
+  file_lessons=$(count_rows "$file" lessons)
+  if [[ $file_lessons -eq 0 ]]; then
+    die "restore: $file contains no lessons — nothing to load.
+       Re-dump from a database that holds the full curriculum, or import there first."
+  fi
+  say "file: $file ($file_lessons lessons)"
 
   local existing
   existing=$(psql_container -Atc "select count(*) from curricula")

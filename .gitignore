@@ -3,6 +3,8 @@
 .env.local
 # Compose overrides — see docker/.env.compose.example
 .env.compose
+# Curriculum dumps (scripts/seed-content.sh) — data, not source
+hanpath-content.sql
 *.local
 # The local Postgres cluster's data directory and log
 /.local/
