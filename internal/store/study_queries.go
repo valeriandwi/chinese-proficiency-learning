@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -144,15 +145,20 @@ type StudyLexeme struct {
 // Page-scoped with limit/offset and a total, so the guide can grow without the
 // response growing with it.
 func (s *Store) VocabularyList(ctx context.Context, userID uuid.UUID, version string, level, limit, offset int, search string) ([]StudyLexeme, int, error) {
-	where := `c.version = $2`
-	args := []any{userID, version}
+	// Two argument lists, not one: the count does not take the learner, and a parameter
+	// that appears in no expression cannot be typed by Postgres ("could not determine data
+	// type of parameter $1") — a 500 for a query that is otherwise correct.
+	countWhere := `c.version = $1`
+	countArgs := []any{version}
+	countNext := 2
 	if level > 0 {
-		args = append(args, level)
-		where += ` AND ll.level_number = $3`
+		countWhere += fmt.Sprintf(` AND ll.level_number = $%d`, countNext)
+		countArgs = append(countArgs, level)
+		countNext++
 	}
 	if search != "" {
-		args = append(args, "%"+search+"%")
-		where += ` AND (lx.simplified ILIKE $4 OR lx.pinyin ILIKE $4 OR lx.senses::text ILIKE $4)`
+		countWhere += fmt.Sprintf(` AND (lx.simplified ILIKE $%d OR lx.pinyin ILIKE $%d OR lx.senses::text ILIKE $%d)`, countNext, countNext, countNext)
+		countArgs = append(countArgs, "%"+search+"%")
 	}
 
 	var total int
@@ -161,8 +167,22 @@ func (s *Store) VocabularyList(ctx context.Context, userID uuid.UUID, version st
 		FROM lexemes lx
 		JOIN lexeme_levels ll ON ll.lexeme_id = lx.id
 		JOIN curricula c ON c.id = ll.curriculum_id
-		WHERE `+where, args...).Scan(&total); err != nil {
+		WHERE `+countWhere, countArgs...).Scan(&total); err != nil {
 		return nil, 0, mapErr(err)
+	}
+
+	// $1 belongs to the list query: it decides whether each word is bookmarked.
+	where := `c.version = $2`
+	args := []any{userID, version}
+	next := 3
+	if level > 0 {
+		where += fmt.Sprintf(` AND ll.level_number = $%d`, next)
+		args = append(args, level)
+		next++
+	}
+	if search != "" {
+		where += fmt.Sprintf(` AND (lx.simplified ILIKE $%d OR lx.pinyin ILIKE $%d OR lx.senses::text ILIKE $%d)`, next, next, next)
+		args = append(args, "%"+search+"%")
 	}
 
 	args = append(args, limit, offset)

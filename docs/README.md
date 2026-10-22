@@ -1,12 +1,15 @@
-# hanpath
+# hanpath — engineering overview
+
+> The showcase README, with screenshots and a feature tour, is at the repository root:
+> [`../README.md`](../README.md). This file is the deeper account of how it is built.
 
 A full-stack web app for learning Mandarin and preparing for the HSK exams:
 structured lessons by level, practice in reading / listening / writing / speaking,
 spaced repetition, streaks, and (in progress) mock exams.
 
 **Status: M0–M2 are playable end to end.** Accounts, the HSK 2.0 levels 1–5 path
-(2,387 words, 10,577 drills, 392 lessons at levels 2–5 generated from the published
-word lists), pronunciation scoring for speaking drills behind a provider interface
+(2,386 words, 11,040 exercises, 406 lessons across five levels),
+pronunciation scoring for speaking drills behind a provider interface
 (off by default; the recording is scored and never stored),
 a tone-practice page (drill tone alone without walking the path; it earns no XP and
 moves nothing), proficiency tests that open a level at 80% on a paper drawn across it
