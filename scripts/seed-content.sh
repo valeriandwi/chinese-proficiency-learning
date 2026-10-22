@@ -196,9 +196,15 @@ cmd_dump() {
   if [[ $lessons -eq 0 ]]; then
     rm -f "$out"
     die "that database has no lessons: the dump was deleted rather than shipped.
-       An import that failed partway leaves a curriculum row but no lessons behind —
-       seed a complete database (`make content-import` on a machine with macOS `say`),
-       or point DATABASE_URL at one and dump again."
+
+       Run this on the machine that already holds the curriculum (your Mac, after
+       'make content-import' there), then restore the file here:
+
+         ./scripts/seed-content.sh dump        # on the Mac
+         scp hanpath-content.sql vps:/tmp/
+         ./scripts/seed-content.sh restore /tmp/hanpath-content.sql   # on the server
+
+       Importing on a Linux server cannot work while the only synthesiser is macOS 'say'."
   fi
 
   say "wrote $out ($(wc -c <"$out" | tr -d ' ') bytes) using $("$pgdump" --version)"
