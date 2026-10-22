@@ -16,6 +16,11 @@ FROM golang:1.25.1-alpine AS build
 ENV GOTOOLCHAIN=local \
     CGO_ENABLED=0
 
+# ca-certificates for the module proxy over TLS, git for any VCS-backed module path. The
+# official Go image usually carries the first already; both here so the build does not
+# depend on that.
+RUN apk add --no-cache ca-certificates git
+
 WORKDIR /src
 
 # The module graph first, so a source-only change does not refetch dependencies.
