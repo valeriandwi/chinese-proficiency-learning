@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Flame, Lock, Sparkles } from 'lucide-react'
+import { ArrowLeft, Clock, Flame, Lock, Sparkles, X } from 'lucide-react'
 import { useLesson, useSubmitAttempts } from '../../api/hooks'
 import type { AnswerPayload, AttemptInput, AttemptResult, Exercise, SubmitSummary } from '../../api/types'
 import { emptyAnswer, isAnswered, modelAnswer } from '../../lib/answers'
@@ -162,7 +162,15 @@ export function LessonPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
+        <Link
+          to="/"
+          aria-label="Leave lesson"
+          title="Leave lesson — answers you have checked are already saved"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-tile text-ink-3 transition hover:bg-surface-2 hover:text-ink"
+        >
+          <X size={22} aria-hidden />
+        </Link>
+        <div className="min-w-0 flex-1">
           <p className="text-xs font-bold uppercase tracking-wide text-ink-3">
             {lesson.unit_title} · Level {lesson.level_number}
           </p>
@@ -206,15 +214,23 @@ export function LessonPage() {
       </div>
 
       {lesson.vocabulary.length ? (
-        <Card className="flex flex-wrap gap-4">
-          {lesson.vocabulary.map((word) => (
-            <div key={word.id} className="flex flex-col items-center">
-              {prefs.pinyinVisible ? <span className="text-xs text-ink-3">{word.pinyin}</span> : null}
-              <span className="hanzi text-2xl">{word.simplified}</span>
-              <span className="max-w-24 text-center text-[11px] text-ink-3">{word.senses?.[0]?.en}</span>
-            </div>
-          ))}
-        </Card>
+        // A drawer, not a strip: the word list used to sit above every exercise and take ~110px
+        // from the question. It is one tap away for a learner who wants it.
+        <details className="group rounded-card border-2 border-line bg-surface">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-4 text-sm font-extrabold text-ink-2">
+            Words in this lesson · {lesson.vocabulary.length}
+            <span aria-hidden className="transition group-open:rotate-180">⌄</span>
+          </summary>
+          <div className="flex flex-wrap gap-4 border-t-2 border-line p-4">
+            {lesson.vocabulary.map((word) => (
+              <div key={word.id} className="flex flex-col items-center">
+                {prefs.pinyinVisible ? <span className="text-xs text-ink-3">{word.pinyin}</span> : null}
+                <span className="hanzi text-2xl">{word.simplified}</span>
+                <span className="max-w-24 text-center text-[11px] text-ink-3">{word.senses?.[0]?.en}</span>
+              </div>
+            ))}
+          </div>
+        </details>
       ) : null}
 
       {lesson.passages.map((passage) => (
@@ -254,7 +270,7 @@ export function LessonPage() {
       ) : (
         <div
           data-testid="lesson-action-bar"
-          className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 -mx-4 mt-1 border-t border-line bg-paper/95 px-4 py-3 backdrop-blur lg:bottom-0"
+          className="sticky bottom-0 z-10 -mx-4 mt-1 border-t border-line bg-paper/95 px-4 py-3 backdrop-blur"
         >
           <div className="flex items-center gap-3">
             <Button
@@ -335,7 +351,7 @@ export function VerdictBand({
   return (
     <div
       data-testid="lesson-action-bar"
-      className={`animate-slide-up sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 -mx-4 border-t-2 border-white/25 px-4 py-3 text-white lg:bottom-0 ${
+      className={`animate-slide-up sticky bottom-0 z-10 -mx-4 border-t-2 border-white/25 px-4 py-3 text-white ${
         outcome === 'wrong' ? 'animate-shake' : ''
       } ${tone}`}
     >
@@ -343,6 +359,8 @@ export function VerdictBand({
         <span className="mt-0.5 shrink-0 rounded-full bg-white/20 p-1.5" aria-hidden>
           {outcome === 'correct' ? (
             <ChunkyCheck className="h-[22px] w-[22px]" />
+          ) : outcome === 'review' ? (
+            <Clock size={22} aria-hidden />
           ) : (
             <ChunkyCross className="h-[22px] w-[22px]" />
           )}
@@ -455,10 +473,18 @@ function LessonResult({
           </p>
         ) : null}
 
-        <div className="mt-6">
-          <Button onClick={onDone} className="w-full">
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row-reverse">
+          <Button onClick={onDone} className="flex-1">
             Continue
           </Button>
+          {correct < graded.length ? (
+            <Link
+              to="/reviews"
+              className="inline-flex flex-1 items-center justify-center rounded-tile border-2 border-line bg-surface px-5 py-3 text-sm font-extrabold tracking-wide text-ink transition hover:bg-surface-2"
+            >
+              Review {graded.length - correct} mistake{graded.length - correct === 1 ? '' : 's'}
+            </Link>
+          ) : null}
         </div>
         </div>
       </Card>

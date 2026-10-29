@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { AnswerPayload, AttemptResult, Exercise } from '../../api/types'
 import { describeExerciseType, describeGrader, describeSkill, formatPercent } from '../../lib/labels'
 import { modelAnswer } from '../../lib/answers'
@@ -140,7 +140,7 @@ function renderer(
           ) : null}
           {/* No legend: the card already renders prompt.instruction above the drill, so
               passing it again as the option group's label printed it twice. */}
-          <OptionChoices options={options} chosen={chosen} disabled={disabled} result={result} onChange={onChange} />
+          <OptionChoices options={options} chosen={chosen} disabled={disabled} result={result} onChange={onChange} contour />
         </div>
       )
 
@@ -460,19 +460,36 @@ function OptionChoices({
   chosen,
   disabled,
   result,
+  contour,
   onChange,
 }: {
   legend?: string
+  /** Draw each option's pitch contour (tone drills): the shape says what the digits mean. */
+  contour?: boolean
   options: { id: string; text: string }[]
   chosen?: string
   disabled?: boolean
   result?: AttemptResult
   onChange: (payload: AnswerPayload) => void
 }) {
+  // 1–9 pick an option, so a learner never has to leave the keyboard to answer. A field the
+  // learner is typing in keeps its digits.
+  useEffect(() => {
+    if (disabled) return
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      if (event.metaKey || event.ctrlKey || event.altKey || target?.closest('input, textarea, select, [contenteditable]')) return
+      const option = options[Number(event.key) - 1]
+      if (option) onChange({ option_id: option.id })
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [disabled, options, onChange])
+
   return (
     <fieldset className="flex flex-col gap-2" disabled={disabled}>
       {legend ? <legend className="mb-2 text-lg font-medium">{legend}</legend> : null}
-      {options.map((option) => {
+      {options.map((option, index) => {
         const isChosen = chosen === option.id
         const isSolution = result ? (result.solution?.correct_id as string | undefined) === option.id : false
         return (
@@ -483,11 +500,42 @@ function OptionChoices({
             disabled={disabled}
             className={`rounded-card border-2 px-4 py-3.5 text-left transition active:translate-y-px ${optionClass(isChosen, isSolution, Boolean(result))}`}
           >
-            <span className="hanzi mr-3 text-xl">{option.text}</span>
+            {/* aria-hidden: the number is a shortcut hint, not part of the option's name. */}
+            <span
+              aria-hidden
+              className="mr-3 inline-grid h-7 w-7 place-items-center rounded-tile border-2 border-line text-xs font-extrabold tabular-nums text-ink-3"
+            >
+              {index + 1}
+            </span>
+            <span className="hanzi text-xl">{option.text}</span>
+            {contour ? <ToneContour pattern={option.text} /> : null}
           </button>
         )
       })}
     </fieldset>
+  )
+}
+
+/** One pitch shape per tone digit, so a pattern like "3-3" is seen as well as read. 0 and 5
+ *  (neutral) are a short low dot. Decorative: the digits beside it carry the meaning. */
+const TONE_SHAPES: Record<string, string> = {
+  '1': 'M2 4H16',
+  '2': 'M2 16L16 4',
+  '3': 'M2 6Q9 24 16 6',
+  '4': 'M2 4L16 16',
+}
+
+function ToneContour({ pattern }: { pattern: string }) {
+  const tones = pattern.split('-')
+  if (!tones.every((t) => /^[0-5]$/.test(t))) return null
+  return (
+    <span aria-hidden className="ml-3 inline-flex items-center gap-1 align-middle text-ink-3">
+      {tones.map((tone, i) => (
+        <svg key={i} viewBox="0 0 18 20" width="18" height="20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+          {TONE_SHAPES[tone] ? <path d={TONE_SHAPES[tone]} /> : <circle cx="9" cy="15" r="1.6" fill="currentColor" />}
+        </svg>
+      ))}
+    </span>
   )
 }
 

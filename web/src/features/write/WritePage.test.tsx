@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { MemoryRouter } from 'react-router-dom'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { AttemptResult, StudioAnswerResponse, StudyDrill } from '../../api/types'
@@ -109,7 +110,7 @@ beforeEach(() => {
 
 describe('WritePage', () => {
   it('says what the studio is, and what it does not do', () => {
-    render(<WritePage />)
+    render(<MemoryRouter><WritePage /></MemoryRouter>)
 
     // The cost of ungated practice is stated before any work, not discovered afterwards.
     expect(screen.getByText(/Nothing here moves your path and nothing here earns XP/i)).toBeInTheDocument()
@@ -117,7 +118,7 @@ describe('WritePage', () => {
   })
 
   it('loads the drills it is asked for, and filters them by level', async () => {
-    render(<WritePage />)
+    render(<MemoryRouter><WritePage /></MemoryRouter>)
 
     // Level is part of the query key: the page asks the server rather than filtering
     // its own copy of the curriculum.
@@ -131,18 +132,18 @@ describe('WritePage', () => {
   })
 
   it('shows the character the drill asks for, and its pinyin only when the learner wants it', () => {
-    const { unmount } = render(<WritePage />)
+    const { unmount } = render(<MemoryRouter><WritePage /></MemoryRouter>)
     expect(screen.getByText('你好')).toBeInTheDocument()
     expect(screen.queryByText('nǐ hǎo')).not.toBeInTheDocument()
     unmount()
 
     prefsMock.mockReturnValue({ pinyinVisible: true, togglePinyin: vi.fn() })
-    render(<WritePage />)
+    render(<MemoryRouter><WritePage /></MemoryRouter>)
     expect(screen.getByText('nǐ hǎo')).toBeInTheDocument()
   })
 
   it('submits the exact payload the server decodes, keyed so a retry is idempotent', async () => {
-    render(<WritePage />)
+    render(<MemoryRouter><WritePage /></MemoryRouter>)
 
     await userEvent.click(screen.getByRole('button', { name: 'trace 你好' }))
 
@@ -169,7 +170,7 @@ describe('WritePage', () => {
   it('records a trace that stopped early, and marks it unfinished', async () => {
     // One stroke of a two-stroke character: the attempt is real and must be recorded,
     // but it is not a written character — `completed` is what the grader reads.
-    render(<WritePage />)
+    render(<MemoryRouter><WritePage /></MemoryRouter>)
 
     await userEvent.click(screen.getByRole('button', { name: 'partial 你好' }))
 
@@ -186,7 +187,7 @@ describe('WritePage', () => {
       data: queue([drill('w1', '你', 2), drill('w2', '好', 2)]),
       refetch: refetchMock,
     })
-    render(<WritePage />)
+    render(<MemoryRouter><WritePage /></MemoryRouter>)
 
     expect(screen.queryByText('correct')).not.toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'trace 你' }))
@@ -198,7 +199,7 @@ describe('WritePage', () => {
   })
 
   it('counts the round it actually did, and deals a new one from the server', async () => {
-    render(<WritePage />)
+    render(<MemoryRouter><WritePage /></MemoryRouter>)
 
     await userEvent.click(screen.getByRole('button', { name: 'trace 你好' }))
     await userEvent.click(await screen.findByRole('button', { name: 'See how you did' }))
@@ -213,7 +214,7 @@ describe('WritePage', () => {
 
   it('says so when a level has no writing drills, instead of rendering an empty card', () => {
     queueMock.mockReturnValue({ isLoading: false, error: null, data: queue([], 5), refetch: refetchMock })
-    render(<WritePage />)
+    render(<MemoryRouter><WritePage /></MemoryRouter>)
 
     expect(screen.getByText('No writing drills at this level')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^trace/ })).not.toBeInTheDocument()
@@ -226,7 +227,7 @@ describe('WritePage', () => {
       data: undefined,
       refetch: refetchMock,
     })
-    render(<WritePage />)
+    render(<MemoryRouter><WritePage /></MemoryRouter>)
 
     expect(screen.getByRole('alert')).toHaveTextContent('drills are unavailable')
   })

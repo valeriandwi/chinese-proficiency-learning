@@ -12,7 +12,8 @@ export function ReviewPage() {
   const answer = useAnswerReview()
   const [revealed, setRevealed] = useState<Record<string, boolean>>({})
   const [lastInterval, setLastInterval] = useState<number | null>(null)
-  const [answered, setAnswered] = useState(0)
+  const [doneIds, setDoneIds] = useState<Set<string>>(new Set())
+  const answered = doneIds.size
 
   if (queue.isLoading) return <Spinner label="Loading your review queue" />
   if (queue.error) return <ErrorNote>{(queue.error as Error).message}</ErrorNote>
@@ -23,16 +24,20 @@ export function ReviewPage() {
   // this sitting, not the lifetime queue, so it can actually reach 100%.
   const presented = items.length
 
-  const record = (lexemeId: string, correct: boolean) =>
+  const record = (itemId: string, lexemeId: string, correct: boolean) =>
     answer.mutate(
       { lexeme_id: lexemeId, correct },
       {
         onSuccess: (res) => {
           setLastInterval(res.interval_index)
-          setAnswered((n) => n + 1)
+          setDoneIds((ids) => new Set(ids).add(itemId))
         },
       },
     )
+
+  // One card at a time: the session is a stream, not a page of twenty things to scroll.
+  const upcoming = items.filter((item) => !doneIds.has(item.id))
+  const sessionDone = presented > 0 && upcoming.length === 0
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
@@ -40,7 +45,7 @@ export function ReviewPage() {
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-ink">复习</h1>
           <p className="text-sm text-ink-2">
-            {dueTotal} cards due · spaced repetition advances each word along an interval ladder
+            {dueTotal} card{dueTotal === 1 ? '' : 's'} due · about {Math.max(1, Math.round(presented / 3))} min
           </p>
         </div>
         <button
@@ -73,7 +78,15 @@ export function ReviewPage() {
         />
       ) : null}
 
-      {items.map((item) => {
+      {sessionDone ? (
+        <EmptyState
+          icon={<Check size={22} aria-hidden />}
+          title="All caught up"
+          hint={`${answered} card${answered === 1 ? '' : 's'} reviewed. Each one comes back on a widening interval.`}
+        />
+      ) : null}
+
+      {upcoming.slice(0, 1).map((item) => {
         const isRevealed = revealed[item.id]
         const meaning = item.senses?.[0]?.en ?? ''
         return (
@@ -105,10 +118,10 @@ export function ReviewPage() {
             {/* Two answers, two colours, two icons — the same pairing the lesson
                 feedback uses, so "I knew it" always looks like a correct answer. */}
             <div className="flex gap-2">
-              <Button onClick={() => record(item.lexeme_id, false)} disabled={answer.isPending} variant="danger" className="flex-1">
+              <Button onClick={() => record(item.id, item.lexeme_id, false)} disabled={answer.isPending} variant="danger" className="flex-1">
                 <X size={16} aria-hidden /> I didn&apos;t know it
               </Button>
-              <Button onClick={() => record(item.lexeme_id, true)} disabled={answer.isPending} variant="success" className="flex-1">
+              <Button onClick={() => record(item.id, item.lexeme_id, true)} disabled={answer.isPending} variant="success" className="flex-1">
                 <Check size={16} aria-hidden /> I knew it
               </Button>
             </div>

@@ -42,6 +42,19 @@ describe('ExerciseCard', () => {
     expect(onChange).toHaveBeenCalledWith({ option_id: 'b' })
   })
 
+  it('picks an option from the keyboard with its number, and stops once graded', async () => {
+    const onChange = vi.fn()
+    const { rerender } = render(<ExerciseCard exercise={mcq} answer={undefined} showPinyin onChange={onChange} />)
+
+    await userEvent.keyboard('3')
+    expect(onChange).toHaveBeenCalledWith({ option_id: 'c' })
+
+    onChange.mockClear()
+    rerender(<ExerciseCard exercise={mcq} answer={{ option_id: 'c' }} showPinyin disabled onChange={onChange} />)
+    await userEvent.keyboard('1')
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   it('shows the verdict, the correct answer and who judged it once graded', () => {
     render(<ExerciseCard exercise={mcq} answer={{ option_id: 'b' }} showPinyin onChange={vi.fn()} result={wrongResult} />)
 

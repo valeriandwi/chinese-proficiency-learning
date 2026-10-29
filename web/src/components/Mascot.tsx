@@ -22,6 +22,8 @@ type MascotProps = {
   title?: string
   className?: string
   style?: CSSProperties
+  /** Outline colour that cuts the silhouette out of whatever sits behind it (the logo's moon). */
+  rim?: string
 }
 
 const FUR = 'var(--color-surface)'
@@ -29,8 +31,11 @@ const INK = 'var(--color-ink)'
 const EAR = 'var(--color-reward-500)'
 const CHEEK = 'var(--color-danger-300)'
 
-export function Mascot({ size = 40, mood = 'idle', title, className = '', style }: MascotProps) {
+export function Mascot({ size = 40, mood = 'idle', title, className = '', style, rim }: MascotProps) {
   const cheering = mood === 'cheer'
+  // Gold inner ears vanish against the gold moon, so the rimmed (logo) rabbit goes pink.
+  const ear = rim ? CHEEK : EAR
+  const outline = rim ? { stroke: rim, strokeWidth: 1.8 } : {}
   // Below 40px the cheeks and the celebration ticks turn into noise at 1x: the silhouette,
   // the eyes and the nose are what survives, so those are the only things drawn.
   const detailed = size >= 40
@@ -53,14 +58,14 @@ export function Mascot({ size = 40, mood = 'idle', title, className = '', style 
           short and high so its base never reaches the forehead, which at 30px turns the ear
           into a mark on the face. */}
       <g>
-        <ellipse cx="18.6" cy="15" rx="3.7" ry="9.4" transform="rotate(-11 18.6 24)" fill={FUR} />
-        <ellipse cx="18.4" cy="13.4" rx="1.7" ry="5" transform="rotate(-11 18.6 24)" fill={EAR} opacity="0.9" />
-        <ellipse cx="29.4" cy="14.4" rx="3.7" ry="9.4" transform="rotate(13 29.4 24)" fill={FUR} />
-        <ellipse cx="29.6" cy="12.8" rx="1.7" ry="5" transform="rotate(13 29.4 24)" fill={EAR} opacity="0.9" />
+        <ellipse cx="18.6" cy="15" rx="3.7" ry="9.4" transform="rotate(-11 18.6 24)" fill={FUR} {...outline} />
+        <ellipse cx="18.4" cy="13.4" rx="1.7" ry="5" transform="rotate(-11 18.6 24)" fill={ear} opacity="0.9" />
+        <ellipse cx="29.4" cy="14.4" rx="3.7" ry="9.4" transform="rotate(13 29.4 24)" fill={FUR} {...outline} />
+        <ellipse cx="29.6" cy="12.8" rx="1.7" ry="5" transform="rotate(13 29.4 24)" fill={ear} opacity="0.9" />
       </g>
 
       {/* Head */}
-      <circle cx="24" cy="30.5" r="12.4" fill={FUR} />
+      <circle cx="24" cy="30.5" r="12.4" fill={FUR} {...outline} />
 
       {/* Eyes */}
       {cheering ? (
@@ -102,16 +107,20 @@ export function Mascot({ size = 40, mood = 'idle', title, className = '', style 
   )
 }
 
-/** The logo mark: the mascot on the brand tile. This is the piece that replaces the old
- *  汉 glyph, so it has to hold a 30px square without turning to mush. */
+/** The logo mark: the moon rabbit in front of its full moon, on the brand tile. It has to
+ *  hold a 30px square without turning to mush; the rim keeps rabbit and moon apart there.
+ *  Keep in step with the favicon in web/index.html. */
 export function MascotMark({ size = 30, className = '' }: { size?: number; className?: string }) {
   return (
     <span
       aria-hidden
-      className={`grid shrink-0 place-items-center rounded-tile bg-brand-600 ${className}`}
+      className={`grid shrink-0 place-items-center overflow-hidden rounded-tile bg-brand-600 ${className}`}
       style={{ width: size, height: size }}
     >
-      <Mascot size={size * 0.86} />
+      <svg viewBox="0 0 48 48" width={size} height={size} className="[grid-area:1/1]" focusable="false">
+        <circle cx="24" cy="21.5" r="17" fill="var(--color-reward-500)" />
+      </svg>
+      <Mascot size={size} rim="var(--color-brand-600)" className="[grid-area:1/1]" />
     </span>
   )
 }

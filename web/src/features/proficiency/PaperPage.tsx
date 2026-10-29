@@ -146,6 +146,31 @@ export function PaperPage({ level, onLeave }: { level: number; onLeave: () => vo
         </p>
       </div>
 
+      {/* The map of the paper: every question must be answered, so say which are not. */}
+      <nav aria-label="Questions" className="flex flex-wrap gap-1.5">
+        {questions.map((q, i) => {
+          const done = isAnswered(q, answers[q.id])
+          return (
+            <button
+              key={q.id}
+              type="button"
+              onClick={() => setIndex(i)}
+              aria-current={i === index ? 'step' : undefined}
+              aria-label={`Go to question ${i + 1}, ${done ? 'answered' : 'not answered'}`}
+              className={`h-9 min-w-9 rounded-tile px-2 text-xs font-extrabold tabular-nums transition ${
+                i === index
+                  ? 'bg-ink text-white'
+                  : done
+                    ? 'bg-brand-100 text-brand-700'
+                    : 'border-2 border-dashed border-line-strong text-ink-3 hover:bg-surface-2'
+              }`}
+            >
+              {i + 1}
+            </button>
+          )
+        })}
+      </nav>
+
       <section className="flex flex-col gap-4 py-2">
         <ExerciseCard
           exercise={current}
@@ -176,7 +201,7 @@ export function PaperPage({ level, onLeave }: { level: number; onLeave: () => vo
               ? 'Marking…'
               : answeredCount === questions.length
                 ? 'Submit paper'
-                : `${questions.length - answeredCount} left to answer`}
+                : `Submit · ${questions.length - answeredCount} left to answer`}
           </Button>
         ) : (
           <Button

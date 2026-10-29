@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Check } from 'lucide-react'
 import { useSession, useSubmitPlacement, useUpdateMe } from '../../api/hooks'
 import { usePlacementQuestions } from '../../api/hooks'
 import { Button, Card, Chip, ErrorNote, Spinner } from '../../components/ui'
@@ -53,6 +54,7 @@ export function PlacementPage() {
               key={item.id}
               type="button"
               onClick={() => setKnown((k) => ({ ...k, [item.id]: !isKnown }))}
+              aria-pressed={isKnown}
               className={`flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition ${
                 isKnown ? 'border-brand-500 bg-brand-50' : 'border-line-strong bg-surface hover:border-brand-300'
               }`}
@@ -61,7 +63,10 @@ export function PlacementPage() {
                 {prefs.pinyinVisible ? <span className="block text-xs text-ink-3">{item.pinyin}</span> : null}
                 <span className="hanzi block text-2xl">{item.simplified}</span>
               </span>
-              <span className="max-w-40 text-right text-xs text-ink-2">{item.senses?.[0]?.en}</span>
+              <span className="flex max-w-40 items-center gap-2 text-right text-xs text-ink-2">
+                {item.senses?.[0]?.en}
+                {isKnown ? <Check size={16} aria-label="marked as known" className="shrink-0 text-brand-700" /> : null}
+              </span>
             </button>
           )
         })}

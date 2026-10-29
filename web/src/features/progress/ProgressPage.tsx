@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowLeft, BadgeCheck, BookOpenCheck, Flame, Sparkles, Target, Wrench } from 'lucide-react'
+import { ArrowLeft, BookOpenCheck, Flame, Sparkles, Target, Wrench } from 'lucide-react'
 import { useCurricula, useOverview, useRefreshProgress, useSession } from '../../api/hooks'
 import { describeGoal, describeSkill, formatDay, formatPercent } from '../../lib/labels'
 import { goalProgress, goalRatio } from '../../lib/goal'
@@ -40,6 +40,11 @@ export function ProgressPage() {
 
   const { streak, skills, activity } = overview.data
   const user = session.data?.authenticated ? session.data.user : undefined
+  // The skill with the lowest mastery among those actually attempted: absence of data is
+  // not weakness, so an unattempted skill never qualifies.
+  const weakest = skills
+    .filter((skill) => skill.attempts > 0)
+    .reduce<(typeof skills)[number] | undefined>((low, skill) => (!low || skill.mastery < low.mastery ? skill : low), undefined)
   const version = overview.data.curriculum_version ?? curricula.data?.curricula[0]?.version ?? 'hsk2.0'
   const ratio = goalRatio(
     streak.goal_kind,
@@ -153,24 +158,6 @@ export function ProgressPage() {
         />
       </div>
 
-      <Card className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-tile bg-brand-50 text-brand-700" aria-hidden>
-            <BadgeCheck size={20} />
-          </span>
-          <div>
-            <h2 className="font-extrabold text-ink">Test out of a level</h2>
-            <p className="text-sm text-ink-2">
-              Already know it? Sit a paper drawn across the level and score 80% or better to open it — passing opens
-              the level without claiming you learned it.
-            </p>
-          </div>
-        </div>
-        <Link to="/proficiency">
-          <Button variant="secondary">Test out</Button>
-        </Link>
-      </Card>
-
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <h2 className="font-extrabold text-ink">Skill mastery</h2>
@@ -206,6 +193,11 @@ export function ProgressPage() {
               })}
             </ul>
           )}
+          {weakest ? (
+            <Link to="/skills" className="mt-4 inline-block text-sm font-extrabold text-brand-700">
+              Weakest: {describeSkill(weakest.skill).label.toLowerCase()} — practise it →
+            </Link>
+          ) : null}
         </Card>
 
         <Card>
@@ -214,15 +206,25 @@ export function ProgressPage() {
             {activity.length === 0 ? (
               <p className="text-sm text-ink-2">Nothing recorded yet.</p>
             ) : (
-              activity.map((day) => (
+              activity.map((day, i) => (
                 <span
                   key={day.day}
                   title={`${day.day}: ${day.minutes} min, ${day.xp} XP, ${day.attempts} answers`}
-                  className={`h-5 w-5 rounded ${day.goal_met ? 'bg-success-600' : day.attempts > 0 ? 'bg-success-300' : 'bg-surface-2'}`}
+                  className={`h-5 w-5 rounded ${day.goal_met ? 'bg-success-600' : day.attempts > 0 ? 'bg-success-300' : 'bg-surface-2'} ${
+                    i === activity.length - 1 ? 'ring-2 ring-offset-1 ring-ink' : ''
+                  }`}
                 />
               ))
             )}
           </div>
+          {activity.length > 0 ? (
+            <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-bold text-ink-3">
+              <li className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-surface-2" />none</li>
+              <li className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-success-300" />some</li>
+              <li className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-success-600" />goal met</li>
+              <li className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded ring-2 ring-ink" />today</li>
+            </ul>
+          ) : null}
           <div className="mt-4 flex flex-wrap gap-4 text-sm text-ink-2">
             <span className="inline-flex items-center gap-1.5">
               <Sparkles size={16} className="text-reward-700" aria-hidden />

@@ -172,8 +172,9 @@ export function App() {
  *  screen, a thumb-reachable bottom bar on a phone. Adding a destination is one line. */
 type Destination = { to: string; label: string; icon: (props: SVGProps<SVGSVGElement>) => ReactElement; end?: boolean }
 
-// Four destinations, not five: "Today" and "Path" were two labels for one screen, and
-// the strip above carries the learner's numbers on every page, so neither needs a tab.
+// Five destinations. "Today" and "Path" were two labels for one screen, so neither needs a
+// tab; Progress earns one because it was only reachable through links inside other pages;
+// Tones is an off-path drill, so it lives in Practice with the other studios.
 // The icons are hanpath's own (components/icons.tsx) — filled and chunky, so the chrome
 // reads as pressable rather than as a library default.
 const DESTINATIONS: Destination[] = [
@@ -182,8 +183,9 @@ const DESTINATIONS: Destination[] = [
   // and the study guide. Without this the studio pages exist but nothing reaches them.
   { to: '/skills', label: 'Practice', icon: SkillsGlyph },
   { to: '/reviews', label: 'Reviews', icon: ReviewsGlyph },
-  { to: '/tones', label: 'Tones', icon: TonesGlyph },
-  { to: '/settings', label: 'Settings', icon: SettingsGlyph },
+  // The bars glyph reads as "progress" here; the tone drills no longer have a tab.
+  { to: '/progress', label: 'Progress', icon: TonesGlyph },
+  { to: '/settings', label: 'Profile', icon: SettingsGlyph },
 ]
 
 function RequireAuth({ authenticated, children }: { authenticated: boolean; children: ReactNode }) {
@@ -223,6 +225,20 @@ function LearnerShell() {
   const overview = useOverview()
   const signOut = () => void logout.mutateAsync()
   const due = overview.data?.due_reviews ?? 0
+  // A lesson is a focus screen: no navigation, no numbers strip, nothing to leave through
+  // by accident. The lesson page carries its own way out.
+  const focus = useLocation().pathname.startsWith('/lessons/')
+
+  if (focus) {
+    return (
+      <div className="min-h-screen bg-paper">
+        <main className="mx-auto w-full max-w-2xl px-4 pb-10 pt-4">
+          <Outlet />
+        </main>
+        <LicenceFooter className="mx-auto w-full max-w-2xl px-4 pb-8" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-paper">

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { MemoryRouter } from 'react-router-dom'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ToneAnswersResponse, ToneDrill, ToneQueue } from '../../api/types'
@@ -83,7 +84,7 @@ beforeEach(() => {
 
 describe('TonePage', () => {
   it('asks the first tone question and counts the round', () => {
-    render(<TonePage />)
+    render(<MemoryRouter><TonePage /></MemoryRouter>)
 
     expect(screen.getByText('你好')).toBeInTheDocument()
     expect(screen.getAllByText(/choose the tones written for this word/i).length).toBeGreaterThan(0)
@@ -97,7 +98,7 @@ describe('TonePage', () => {
       data: queue([drill('e1', '你好', '3-3'), drill('e2', '现在', '4-4')]),
       refetch: vi.fn(),
     })
-    render(<TonePage />)
+    render(<MemoryRouter><TonePage /></MemoryRouter>)
 
     await userEvent.click(screen.getByRole('button', { name: '3-3' }))
 
@@ -116,7 +117,7 @@ describe('TonePage', () => {
       data: queue([drill('e1', '你好', '3-3'), drill('e2', '现在', '4-4')]),
       refetch: vi.fn(),
     })
-    render(<TonePage />)
+    render(<MemoryRouter><TonePage /></MemoryRouter>)
 
     await userEvent.click(screen.getByRole('button', { name: '3-3' }))
 
@@ -130,7 +131,7 @@ describe('TonePage', () => {
   })
 
   it('ends the round by naming the tone that was missed', async () => {
-    render(<TonePage />)
+    render(<MemoryRouter><TonePage /></MemoryRouter>)
 
     await userEvent.click(screen.getByRole('button', { name: '3-3' }))
     await userEvent.click(screen.getByRole('button', { name: /see how you did/i }))
@@ -151,13 +152,13 @@ describe('TonePage', () => {
       data: { items: [], level: 2, stats: [] },
       refetch: vi.fn(),
     })
-    render(<TonePage />)
+    render(<MemoryRouter><TonePage /></MemoryRouter>)
 
     expect(screen.getByText(/no tone drills at this level/i)).toBeInTheDocument()
   })
 
   it('asks the server for the chosen level instead of choosing for itself', async () => {
-    render(<TonePage />)
+    render(<MemoryRouter><TonePage /></MemoryRouter>)
     // The page starts by letting the server decide (null), which is why the chip that
     // matches the drills in hand is the highlighted one — not a guessed default.
     expect(queueMock).toHaveBeenCalledWith(null)

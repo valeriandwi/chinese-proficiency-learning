@@ -159,7 +159,11 @@ function Field({ label, error, children }: { label: string; error?: string; chil
     <label className="flex flex-col gap-1">
       <span className="text-sm font-bold text-ink-2">{label}</span>
       {children}
-      {error ? <span className="text-xs font-semibold text-danger-700">{error}</span> : null}
+      {error ? (
+        <span role="alert" className="text-xs font-semibold text-danger-700">
+          {error}
+        </span>
+      ) : null}
     </label>
   )
 }

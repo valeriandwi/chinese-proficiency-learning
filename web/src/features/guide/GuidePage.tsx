@@ -1,3 +1,4 @@
+import { BackToPractice } from '../../components/BackToPractice'
 import { useState } from 'react'
 import { BookMarked, Search } from 'lucide-react'
 import { useBookmarks, useGrammarNotes, useVocabulary } from '../../api/hooks'
@@ -44,6 +45,7 @@ export function GuidePage() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
       <header className="flex flex-col gap-3">
+        <BackToPractice />
         <div>
           <h1 className="flex items-center gap-2 text-3xl font-extrabold tracking-tight text-ink">
             <BookMarked size={26} aria-hidden className="text-brand-600" />

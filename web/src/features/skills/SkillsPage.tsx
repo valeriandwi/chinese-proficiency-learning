@@ -35,11 +35,11 @@ export function SkillsPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl font-extrabold tracking-tight text-ink">
-          练习 <span className="text-lg font-bold text-ink-3">skills</span>
+          练习 <span className="text-lg font-bold text-ink-3">practice</span>
         </h1>
         <p className="text-sm text-ink-2">
-          Practise writing, reading and speaking outside the path. Studio practice earns no XP and moves no lesson — it
-          is practice, not progress.
+          Drill writing, speaking, reading and tones from any level. Studio practice earns no XP and moves no lesson —
+          it is practice, not progress.
         </p>
       </header>
 
@@ -82,6 +82,16 @@ export function SkillsPage() {
         blurb="Read real passages from the lessons, sentence by sentence, with pinyin and translation on tap."
         art={<ReadDoorArt className="h-16 w-28 shrink-0" />}
         mastery={skills.find((s) => s.skill === 'reading')}
+        targetLevel={targetLevel}
+        wide
+      />
+      <SkillDoor
+        to="/tones"
+        title="Tones"
+        hanzi="调"
+        blurb="Hear a word and choose its tone pattern — the drill learners fail most, without walking the path first."
+        art={<span className="hanzi grid h-16 w-16 shrink-0 place-items-center rounded-tile bg-brand-50 text-3xl font-bold text-brand-700" aria-hidden>调</span>}
+        mastery={undefined}
         targetLevel={targetLevel}
         wide
       />

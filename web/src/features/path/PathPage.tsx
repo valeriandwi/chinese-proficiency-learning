@@ -3,8 +3,9 @@ import { Check, Lock, Play, Star } from "lucide-react";
 import { useOverview, usePath, useSession } from "../../api/hooks";
 import { describeLessonState } from "../../lib/labels";
 import type { LessonSummary } from "../../api/types";
-import { Chip, ErrorNote, ProgressRing, Spinner } from "../../components/ui";
+import { Chip, ErrorNote, ProgressRing, Skeleton } from "../../components/ui";
 import { CheckpointGlyph } from "../../components/icons";
+import { MascotMark } from "../../components/Mascot";
 
 /** One accent per unit, cycling through five families — Duolingo's device for telling
  *  one stretch of the path from the next. Written as literal class strings because
@@ -35,11 +36,11 @@ export function PathPage() {
   const path = usePath(version, Boolean(overview.data));
 
   if (overview.isLoading || (overview.data && path.isLoading))
-    return <Spinner label="Loading the path" />;
+    return <PathSkeleton />;
   if (overview.error)
     return <ErrorNote>{(overview.error as Error).message}</ErrorNote>;
   if (path.error) return <ErrorNote>{(path.error as Error).message}</ErrorNote>;
-  if (!path.data) return <Spinner label="Loading the path" />;
+  if (!path.data) return <PathSkeleton />;
 
   // The trail marks exactly one "start here" node: the first lesson that is not
   // finished. Everything above it is behind the learner, everything below is ahead.
@@ -49,21 +50,56 @@ export function PathPage() {
   const nextLessonId = flat.find((lesson) => lesson.state !== "completed")?.id;
   const nextLesson = flat.find((lesson) => lesson.id === nextLessonId);
   const user = session.data?.authenticated ? session.data.user : undefined;
+  const dueReviews = overview.data?.due_reviews ?? 0;
 
   return (
     <div className="flex flex-col gap-8">
       {/* The home screen. It says hello and then says what to do — the analytics that
           used to live here are on /progress, one tap from the strip above. */}
       <header>
-        <h1 className="text-3xl font-extrabold tracking-tight text-ink">
+        <h1 className="text-2xl font-extrabold tracking-tight text-ink">
           {user ? `你好, ${user.display_name}` : "你的学习路径"}
         </h1>
-        <p className="mt-1 text-sm text-ink-2">
-          {nextLesson
-            ? `Next up: ${nextLesson.title}`
-            : "Every lesson in this curriculum is complete."}
-        </p>
       </header>
+
+      {/* The answer to "what now?" is the largest thing on the screen. Reviews are a nudge
+          inside it, not a second button competing with Continue. */}
+      <section
+        aria-labelledby="up-next-title"
+        className="flex flex-wrap items-center gap-4 rounded-lg bg-brand-400 p-6 text-ink shadow-[0_6px_0_var(--color-brand-600)]"
+      >
+        <div className="flex min-w-0 flex-1 basis-64 flex-col gap-2">
+          <p className="text-xs font-extrabold uppercase tracking-widest">Up next</p>
+          {nextLesson ? (
+            <>
+              <h2 id="up-next-title" className="hanzi text-2xl font-extrabold leading-tight">
+                {nextLesson.title}
+              </h2>
+              <p className="text-sm font-bold">
+                {nextLesson.exercise_count} exercises · {nextLesson.estimated_minutes} min · {nextLesson.xp_reward} XP
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
+                <Link
+                  to={`/lessons/${nextLesson.id}`}
+                  className="inline-flex min-h-12 items-center justify-center rounded-tile border-2 border-white bg-white px-6 text-base font-extrabold text-brand-700 shadow-[0_4px_0_var(--color-brand-100)] transition active:translate-y-px active:shadow-none"
+                >
+                  {nextLesson.state === "in_progress" ? "Continue" : "Start"} lesson
+                </Link>
+                {dueReviews > 0 ? (
+                  <Link to="/reviews" className="text-sm font-extrabold underline underline-offset-2">
+                    {dueReviews} review{dueReviews === 1 ? "" : "s"} due — do those first
+                  </Link>
+                ) : null}
+              </div>
+            </>
+          ) : (
+            <h2 id="up-next-title" className="text-xl font-extrabold">
+              Every lesson in this curriculum is complete.
+            </h2>
+          )}
+        </div>
+        <MascotMark size={88} />
+      </section>
 
       {path.data.levels.map((level) => {
         const levelRatio =
@@ -257,5 +293,20 @@ function LessonNode({
         </span>
       </Link>
     </li>
+  );
+}
+
+/** The path's loading state is the shape of the path: a hero, then nodes down the trail. */
+function PathSkeleton() {
+  return (
+    <div role="status" aria-busy="true" aria-label="Loading the path" className="flex flex-col gap-8">
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-40 w-full !rounded-lg" />
+      <div className="flex flex-col items-center gap-7">
+        <Skeleton className="h-24 w-24 !rounded-full" />
+        <Skeleton className="h-24 w-24 !rounded-full" />
+        <Skeleton className="h-24 w-24 !rounded-full" />
+      </div>
+    </div>
   );
 }

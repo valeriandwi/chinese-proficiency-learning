@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useCurricula, useLogout, useOverview, useSession, useUpdateMe } from '../../api/hooks'
+import { useLogout, useOverview, useSession, useUpdateMe } from '../../api/hooks'
 import { describeGoal } from '../../lib/labels'
-import { Button, Card, Chip, ErrorNote } from '../../components/ui'
+import { Button, Card, ErrorNote } from '../../components/ui'
 import { usePrefs } from '../../stores/prefs'
 
 const timezones = [
@@ -19,7 +19,6 @@ const timezones = [
 export function ProfilePage() {
   const session = useSession()
   const overview = useOverview()
-  const curricula = useCurricula()
   const update = useUpdateMe()
   const logout = useLogout()
   const prefs = usePrefs()
@@ -50,47 +49,46 @@ export function ProfilePage() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-      <h1 className="text-2xl font-semibold">Settings</h1>
-
-      <Card className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <Chip tone="accent">{user.role}</Chip>
-          <Chip tone={user.email_verified_at ? 'positive' : 'warning'}>
-            {user.email_verified_at ? 'email verified' : 'email not verified'}
-          </Chip>
-          <Chip>{user.email}</Chip>
+      <div className="flex items-center gap-4">
+        <span
+          aria-hidden
+          className="grid h-14 w-14 shrink-0 place-items-center rounded-card bg-brand-400 text-2xl font-extrabold text-ink"
+        >
+          {user.display_name.trim().charAt(0).toUpperCase()}
+        </span>
+        <div className="min-w-0">
+          <h1 className="truncate text-2xl font-extrabold tracking-tight text-ink">{user.display_name}</h1>
+          <p className="truncate text-sm text-ink-2">
+            {user.email} · {user.email_verified_at ? 'email verified' : 'email not verified'}
+          </p>
         </div>
+      </div>
+
+      <Card className="flex flex-col gap-4" aria-labelledby="learning-h">
+        <h2 id="learning-h" className="text-lg font-extrabold text-ink">
+          Learning
+        </h2>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-ink-2">Display name</span>
+          <span className="text-sm font-bold text-ink-2">Display name</span>
           <input className="input" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
         </label>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-ink-2">
-            Timezone — this decides which day your streak counts
-          </span>
-          <select className="input" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
-            {[...new Set([timezone, ...timezones])].map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <div className="grid grid-cols-2 gap-3">
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-ink-2">Daily goal measured in</span>
-            <select className="input" value={goalKind} onChange={(e) => setGoalKind(e.target.value as never)}>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-sm font-bold text-ink-2">Daily goal</legend>
+          <div className="grid grid-cols-2 gap-3">
+            <select
+              aria-label="Daily goal measured in"
+              className="input"
+              value={goalKind}
+              onChange={(e) => setGoalKind(e.target.value as never)}
+            >
               <option value="minutes">minutes</option>
               <option value="xp">XP</option>
               <option value="lessons">lessons</option>
             </select>
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-ink-2">Target per day</span>
             <input
+              aria-label="Target per day"
               className="input"
               type="number"
               min={1}
@@ -98,20 +96,12 @@ export function ProfilePage() {
               value={goalValue}
               onChange={(e) => setGoalValue(Number(e.target.value))}
             />
-          </label>
-        </div>
+          </div>
+          <p className="text-xs text-ink-3">Your streak counts the days you meet this.</p>
+        </fieldset>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-ink-2">Pinyin by default</span>
-          <select className="input" value={pinyinDefault} onChange={(e) => setPinyinDefault(e.target.value as never)}>
-            <option value="always">always shown</option>
-            <option value="on_tap">only when tapped</option>
-            <option value="never">never</option>
-          </select>
-        </label>
-
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-ink-2">Target HSK level</span>
+          <span className="text-sm font-bold text-ink-2">Target HSK level</span>
           <select className="input" value={targetLevel} onChange={(e) => setTargetLevel(Number(e.target.value))}>
             {Array.from({ length: 9 }, (_, i) => i + 1).map((level) => (
               <option key={level} value={level}>
@@ -121,61 +111,80 @@ export function ProfilePage() {
           </select>
         </label>
 
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-bold text-ink-2">Time zone — this decides where your day ends</span>
+          <select className="input" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
+            {[...new Set([timezone, ...timezones])].map((tz) => (
+              <option key={tz} value={tz}>
+                {tz}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-bold text-ink-2">Pinyin by default</span>
+          <select className="input" value={pinyinDefault} onChange={(e) => setPinyinDefault(e.target.value as never)}>
+            <option value="always">always shown</option>
+            <option value="on_tap">only when tapped</option>
+            <option value="never">never</option>
+          </select>
+        </label>
+
         {update.error ? <ErrorNote>{(update.error as Error).message}</ErrorNote> : null}
         <div className="flex items-center gap-3">
           <Button onClick={save} disabled={update.isPending}>
             {update.isPending ? 'Saving…' : 'Save'}
           </Button>
-          {saved ? <span className="text-sm text-brand-700">Saved — your rollups were recomputed.</span> : null}
+          {saved ? (
+            <span role="status" className="text-sm font-bold text-brand-700">
+              Saved — your rollups were recomputed.
+            </span>
+          ) : null}
         </div>
       </Card>
 
-      <Card className="flex flex-col gap-3">
-        <h2 className="font-semibold">Learner-facing options</h2>
-        <div className="flex items-center justify-between">
+      <Card className="flex flex-col gap-3" aria-labelledby="display-h">
+        <h2 id="display-h" className="text-lg font-extrabold text-ink">
+          Display &amp; sound
+        </h2>
+        <div className="flex items-center justify-between gap-3">
           <span className="text-sm text-ink-2">Show pinyin in lessons (this session)</span>
-          <Button variant="secondary" onClick={prefs.togglePinyin}>
+          <Button variant="secondary" onClick={prefs.togglePinyin} aria-pressed={prefs.pinyinVisible}>
             {prefs.pinyinVisible ? 'On' : 'Off'}
           </Button>
         </div>
-        <Link to="/placement" className="text-sm font-semibold text-brand-700">
-          Retake the placement check →
-        </Link>
-      </Card>
-
-      <Card className="flex flex-col gap-2">
-        <h2 className="font-semibold">Curricula available</h2>
-        {curricula.data?.curricula.map((c) => (
-          <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
-            <span>
-              <strong>{c.version}</strong> · {c.standard}
-            </span>
-            <span className="text-ink-3">
-              {c.level_count} levels · {c.lesson_count} lessons · {c.exercise_count} exercises · {c.status}
-            </span>
-          </div>
-        ))}
-        <p className="text-xs text-ink-3">
-          A curriculum version is data, not code: importing HSK 3.0&apos;s nine levels adds a version here without a
-          deployment.
-        </p>
-      </Card>
-
-      <Card className="flex items-center justify-between">
-        <div>
-          <h2 className="font-semibold">Signed in as {user.display_name}</h2>
-          <p className="text-sm text-ink-2">
-            {overview.data ? describeGoal(overview.data.streak.goal_kind, overview.data.streak.goal_value) : ''}
-          </p>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm text-ink-2">Sound effects (音效)</span>
+          <Button variant="secondary" onClick={prefs.toggleSound} aria-pressed={prefs.soundEnabled}>
+            {prefs.soundEnabled ? 'On' : 'Off'}
+          </Button>
         </div>
-        <Button
-          variant="secondary"
-          onClick={async () => {
-            await logout.mutateAsync()
-          }}
-        >
-          Sign out
-        </Button>
+      </Card>
+
+      <Card className="flex flex-col gap-3" aria-labelledby="account-h">
+        <h2 id="account-h" className="text-lg font-extrabold text-ink">
+          Account
+        </h2>
+        <p className="text-sm text-ink-2">
+          {overview.data ? describeGoal(overview.data.streak.goal_kind, overview.data.streak.goal_value) : ''}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/placement"
+            className="inline-flex items-center rounded-tile border-2 border-line bg-surface px-5 py-3 text-sm font-extrabold tracking-wide text-ink transition hover:bg-surface-2"
+          >
+            Retake placement
+          </Link>
+          <Button
+            variant="ghost"
+            onClick={async () => {
+              await logout.mutateAsync()
+            }}
+          >
+            Sign out
+          </Button>
+        </div>
       </Card>
     </div>
   )

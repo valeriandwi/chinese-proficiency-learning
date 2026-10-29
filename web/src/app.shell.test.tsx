@@ -117,9 +117,9 @@ describe('the application shell', () => {
     const navs = screen.getAllByRole('navigation', { name: 'Main', hidden: true })
     expect(navs).toHaveLength(2)
     for (const navigation of navs) {
-      // Four, not five: "Today" and "Path" were two labels for one screen, and the
-      // learner's numbers ride in the strip on every page rather than owning a tab.
-      for (const label of ['Learn', 'Reviews', 'Tones', 'Settings']) {
+      // Five: "Today" and "Path" were two labels for one screen; Progress has its own tab,
+      // and Tones now lives in Practice with the other studios.
+      for (const label of ['Learn', 'Practice', 'Reviews', 'Progress', 'Profile']) {
         expect(
           within(navigation).getByRole('link', { name: new RegExp(label), hidden: true }),
         ).toBeInTheDocument()

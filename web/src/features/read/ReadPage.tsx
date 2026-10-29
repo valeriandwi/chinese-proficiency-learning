@@ -1,5 +1,6 @@
+import { BackToPractice } from '../../components/BackToPractice'
 import { useState } from 'react'
-import { BookOpen, Eye, EyeOff } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 import { useReadingPassages } from '../../api/hooks'
 import { Button, Card, Chip, EmptyState, ErrorNote, Spinner } from '../../components/ui'
 import { BookmarkButton } from './BookmarkButton'
@@ -32,7 +33,7 @@ type Sentence = {
 export function ReadPage() {
   const [level, setLevel] = useState(0)
   const passages = useReadingPassages(level)
-  const [revealed, setRevealed] = useState<Record<string, boolean>>({})
+  const [revealed, setRevealed] = useState<Record<string, 0 | 1 | 2>>({})
   const [tappedWord, setTappedWord] = useState<{ zh: string; pinyin?: string; en?: string } | null>(null)
 
   if (passages.isLoading) return <Spinner label="Loading passages" />
@@ -41,6 +42,7 @@ export function ReadPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
       <header className="flex flex-col gap-3">
+        <BackToPractice />
         <div>
           <h1 className="flex items-center gap-2 text-3xl font-extrabold tracking-tight text-ink">
             <BookOpen size={26} aria-hidden className="text-brand-600" />
@@ -76,7 +78,7 @@ export function ReadPage() {
 
       {passages.data?.items.map((passage) => {
         const sentences = (passage.sentences ?? []) as Sentence[]
-        const isOpen = revealed[passage.id] ?? false
+        const help = revealed[passage.id] ?? 0
         return (
           <Card key={passage.id} className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -84,15 +86,23 @@ export function ReadPage() {
                 <Chip tone="neutral">HSK {passage.level}</Chip>
                 <Chip tone="neutral">{passage.word_count} words · {passage.minutes} min</Chip>
               </div>
-              <Button
-                variant="secondary"
-                onClick={() => setRevealed((r) => ({ ...r, [passage.id]: !isOpen }))}
-                className="px-3 py-1.5 text-xs"
-                aria-pressed={isOpen}
-              >
-                {isOpen ? <EyeOff size={14} aria-hidden /> : <Eye size={14} aria-hidden />}
-                {isOpen ? 'Hide helps' : 'Show pinyin + translation'}
-              </Button>
+              {/* Hanzi alone → + pinyin → + English: help is added a step at a time, so a
+                  learner can stop at the step that still makes them read. */}
+              <div role="group" aria-label="Show" className="inline-flex gap-1 rounded-tile bg-surface-2 p-1">
+                {(['Hanzi', '+ Pinyin', '+ English'] as const).map((label, step) => (
+                  <button
+                    key={label}
+                    type="button"
+                    aria-pressed={help === step}
+                    onClick={() => setRevealed((r) => ({ ...r, [passage.id]: step as 0 | 1 | 2 }))}
+                    className={`min-h-9 rounded-tile px-3 text-xs font-extrabold transition ${
+                      help === step ? 'bg-surface text-ink shadow-tile' : 'text-ink-2 hover:text-ink'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <h2 className="hanzi text-2xl font-extrabold text-ink">{passage.title}</h2>
@@ -102,10 +112,10 @@ export function ReadPage() {
               {sentences.map((sentence, i) => (
                 <div key={i} className="rounded-tile bg-surface-2 px-4 py-3">
                   <p className="hanzi text-xl leading-relaxed text-ink">{sentence.zh}</p>
-                  {isOpen && sentence.pinyin ? (
+                  {help >= 1 && sentence.pinyin ? (
                     <p className="mt-1 text-sm text-ink-3">{sentence.pinyin}</p>
                   ) : null}
-                  {isOpen && sentence.en ? (
+                  {help >= 2 && sentence.en ? (
                     <p className="mt-1 text-sm text-ink-2">{sentence.en}</p>
                   ) : null}
                   {/* Tap-a-word: where the passage's own token data carries a

@@ -1,3 +1,4 @@
+import { BackToPractice } from '../../components/BackToPractice'
 import { useEffect, useRef, useState } from 'react'
 import { PenLine, RotateCcw } from 'lucide-react'
 import { useAnswerStudio, useStudioQueue } from '../../api/hooks'
@@ -89,6 +90,7 @@ export function WritePage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
       <header className="flex flex-col gap-3">
+        <BackToPractice />
         <div>
           <h1 className="flex items-center gap-2 text-3xl font-extrabold tracking-tight text-ink">
             <PenLine size={26} aria-hidden className="text-brand-600" />
