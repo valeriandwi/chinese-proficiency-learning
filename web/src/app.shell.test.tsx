@@ -146,7 +146,7 @@ describe('the application shell', () => {
     // The home's job is to say what to do next. The statistics that used to share this
     // screen — and the database operation that sat in its primary position — moved to
     // /progress.
-    expect(await screen.findByText(/你好, Lan/)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /saying hello/ })).toBeInTheDocument()
     expect(screen.queryByText(/Skill mastery/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/Last 30 days/i)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /recompute/i })).not.toBeInTheDocument()

@@ -1,0 +1,329 @@
+# Hand-authored grammar lessons for HSK 2.0 level 4.
+#
+# Unlike level-4.yaml, which cmd/contentgen derives from the word lists, these sentences
+# were written by a person: each is a standard textbook pattern with a plain-language
+# explanation. This file ADDS one unit to level 4 (the way level-1-tones.yaml adds a unit
+# to level 1), so it is imported after the level it belongs to — see the Makefile.
+#
+# The vocabulary entries below are copied verbatim from level-4.yaml; the importer
+# requires every key a lesson names to be defined in the same file, and re-importing an
+# identical entry changes nothing.
+version: hsk2.0
+name: HSK 2.0 — Levels 1-6
+standard: HSK 2.0 (Chinese Testing International six-level syllabus)
+stage_model: six-levels
+status: published
+effective_from: "2010-01-01"
+notes: |
+    The legacy six-level HSK syllabus. Vocabulary placement follows the published
+    HSK 2.0 level word lists; definitions and example sentences here are authored
+    for this application (see docs/sources.md for what is derived from third-party
+    data and under which licence).
+
+    HSK 3.0 (three stages, nine levels) is a separate curriculum version and is
+    imported alongside this one — nothing in the application assumes six levels.
+
+    Levels 2 to 5 are generated from the same published word lists by
+    cmd/contentgen, and carry only the drills that can be derived from a word without
+    inventing language: meaning, listening, dictation, speaking and stroke order.
+    Authored sentences — fill_blank, sentence_order, translation, short_answer — exist
+    only where a person wrote them, which today means this file.
+
+    Every listening drill needs generated reference audio; the importer synthesises it
+    from the item's audio_text and stores a content-hash key, so an item whose audio
+    cannot be produced fails the import instead of shipping a silent lesson.
+vocabulary:
+    - key: Lian2
+      simplified: 连
+      traditional: 連
+      pinyin: Lián
+      parts_of_speech:
+        - adverb
+        - noun
+        - particle
+        - verb
+      senses:
+        - en: to link
+      audio_key: ""
+      freq_rank: 406
+      levels:
+        hsk2.0: 4
+    - key: bu4dan4
+      simplified: 不但
+      traditional: 不但
+      pinyin: bù dàn
+      parts_of_speech:
+        - conjunction
+      senses:
+        - en: not only (... but also ...)
+      audio_key: ""
+      freq_rank: 4161
+      levels:
+        hsk2.0: 4
+    - key: ji2shi3
+      simplified: 即使
+      traditional: 即使
+      pinyin: jí shǐ
+      parts_of_speech:
+        - conjunction
+      senses:
+        - en: even if
+      audio_key: ""
+      freq_rank: 1004
+      levels:
+        hsk2.0: 4
+    - key: zhi3yao4
+      simplified: 只要
+      traditional: 只要
+      pinyin: zhǐ yào
+      parts_of_speech:
+        - conjunction
+      senses:
+        - en: if only
+      audio_key: ""
+      freq_rank: 452
+      levels:
+        hsk2.0: 4
+    - key: Cheng2gong1
+      simplified: 成功
+      traditional: 成功
+      pinyin: Chéng gōng
+      parts_of_speech:
+        - adjective
+        - noun
+      senses:
+        - en: Chenggong or Chengkung town in Taitung…
+      audio_key: ""
+      freq_rank: 476
+      levels:
+        hsk2.0: 4
+    - key: dui4
+      simplified: 对
+      traditional: 對
+      pinyin: duì
+      parts_of_speech:
+        - adjective
+        - classifier
+        - preposition
+        - verb
+      senses:
+        - en: right
+      audio_key: ""
+      freq_rank: 28
+      levels:
+        hsk2.0: 4
+    - key: wu2lun4
+      simplified: 无论
+      traditional: 無論
+      pinyin: wú lùn
+      parts_of_speech:
+        - conjunction
+      senses:
+        - en: no matter what or how
+      audio_key: ""
+      freq_rank: 1069
+      levels:
+        hsk2.0: 4
+levels:
+    - level: 4
+      stage: intermediate
+      title: Level 4 — core vocabulary
+      description: The published HSK 2.0 level-4 word list in frequency order, practised as meaning, listening and speaking drills. Thematic units are not yet curated; every word is covered by a meaning drill, a listening drill and a speaking drill.
+      vocab_target: 598
+      units:
+        - unit: 26
+          title: 语法 — grammar
+          description: 'Grammar patterns of this level, each with a plain-language rule, a fill-in-the-blank and a sentence to put in order.'
+          lessons:
+            - lesson: 1
+              title: "连……都 — even"
+              kind: lesson
+              goal: "Stress an extreme case with 连……都."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["Lian2"]
+              passages: []
+              exercises:
+                - key: g4-lian-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "连……都 (or 连……也) stresses an extreme example: 他忙得连水都没喝 is “he was so busy he didn’t even drink water”. The thing after 连 is the extreme case."
+                  prompt:
+                    sentence: "他忙得连水___没喝。"
+                    pinyin: "tā máng de lián shuǐ ___ méi hē."
+                    hint: "Add the word that closes “even …”."
+                    word_bank: ["都", "才", "就"]
+                  answer_key:
+                    accepted: ["都"]
+                - key: g4-lian-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"Even the teacher doesn’t know.\""
+                    tokens: ["老师", "连", "都", "不知道"]
+                    pinyin: "lián lǎoshī dōu bù zhīdào"
+                  answer_key:
+                    order: [1, 0, 2, 3]
+                    full_pinyin: "lián lǎoshī dōu bù zhīdào"
+            - lesson: 2
+              title: "不但……而且 — not only … but also"
+              kind: lesson
+              goal: "Add a second point to the first with 不但……而且."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["bu4dan4"]
+              passages: []
+              exercises:
+                - key: g4-budan-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "不但 introduces the first point and 而且 adds a second that goes further: 她不但聪明，而且很努力 is “she is not only clever but also hardworking”."
+                  prompt:
+                    sentence: "她不但聪明，___很努力。"
+                    pinyin: "tā búdàn cōngming, ___ hěn nǔlì."
+                    hint: "Add the word that means “but also”."
+                    word_bank: ["而且", "但是", "所以"]
+                  answer_key:
+                    accepted: ["而且"]
+                - key: g4-budan-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"This dish is not only cheap but also tasty.\""
+                    tokens: ["而且", "便宜", "好吃", "这个菜", "不但"]
+                    pinyin: "zhège cài búdàn piányi, érqiě hǎochī"
+                  answer_key:
+                    order: [3, 4, 1, 0, 2]
+                    full_pinyin: "zhège cài búdàn piányi, érqiě hǎochī"
+            - lesson: 3
+              title: "即使……也 — even if"
+              kind: lesson
+              goal: "Hold your ground against a supposed obstacle with 即使……也."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["ji2shi3"]
+              passages: []
+              exercises:
+                - key: g4-jishi-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "即使 introduces a hypothetical obstacle and 也 says the result stays the same: 即使下雨，我也要去 is “even if it rains, I will still go”."
+                  prompt:
+                    sentence: "即使下雨，我___要去。"
+                    pinyin: "jíshǐ xiàyǔ, wǒ ___ yào qù."
+                    hint: "Add the word that means “still”."
+                    word_bank: ["也", "就", "才"]
+                  answer_key:
+                    accepted: ["也"]
+                - key: g4-jishi-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"Even if he is tired, he still has to work.\""
+                    tokens: ["也", "即使", "很累", "他", "要工作"]
+                    pinyin: "jíshǐ hěn lèi, tā yě yào gōngzuò"
+                  answer_key:
+                    order: [1, 2, 3, 0, 4]
+                    full_pinyin: "jíshǐ hěn lèi, tā yě yào gōngzuò"
+            - lesson: 4
+              title: "只要……就 — as long as"
+              kind: lesson
+              goal: "State a sufficient condition with 只要……就."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["zhi3yao4", "Cheng2gong1"]
+              passages: []
+              exercises:
+                - key: g4-zhiyao-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "只要……就 gives a condition that is enough on its own: 只要你努力，就能成功 is “as long as you work hard, you can succeed”. Compare 只有……才, where the condition is the only way."
+                  prompt:
+                    sentence: "只要你努力，___能成功。"
+                    pinyin: "zhǐyào nǐ nǔlì, ___ néng chénggōng."
+                    hint: "Add the word that pairs with 只要."
+                    word_bank: ["就", "才", "却"]
+                  answer_key:
+                    accepted: ["就"]
+                - key: g4-zhiyao-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"As long as you work hard, you can succeed.\""
+                    tokens: ["就", "能成功", "只要", "努力", "你"]
+                    pinyin: "zhǐyào nǐ nǔlì, jiù néng chénggōng"
+                  answer_key:
+                    order: [2, 4, 3, 0, 1]
+                    full_pinyin: "zhǐyào nǐ nǔlì, jiù néng chénggōng"
+            - lesson: 5
+              title: "对……来说 — for someone"
+              kind: lesson
+              goal: "Give a point of view with 对……来说."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["dui4"]
+              passages: []
+              exercises:
+                - key: g4-duilaishuo-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "对……来说 means “as far as … is concerned”, introducing whose point of view a statement is from: 对学生来说，考试很重要 is “for students, exams are important”."
+                  prompt:
+                    sentence: "___学生来说，考试很重要。"
+                    pinyin: "___ xuésheng lái shuō, kǎoshì hěn zhòngyào."
+                    hint: "Add the word that opens “for …”."
+                    word_bank: ["对", "给", "比"]
+                  answer_key:
+                    accepted: ["对"]
+                - key: g4-duilaishuo-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"For students, exams are very important.\""
+                    tokens: ["很重要", "来说", "考试", "对", "学生"]
+                    pinyin: "duì xuésheng lái shuō, kǎoshì hěn zhòngyào"
+                  answer_key:
+                    order: [3, 4, 1, 2, 0]
+                    full_pinyin: "duì xuésheng lái shuō, kǎoshì hěn zhòngyào"
+            - lesson: 6
+              title: "无论……都 — no matter"
+              kind: lesson
+              goal: "Say something holds in every case with 无论……都."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["wu2lun4"]
+              passages: []
+              exercises:
+                - key: g4-wulun-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "无论 opens a range (a question word, or alternatives) and 都 says the result is the same in every case: 无论谁都可以参加 is “no matter who, anyone can join”."
+                  prompt:
+                    sentence: "无论多忙，他___会来。"
+                    pinyin: "wúlùn duō máng, tā ___ huì lái."
+                    hint: "Add the word that means “in every case”."
+                    word_bank: ["都", "就", "才"]
+                  answer_key:
+                    accepted: ["都"]
+                - key: g4-wulun-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"No matter who, anyone can take part.\""
+                    tokens: ["都", "无论", "可以参加", "谁"]
+                    pinyin: "wúlùn shéi dōu kěyǐ cānjiā"
+                  answer_key:
+                    order: [1, 3, 0, 2]
+                    full_pinyin: "wúlùn shéi dōu kěyǐ cānjiā"

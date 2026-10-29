@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useLogout, useOverview, useSession, useUpdateMe } from '../../api/hooks'
 import { describeGoal } from '../../lib/labels'
 import { Button, Card, ErrorNote } from '../../components/ui'
+import { Select } from '../../components/Select'
 import { usePrefs } from '../../stores/prefs'
 
 const timezones = [
@@ -94,16 +95,16 @@ export function ProfilePage() {
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-bold text-ink-2">Daily goal</legend>
           <div className="grid grid-cols-2 gap-3">
-            <select
-              aria-label="Daily goal measured in"
-              className="input"
+            <Select
+              label="Daily goal measured in"
               value={goalKind}
-              onChange={(e) => setGoalKind(e.target.value as never)}
-            >
-              <option value="minutes">minutes</option>
-              <option value="xp">XP</option>
-              <option value="lessons">lessons</option>
-            </select>
+              onChange={setGoalKind}
+              options={[
+                { value: 'minutes', label: 'minutes' },
+                { value: 'xp', label: 'XP' },
+                { value: 'lessons', label: 'lessons' },
+              ]}
+            />
             <input
               aria-label="Target per day"
               className="input"
@@ -119,33 +120,33 @@ export function ProfilePage() {
 
         <label className="flex flex-col gap-1">
           <span className="text-sm font-bold text-ink-2">Target HSK level</span>
-          <select className="input" value={targetLevel} onChange={(e) => setTargetLevel(Number(e.target.value))}>
-            {Array.from({ length: 9 }, (_, i) => i + 1).map((level) => (
-              <option key={level} value={level}>
-                HSK {level}
-              </option>
-            ))}
-          </select>
+          <Select
+            value={targetLevel}
+            onChange={setTargetLevel}
+            options={Array.from({ length: 9 }, (_, i) => ({ value: i + 1, label: `HSK ${i + 1}` }))}
+          />
         </label>
 
         <label className="flex flex-col gap-1">
           <span className="text-sm font-bold text-ink-2">Time zone — this decides where your day ends</span>
-          <select className="input" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
-            {[...new Set([timezone, ...timezones])].map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
+          <Select
+            value={timezone}
+            onChange={setTimezone}
+            options={[...new Set([timezone, ...timezones])].map((tz) => ({ value: tz, label: tz }))}
+          />
         </label>
 
         <label className="flex flex-col gap-1">
           <span className="text-sm font-bold text-ink-2">Pinyin by default</span>
-          <select className="input" value={pinyinDefault} onChange={(e) => setPinyinDefault(e.target.value as never)}>
-            <option value="always">always shown</option>
-            <option value="on_tap">only when tapped</option>
-            <option value="never">never</option>
-          </select>
+          <Select
+            value={pinyinDefault}
+            onChange={setPinyinDefault}
+            options={[
+              { value: 'always', label: 'always shown' },
+              { value: 'on_tap', label: 'only when tapped' },
+              { value: 'never', label: 'never' },
+            ]}
+          />
         </label>
 
         {update.error ? <ErrorNote>{(update.error as Error).message}</ErrorNote> : null}

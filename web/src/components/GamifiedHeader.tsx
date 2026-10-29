@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Flame, Sparkles } from 'lucide-react'
-import { useOverview, useSession } from '../api/hooks'
+import { useOverview } from '../api/hooks'
 import { goalRatio } from '../lib/goal'
 import { ProgressRing, Skeleton } from './ui'
 
@@ -17,7 +17,6 @@ import { ProgressRing, Skeleton } from './ui'
  */
 export function GamifiedHeader() {
   const overview = useOverview()
-  const session = useSession()
 
   if (overview.isLoading) {
     return (
@@ -42,21 +41,9 @@ export function GamifiedHeader() {
   )
   const percent = Math.round(ratio * 100)
   const days = `${streak.current_streak} day${streak.current_streak === 1 ? '' : 's'}`
-  const user = session.data?.authenticated ? session.data.user : undefined
-  const level = user?.target_level ?? null
 
   return (
-    <div data-testid="gamified-header" className="flex min-w-0 items-center gap-2.5 max-sm:justify-end">
-      {/* The phone header above already carries identity; here it would only cost a line. */}
-      <p className="min-w-0 flex-1 truncate text-sm font-extrabold text-ink max-sm:hidden">
-        {user?.display_name ?? 'Learner'}
-        {level ? (
-          <span className="ml-2 rounded-pill bg-brand-100 px-2 py-0.5 align-middle text-[0.65rem] font-extrabold uppercase tracking-wide text-brand-700">
-            HSK {level}
-          </span>
-        ) : null}
-      </p>
-
+    <div data-testid="gamified-header" className="flex min-w-0 items-center gap-2.5">
       <Link
         to="/progress"
         aria-label={`Streak: ${days}. See your progress.`}

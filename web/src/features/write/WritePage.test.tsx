@@ -28,6 +28,9 @@ vi.mock('../../api/hooks', async (importOriginal) => {
   return {
     ...actual,
     useStudioQueue: (kind: string, level: number | null, character = '') => queueMock(kind, level, character),
+    useStudioCharacters: () => ({
+      data: { level: 0, items: [{ character: '我', pinyin: 'wǒ', level: 1 }, { character: '你', pinyin: 'nǐ', level: 1 }] },
+    }),
     useAnswerStudio: () => ({ mutate: answerMock, isPending: false, error: null }),
   }
 })
@@ -241,5 +244,16 @@ describe('WritePage', () => {
     render(<MemoryRouter><WritePage /></MemoryRouter>)
 
     expect(screen.getByRole('alert')).toHaveTextContent('drills are unavailable')
+  })
+})
+
+describe('WritePage character picker', () => {
+  it('lists the level\'s characters and deals the one the learner picks', async () => {
+    render(<MemoryRouter><WritePage /></MemoryRouter>)
+    expect(screen.getByText(/2 characters/)).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: '你 nǐ' }))
+    expect(queueMock).toHaveBeenLastCalledWith('writing', null, '你')
+    expect(screen.getByRole('button', { name: '你 nǐ' })).toHaveAttribute('aria-pressed', 'true')
   })
 })

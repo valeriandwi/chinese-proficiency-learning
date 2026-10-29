@@ -35,6 +35,8 @@ export function ReadPage() {
   const passages = useReadingPassages(level)
   const [revealed, setRevealed] = useState<Record<string, 0 | 1 | 2>>({})
   const [tappedWord, setTappedWord] = useState<{ zh: string; pinyin?: string; en?: string } | null>(null)
+  // The sentence last touched is tinted, so a learner never loses their place.
+  const [active, setActive] = useState<string | null>(null)
 
   if (passages.isLoading) return <Spinner label="Loading passages" />
   if (passages.error) return <ErrorNote onRetry={() => void passages.refetch()}>{(passages.error as Error).message}</ErrorNote>
@@ -109,33 +111,49 @@ export function ReadPage() {
             {passage.instruction ? <p className="text-sm text-ink-2">{passage.instruction}</p> : null}
 
             <div className="flex flex-col gap-2.5">
-              {sentences.map((sentence, i) => (
-                <div key={i} className="rounded-tile bg-surface-2 px-4 py-3">
-                  <p className="hanzi text-xl leading-relaxed text-ink">{sentence.zh}</p>
-                  {help >= 1 && sentence.pinyin ? (
-                    <p className="mt-1 text-sm text-ink-3">{sentence.pinyin}</p>
-                  ) : null}
-                  {help >= 2 && sentence.en ? (
-                    <p className="mt-1 text-sm text-ink-2">{sentence.en}</p>
-                  ) : null}
-                  {/* Tap-a-word: where the passage's own token data carries a
-                      meaning, a word can be tapped for it. */}
-                  {sentence.tokens?.length ? (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {sentence.tokens.map((token, j) => (
-                        <button
-                          key={`${i}-${j}`}
-                          type="button"
-                          className="hanzi rounded-lg border border-line-strong bg-surface px-2 py-1 text-base transition hover:border-brand-500"
-                          onClick={() => setTappedWord(token)}
-                        >
-                          {token.zh}
-                        </button>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ))}
+              {sentences.map((sentence, i) => {
+                const key = `${passage.id}:${i}`
+                return (
+                  <div
+                    key={i}
+                    onClick={() => setActive(key)}
+                    className={`rounded-tile px-4 py-3 ${active === key ? 'bg-reward-50' : 'bg-surface-2'}`}
+                  >
+                    {sentence.tokens?.length ? (
+                      /* Pinyin sits in real <ruby> above each word, so it aligns with the
+                         word and a screen reader gets it; each word is a button for its card. */
+                      <p className="hanzi flex flex-wrap items-end gap-x-0.5 gap-y-1 text-3xl leading-relaxed text-ink">
+                        {sentence.tokens.map((token, j) => (
+                          <button
+                            key={`${i}-${j}`}
+                            type="button"
+                            className="rounded-lg px-0.5 transition hover:bg-reward-100"
+                            onClick={() => {
+                              setActive(key)
+                              setTappedWord(token)
+                            }}
+                          >
+                            <ruby>
+                              {token.zh}
+                              {help >= 1 && token.pinyin ? (
+                                <rt className="font-sans text-[0.8rem] font-medium text-ink-3">{token.pinyin}</rt>
+                              ) : null}
+                            </ruby>
+                          </button>
+                        ))}
+                      </p>
+                    ) : (
+                      <>
+                        <p className="hanzi text-xl leading-relaxed text-ink">{sentence.zh}</p>
+                        {help >= 1 && sentence.pinyin ? (
+                          <p className="mt-1 text-sm text-ink-3">{sentence.pinyin}</p>
+                        ) : null}
+                      </>
+                    )}
+                    {help >= 2 && sentence.en ? <p className="mt-1 text-sm text-ink-2">{sentence.en}</p> : null}
+                  </div>
+                )
+              })}
             </div>
           </Card>
         )

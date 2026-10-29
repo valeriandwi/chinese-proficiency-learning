@@ -2,7 +2,7 @@ import { BackToPractice } from '../../components/BackToPractice'
 import { useEffect, useRef, useState } from 'react'
 import { AudioLines, RotateCcw, TrendingDown, Trophy } from 'lucide-react'
 import { useAnswerTone, useToneQueue } from '../../api/hooks'
-import type { AnswerPayload, AttemptResult, ToneDrill, ToneLevelStat, ToneTallyRow } from '../../api/types'
+import type { AnswerPayload, AttemptResult, ToneDrill, ToneTallyRow } from '../../api/types'
 import { Button, Card, Chip, EmptyState, ErrorNote, ProgressBar, Spinner } from '../../components/ui'
 import { ExerciseCard } from '../lesson/ExerciseCard'
 import { usePrefs } from '../../stores/prefs'
@@ -45,7 +45,6 @@ export function TonePage() {
   const [payloads, setPayloads] = useState<Record<string, AnswerPayload>>({})
   const [results, setResults] = useState<Record<string, AttemptResult>>({})
   const [tally, setTally] = useState<ToneTallyRow[]>([])
-  const [stats, setStats] = useState<ToneLevelStat[]>([])
   const sequence = useRef(0)
 
   // A round starts as soon as the server has questions for the chosen level, and never
@@ -59,13 +58,11 @@ export function TonePage() {
     setPayloads({})
     setResults({})
     setTally([])
-    setStats(queue.data.stats ?? [])
   }, [queue.data, round])
 
   const chooseLevel = (value: number) => {
     setLevel(value)
     setRound(null) // the next round is dealt from the new level
-    setStats([])
   }
 
   const nextRound = () => {
@@ -81,6 +78,7 @@ export function TonePage() {
   const current = drills[index]
   const finished = round !== null && index >= drills.length
   const correct = Object.values(results).filter((r) => r.is_correct === true).length
+  const missed = Object.values(results).filter((r) => r.is_correct === false).length
 
   const submit = (drill: ToneDrill, payload: AnswerPayload) => {
     setPayloads((p) => ({ ...p, [drill.id]: payload }))
@@ -98,7 +96,6 @@ export function TonePage() {
             notifyGraded(result)
           }
           setTally((rows) => mergeTally(rows, res.tone_tally ?? []))
-          if (res.stats?.length) setStats(res.stats)
         },
       },
     )
@@ -138,23 +135,12 @@ export function TonePage() {
               </Button>
             )
           })}
+          <span className="ml-auto flex gap-2">
+            <Chip tone="positive">{correct} right</Chip>
+            <Chip tone="danger">{missed} missed</Chip>
+          </span>
         </div>
       </header>
-
-      {stats.length > 0 ? (
-        <div className="flex flex-wrap gap-2 text-xs text-ink-3">
-          {stats
-            .filter((s) => s.answered > 0)
-            .map((s) => (
-              <Chip key={s.level} tone="neutral">
-                HSK {s.level}: {s.correct}/{s.answered} correct
-              </Chip>
-            ))}
-          {stats.every((s) => s.answered === 0) ? (
-            <span>No tone practice yet — the lifetime counts appear here as you go.</span>
-          ) : null}
-        </div>
-      ) : null}
 
       {round !== null && drills.length > 0 && !finished ? (
         <div className="flex flex-col gap-1.5">

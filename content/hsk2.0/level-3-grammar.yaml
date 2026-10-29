@@ -1,0 +1,302 @@
+# Hand-authored grammar lessons for HSK 2.0 level 3.
+#
+# Unlike level-3.yaml, which cmd/contentgen derives from the word lists, these sentences
+# were written by a person: each is a standard textbook pattern with a plain-language
+# explanation. This file ADDS one unit to level 3 (the way level-1-tones.yaml adds a unit
+# to level 1), so it is imported after the level it belongs to — see the Makefile.
+#
+# The vocabulary entries below are copied verbatim from level-3.yaml; the importer
+# requires every key a lesson names to be defined in the same file, and re-importing an
+# identical entry changes nothing.
+version: hsk2.0
+name: HSK 2.0 — Levels 1-6
+standard: HSK 2.0 (Chinese Testing International six-level syllabus)
+stage_model: six-levels
+status: published
+effective_from: "2010-01-01"
+notes: |
+    The legacy six-level HSK syllabus. Vocabulary placement follows the published
+    HSK 2.0 level word lists; definitions and example sentences here are authored
+    for this application (see docs/sources.md for what is derived from third-party
+    data and under which licence).
+
+    HSK 3.0 (three stages, nine levels) is a separate curriculum version and is
+    imported alongside this one — nothing in the application assumes six levels.
+
+    Levels 2 to 5 are generated from the same published word lists by
+    cmd/contentgen, and carry only the drills that can be derived from a word without
+    inventing language: meaning, listening, dictation, speaking and stroke order.
+    Authored sentences — fill_blank, sentence_order, translation, short_answer — exist
+    only where a person wrote them, which today means this file.
+
+    Every listening drill needs generated reference audio; the importer synthesises it
+    from the item's audio_text and stores a content-hash key, so an item whose audio
+    cannot be produced fails the import instead of shipping a silent lesson.
+vocabulary:
+    - key: ba3
+      simplified: 把
+      traditional: 把
+      pinyin: bǎ
+      parts_of_speech:
+        - numeral
+        - preposition
+        - verb
+      senses:
+        - en: to hold
+      audio_key: ""
+      freq_rank: 50
+      levels:
+        hsk2.0: 3
+    - key: fang4
+      simplified: 放
+      traditional: 放
+      pinyin: fàng
+      parts_of_speech:
+        - verb
+      senses:
+        - en: to put
+      audio_key: ""
+      freq_rank: 280
+      levels:
+        hsk2.0: 3
+    - key: bei4
+      simplified: 被
+      traditional: 被
+      pinyin: bèi
+      parts_of_speech:
+        - adverb
+        - preposition
+      senses:
+        - en: quilt
+      audio_key: ""
+      freq_rank: 54
+      levels:
+        hsk2.0: 3
+    - key: sui1ran2
+      simplified: 虽然
+      traditional: 雖然
+      pinyin: suī rán
+      parts_of_speech:
+        - conjunction
+      senses:
+        - en: although
+      audio_key: ""
+      freq_rank: 440
+      levels:
+        hsk2.0: 3
+    - key: ru2guo3
+      simplified: 如果
+      traditional: 如果
+      pinyin: rú guǒ
+      parts_of_speech:
+        - conjunction
+        - verb
+      senses:
+        - en: if
+      audio_key: ""
+      freq_rank: 89
+      levels:
+        hsk2.0: 3
+levels:
+    - level: 3
+      stage: intermediate
+      title: Level 3 — core vocabulary
+      description: The published HSK 2.0 level-3 word list in frequency order, practised as meaning, listening and speaking drills. Thematic units are not yet curated; every word is covered by a meaning drill, a listening drill and a speaking drill.
+      vocab_target: 298
+      units:
+        - unit: 14
+          title: 语法 — grammar
+          description: 'Grammar patterns of this level, each with a plain-language rule, a fill-in-the-blank and a sentence to put in order.'
+          lessons:
+            - lesson: 1
+              title: "把 — doing something to an object"
+              kind: lesson
+              goal: "Put the object before the verb with 把."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["ba3", "fang4"]
+              passages: []
+              exercises:
+                - key: g3-ba-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "把 moves the object in front of the verb to say what you do to it: 我把书放在桌子上. The verb cannot stand bare — it needs a result or a place after it, like 放在桌子上."
+                  prompt:
+                    sentence: "我___书放在桌子上。"
+                    pinyin: "wǒ ___ shū fàng zài zhuōzi shang."
+                    hint: "Add the word that brings the object before the verb."
+                    word_bank: ["把", "被", "对"]
+                  answer_key:
+                    accepted: ["把"]
+                - key: g3-ba-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"I closed the door.\""
+                    tokens: ["把", "门", "我", "关上了"]
+                    pinyin: "wǒ bǎ mén guānshàng le"
+                  answer_key:
+                    order: [2, 0, 1, 3]
+                    full_pinyin: "wǒ bǎ mén guānshàng le"
+            - lesson: 2
+              title: "被 — what was done to you"
+              kind: lesson
+              goal: "Say what happened to something, and who did it, with 被."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["bei4"]
+              passages: []
+              exercises:
+                - key: g3-bei-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "被 marks the passive: receiver + 被 + doer + verb + result. 我的杯子被弟弟打破了 is “my cup was broken by my younger brother”. The verb needs a result, like 破了."
+                  prompt:
+                    sentence: "我的杯子___弟弟打破了。"
+                    pinyin: "wǒ de bēizi ___ dìdi dǎpò le."
+                    hint: "Add the word that marks the passive."
+                    word_bank: ["被", "把", "比"]
+                  answer_key:
+                    accepted: ["被"]
+                - key: g3-bei-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"I was criticised by the teacher.\""
+                    tokens: ["被", "老师", "我", "批评了"]
+                    pinyin: "wǒ bèi lǎoshī pīpíng le"
+                  answer_key:
+                    order: [2, 0, 1, 3]
+                    full_pinyin: "wǒ bèi lǎoshī pīpíng le"
+            - lesson: 3
+              title: "虽然……但是 — although"
+              kind: lesson
+              goal: "Concede one fact and contrast it with another."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["sui1ran2"]
+              passages: []
+              exercises:
+                - key: g3-suiran-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "虽然 concedes a fact and 但是 brings in the contrast: 虽然很冷，但是他去跑步了. Unlike English “although … but”, Chinese uses both words together."
+                  prompt:
+                    sentence: "虽然天气很冷，___他还是去跑步了。"
+                    pinyin: "suīrán tiānqì hěn lěng, ___ tā háishi qù pǎobù le."
+                    hint: "Add the word that means “but”."
+                    word_bank: ["但是", "所以", "因为"]
+                  answer_key:
+                    accepted: ["但是"]
+                - key: g3-suiran-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"Although this phone is expensive, it is very useful.\""
+                    tokens: ["但是", "很好用", "虽然", "这个手机很贵"]
+                    pinyin: "suīrán zhège shǒujī hěn guì, dànshì hěn hǎoyòng"
+                  answer_key:
+                    order: [2, 3, 0, 1]
+                    full_pinyin: "suīrán zhège shǒujī hěn guì, dànshì hěn hǎoyòng"
+            - lesson: 4
+              title: "如果……就 — if … then"
+              kind: lesson
+              goal: "Set a condition with 如果 and give the result with 就."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["ru2guo3"]
+              passages: []
+              exercises:
+                - key: g3-ruguo-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "如果 sets the condition and 就 in the main clause gives the result: 如果明天下雨，我就不去了 is “if it rains tomorrow, I won’t go”. 就 sits before the verb of the result."
+                  prompt:
+                    sentence: "如果明天下雨，我___不去了。"
+                    pinyin: "rúguǒ míngtiān xiàyǔ, wǒ ___ bú qù le."
+                    hint: "Add the word that links the condition to its result."
+                    word_bank: ["就", "才", "都"]
+                  answer_key:
+                    accepted: ["就"]
+                - key: g3-ruguo-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"If you have time, come to my house.\""
+                    tokens: ["就", "来我家", "如果", "你有时间"]
+                    pinyin: "rúguǒ nǐ yǒu shíjiān, jiù lái wǒ jiā"
+                  answer_key:
+                    order: [2, 3, 0, 1]
+                    full_pinyin: "rúguǒ nǐ yǒu shíjiān, jiù lái wǒ jiā"
+            - lesson: 5
+              title: "越来越 — more and more"
+              kind: lesson
+              goal: "Describe a steady change with 越来越."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: []
+              passages: []
+              exercises:
+                - key: g3-yuelaiyue-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "越来越 + adjective or verb means “more and more”: 天气越来越冷了 is “the weather is getting colder and colder”. It is usually followed by 了 to show a change under way."
+                  prompt:
+                    sentence: "天气越来___冷了。"
+                    pinyin: "tiānqì yuè lái ___ lěng le."
+                    hint: "Add the word that repeats the 越 of “more and more”."
+                    word_bank: ["越", "更", "很"]
+                  answer_key:
+                    accepted: ["越"]
+                - key: g3-yuelaiyue-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"I like Chinese more and more.\""
+                    tokens: ["喜欢", "越来越", "汉语", "我"]
+                    pinyin: "wǒ yuè lái yuè xǐhuan Hànyǔ"
+                  answer_key:
+                    order: [3, 1, 0, 2]
+                    full_pinyin: "wǒ yuè lái yuè xǐhuan Hànyǔ"
+            - lesson: 6
+              title: "一……就 — as soon as"
+              kind: lesson
+              goal: "Say one thing follows right after another with 一……就."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: []
+              passages: []
+              exercises:
+                - key: g3-yijiu-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "一……就 means “as soon as”: 他一下班就回家 is “he goes home as soon as he finishes work”. The second action follows the first immediately."
+                  prompt:
+                    sentence: "他一下班___回家。"
+                    pinyin: "tā yí xiàbān ___ huíjiā."
+                    hint: "Add the word that means “right then”."
+                    word_bank: ["就", "才", "也"]
+                  answer_key:
+                    accepted: ["就"]
+                - key: g3-yijiu-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"He goes home as soon as he finishes work.\""
+                    tokens: ["就", "回家", "他", "一下班"]
+                    pinyin: "tā yí xiàbān jiù huíjiā"
+                  answer_key:
+                    order: [2, 3, 0, 1]
+                    full_pinyin: "tā yí xiàbān jiù huíjiā"

@@ -130,7 +130,9 @@ export function SpeakPage() {
         <Card className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Chip tone="neutral">HSK {current.level}</Chip>
+              <Chip tone="neutral">
+                {index + 1} of {drills.length} · HSK {current.level}
+              </Chip>
               <Chip tone="accent">{current.type === 'read_aloud' ? 'read aloud' : current.type === 'speak_answer' ? 'answer aloud' : 'repeat after the model'}</Chip>
             </div>
             {results[current.id] ? (

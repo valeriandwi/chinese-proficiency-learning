@@ -107,20 +107,31 @@ export function Mascot({ size = 40, mood = 'idle', title, className = '', style,
   )
 }
 
-/** The logo mark: the moon rabbit in front of its full moon, on the brand tile. It has to
- *  hold a 30px square without turning to mush; the rim keeps rabbit and moon apart there.
- *  Keep in step with the favicon in web/index.html. */
+/** The 15 trail dots of the logo, [cx, cy, r] on a 96 grid: they grow along one curve towards
+ *  the yellow goal. From the brand file hanpath-logo-concepts.html. */
+const TRAIL: [number, number, number][] = [
+  [17.8, 74.8, 0.9], [18.6, 69.2, 1], [20.6, 64.8, 1.1], [23.7, 61.3, 1.2], [27.8, 58.7, 1.3],
+  [32.5, 56.6, 1.4], [37.7, 54.9, 1.5], [43.1, 53.4, 1.6], [48.7, 51.8, 1.7], [54.1, 50.1, 1.8],
+  [59.2, 48, 1.9], [63.8, 45.3, 2], [67.7, 41.7, 2.1], [70.7, 37.2, 2.2], [72.5, 31.5, 2.3],
+]
+
+/** The logo mark: a trail of growing white dots ending in a yellow goal, on the brand tile
+ *  (corner radius 23% of the side). Keep in step with the favicon in web/index.html.
+ *  shortcut: all dots at every size, though the brand rules fade the finest ones below 24px;
+ *  upgrade if the mark is ever drawn that small in the UI (the favicon already has fewer dots). */
 export function MascotMark({ size = 30, className = '' }: { size?: number; className?: string }) {
   return (
     <span
       aria-hidden
-      className={`grid shrink-0 place-items-center overflow-hidden rounded-tile bg-brand-600 ${className}`}
-      style={{ width: size, height: size }}
+      className={`grid shrink-0 place-items-center overflow-hidden bg-brand-600 ${className}`}
+      style={{ width: size, height: size, borderRadius: size * 0.23 }}
     >
-      <svg viewBox="0 0 48 48" width={size} height={size} className="[grid-area:1/1]" focusable="false">
-        <circle cx="24" cy="21.5" r="17" fill="var(--color-reward-500)" />
+      <svg viewBox="0 0 96 96" width={size} height={size} focusable="false">
+        {TRAIL.map(([cx, cy, r]) => (
+          <circle key={cx} cx={cx} cy={cy} r={r} fill="var(--color-surface)" />
+        ))}
+        <circle cx="72" cy="16" r="6.5" fill="var(--color-reward-500)" />
       </svg>
-      <Mascot size={size} rim="var(--color-brand-600)" className="[grid-area:1/1]" />
     </span>
   )
 }

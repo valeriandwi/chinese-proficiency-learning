@@ -375,3 +375,41 @@ func (s *Store) GrammarNotes(ctx context.Context, version string, level int) ([]
 	}
 	return out, mapErr(rows.Err())
 }
+
+// StudioCharacter is one character the writing studio can drill, with where it comes from.
+type StudioCharacter struct {
+	Character string `json:"character"`
+	Pinyin    string `json:"pinyin"`
+	Level     int    `json:"level"`
+}
+
+// StudioCharacters lists every distinct character the given studio drill types cover for one
+// level (0 means every level), in the order the curriculum teaches them. The queue is capped
+// at a round's worth of drills, so it cannot be the source of a picker that shows them all.
+func (s *Store) StudioCharacters(ctx context.Context, types []string, level int) ([]StudioCharacter, error) {
+	rows, err := s.Pool.Query(ctx, `
+		SELECT e.prompt->>'character', min(coalesce(e.prompt->>'pinyin', '')), min(l.level_number)
+		FROM exercises e
+		JOIN lessons le ON le.id = e.lesson_id
+		JOIN units u ON u.id = le.unit_id
+		JOIN levels l ON l.id = u.level_id
+		WHERE e.type = ANY($1)
+		  AND coalesce(e.prompt->>'character', '') <> ''
+		  AND ($2 = 0 OR l.level_number = $2)
+		GROUP BY e.prompt->>'character'
+		ORDER BY min(l.level_number), min(u.unit_number), min(le.lesson_number), min(e.exercise_number)`, types, level)
+	if err != nil {
+		return nil, mapErr(err)
+	}
+	defer rows.Close()
+
+	out := make([]StudioCharacter, 0, 200)
+	for rows.Next() {
+		var c StudioCharacter
+		if err := rows.Scan(&c.Character, &c.Pinyin, &c.Level); err != nil {
+			return nil, mapErr(err)
+		}
+		out = append(out, c)
+	}
+	return out, mapErr(rows.Err())
+}

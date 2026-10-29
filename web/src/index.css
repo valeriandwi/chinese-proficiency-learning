@@ -36,6 +36,8 @@
   --color-brand-500: #3f9301;
   --color-brand-600: #398501;
   --color-brand-700: #2b6b00;
+  /* ink on the bright brand-400 fills (the current-lesson node, the Up-next hero) */
+  --color-on-brand: #1f3d00;
 
   /* success — completed lessons, correct answers, progress fills. The package maps
      "correct answer" onto the brand green itself, so state is carried by shape and
@@ -63,6 +65,20 @@
   --color-danger-500: #ff4b4b;
   --color-danger-600: #cc3c3c;
   --color-danger-700: #a83232;
+
+  /* info — the active navigation tab and the focus ring in the redesign. Sky Blue, with a
+     700 step for text on the 50 tint (5.6:1). */
+  --color-info-50: #eaf6fe;
+  --color-info-200: #a9dcf8;
+  --color-info-500: #1cb0f6;
+  --color-info-700: #0b6a99;
+
+  /* tones — one hue per Mandarin tone, always paired with the digit and the contour. */
+  --color-tone-1: #1d63c9;
+  --color-tone-2: #b45309;
+  --color-tone-3: #0e7c86;
+  --color-tone-4: #c0362c;
+  --color-tone-0: #666666;
 
   /* ink — the text ramp (Eel Black and its steps). Text never uses opacity: an alpha
      modifier is not contrast-measured, and this ramp is. */

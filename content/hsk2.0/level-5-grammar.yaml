@@ -1,0 +1,276 @@
+# Hand-authored grammar lessons for HSK 2.0 level 5.
+#
+# Unlike level-5.yaml, which cmd/contentgen derives from the word lists, these sentences
+# were written by a person: each is a standard textbook pattern with a plain-language
+# explanation. This file ADDS one unit to level 5 (the way level-1-tones.yaml adds a unit
+# to level 1), so it is imported after the level it belongs to — see the Makefile.
+#
+# The vocabulary entries below are copied verbatim from level-5.yaml; the importer
+# requires every key a lesson names to be defined in the same file, and re-importing an
+# identical entry changes nothing.
+version: hsk2.0
+name: HSK 2.0 — Levels 1-6
+standard: HSK 2.0 (Chinese Testing International six-level syllabus)
+stage_model: six-levels
+status: published
+effective_from: "2010-01-01"
+notes: |
+    The legacy six-level HSK syllabus. Vocabulary placement follows the published
+    HSK 2.0 level word lists; definitions and example sentences here are authored
+    for this application (see docs/sources.md for what is derived from third-party
+    data and under which licence).
+
+    HSK 3.0 (three stages, nine levels) is a separate curriculum version and is
+    imported alongside this one — nothing in the application assumes six levels.
+
+    Levels 2 to 5 are generated from the same published word lists by
+    cmd/contentgen, and carry only the drills that can be derived from a word without
+    inventing language: meaning, listening, dictation, speaking and stroke order.
+    Authored sentences — fill_blank, sentence_order, translation, short_answer — exist
+    only where a person wrote them, which today means this file.
+
+    Every listening drill needs generated reference audio; the importer synthesises it
+    from the item's audio_text and stores a content-hash key, so an item whose audio
+    cannot be produced fails the import instead of shipping a silent lesson.
+vocabulary:
+    - key: yu3qi2
+      simplified: 与其
+      traditional: 與其
+      pinyin: yǔ qí
+      parts_of_speech:
+        - conjunction
+      senses:
+        - en: rather than..
+      audio_key: ""
+      freq_rank: 14771
+      levels:
+        hsk2.0: 5
+    - key: bu4ru2
+      simplified: 不如
+      traditional: 不如
+      pinyin: bù rú
+      parts_of_speech:
+        - conjunction
+        - verb
+      senses:
+        - en: not equal to
+      audio_key: ""
+      freq_rank: 2684
+      levels:
+        hsk2.0: 5
+    - key: yi1dan4
+      simplified: 一旦
+      traditional: 一旦
+      pinyin: yī dàn
+      parts_of_speech:
+        - adverb
+        - conjunction
+      senses:
+        - en: in case (sth happens)
+      audio_key: ""
+      freq_rank: 1323
+      levels:
+        hsk2.0: 5
+levels:
+    - level: 5
+      stage: advanced
+      title: Level 5 — core vocabulary
+      description: The published HSK 2.0 level-5 word list in frequency order, practised as meaning, listening and speaking drills. Thematic units are not yet curated; every word is covered by a meaning drill, a listening drill and a speaking drill.
+      vocab_target: 1298
+      units:
+        - unit: 56
+          title: 语法 — grammar
+          description: 'Grammar patterns of this level, each with a plain-language rule, a fill-in-the-blank and a sentence to put in order.'
+          lessons:
+            - lesson: 1
+              title: "不是……而是 — not A but B"
+              kind: lesson
+              goal: "Correct a wrong idea with 不是……而是."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: []
+              passages: []
+              exercises:
+                - key: g5-bushi-ershi-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "不是 A 而是 B corrects a mistaken assumption: 这不是我的错，而是你的错 is “this isn’t my fault but yours”. A is what it is not, B is what it is."
+                  prompt:
+                    sentence: "我要的不是钱，___是时间。"
+                    pinyin: "wǒ yào de bú shì qián, ___ shì shíjiān."
+                    hint: "Add the word that turns to the real answer."
+                    word_bank: ["而", "但", "和"]
+                  answer_key:
+                    accepted: ["而"]
+                - key: g5-bushi-ershi-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"This is not my fault but yours.\""
+                    tokens: ["而是", "这", "你的错", "不是", "我的错"]
+                    pinyin: "zhè bú shì wǒ de cuò, ér shì nǐ de cuò"
+                  answer_key:
+                    order: [1, 3, 4, 0, 2]
+                    full_pinyin: "zhè bú shì wǒ de cuò, ér shì nǐ de cuò"
+            - lesson: 2
+              title: "与其……不如 — rather than"
+              kind: lesson
+              goal: "Say one choice is better than another with 与其……不如."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["yu3qi2", "bu4ru2"]
+              passages: []
+              exercises:
+                - key: g5-yuqi-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "与其 A，不如 B means “rather than A, better B”: the second option is the one you prefer. 与其等别人，不如自己做 is “rather than wait for others, do it yourself”."
+                  prompt:
+                    sentence: "与其坐车，___走路。"
+                    pinyin: "yǔqí zuò chē, ___ zǒulù."
+                    hint: "Add the word that introduces the better choice."
+                    word_bank: ["不如", "不但", "即使"]
+                  answer_key:
+                    accepted: ["不如"]
+                - key: g5-yuqi-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"Rather than wait for others, do it yourself.\""
+                    tokens: ["不如", "与其", "等别人", "自己做"]
+                    pinyin: "yǔqí děng biérén, bùrú zìjǐ zuò"
+                  answer_key:
+                    order: [1, 2, 0, 3]
+                    full_pinyin: "yǔqí děng biérén, bùrú zìjǐ zuò"
+            - lesson: 3
+              title: "尽管……还是 — despite"
+              kind: lesson
+              goal: "Say something happened despite an obstacle with 尽管……还是."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: []
+              passages: []
+              exercises:
+                - key: g5-jinguan-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "尽管 concedes an obstacle, usually more emphatically than 虽然, and 还是 says the outcome did not change: 尽管很累，他还是完成了 is “although tired, he finished all the same”."
+                  prompt:
+                    sentence: "尽管天气不好，他___来了。"
+                    pinyin: "jǐnguǎn tiānqì bù hǎo, tā ___ lái le."
+                    hint: "Add the word that means “all the same”."
+                    word_bank: ["还是", "因为", "如果"]
+                  answer_key:
+                    accepted: ["还是"]
+                - key: g5-jinguan-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"Although he was tired, he finished it all the same.\""
+                    tokens: ["还是", "完成了", "尽管", "他", "很累"]
+                    pinyin: "jǐnguǎn hěn lèi, tā háishi wánchéng le"
+                  answer_key:
+                    order: [2, 4, 3, 0, 1]
+                    full_pinyin: "jǐnguǎn hěn lèi, tā háishi wánchéng le"
+            - lesson: 4
+              title: "否则 — otherwise"
+              kind: lesson
+              goal: "Warn what happens if something is not done, with 否则."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: []
+              passages: []
+              exercises:
+                - key: g5-fouze-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "否则 means “otherwise”: it introduces the bad result if the first clause is not met. 快走吧，否则会迟到的 is “hurry up, otherwise we will be late”. It starts the second clause."
+                  prompt:
+                    sentence: "你得早点儿睡，___明天起不来。"
+                    pinyin: "nǐ děi zǎodiǎnr shuì, ___ míngtiān qǐ bù lái."
+                    hint: "Add the word that means “otherwise”."
+                    word_bank: ["否则", "而且", "不过"]
+                  answer_key:
+                    accepted: ["否则"]
+                - key: g5-fouze-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"Hurry up, otherwise we will be late.\""
+                    tokens: ["会迟到的", "快走吧", "否则"]
+                    pinyin: "kuài zǒu ba, fǒuzé huì chídào de"
+                  answer_key:
+                    order: [1, 2, 0]
+                    full_pinyin: "kuài zǒu ba, fǒuzé huì chídào de"
+            - lesson: 5
+              title: "一旦……就 — once"
+              kind: lesson
+              goal: "Say what follows once something happens, with 一旦……就."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["yi1dan4"]
+              passages: []
+              exercises:
+                - key: g5-yidan-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "一旦……就 means “once …, then …”. The first part is something that, when it happens, triggers a consequence — often a warning: 一旦错过，就没有机会了 is “once you miss it, there is no chance”."
+                  prompt:
+                    sentence: "一旦你习惯了，___会觉得容易。"
+                    pinyin: "yídàn nǐ xíguàn le, ___ huì juéde róngyì."
+                    hint: "Add the word that pairs with 一旦."
+                    word_bank: ["就", "才", "却"]
+                  answer_key:
+                    accepted: ["就"]
+                - key: g5-yidan-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"Once you miss it, there is no chance.\""
+                    tokens: ["就", "一旦", "没有机会了", "错过"]
+                    pinyin: "yídàn cuòguò, jiù méiyǒu jīhuì le"
+                  answer_key:
+                    order: [1, 3, 0, 2]
+                    full_pinyin: "yídàn cuòguò, jiù méiyǒu jīhuì le"
+            - lesson: 6
+              title: "难道 — surely not?"
+              kind: lesson
+              goal: "Ask a rhetorical question with 难道."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: []
+              passages: []
+              exercises:
+                - key: g5-nandao-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "难道 turns a question into a rhetorical one that shows surprise or disbelief: 难道你不知道吗 is “don’t tell me you didn’t know?”. It sits before the subject or verb and the sentence usually ends in 吗."
+                  prompt:
+                    sentence: "___你还不知道吗？"
+                    pinyin: "___ nǐ hái bù zhīdào ma?"
+                    hint: "Add the word that means “surely not”."
+                    word_bank: ["难道", "到底", "其实"]
+                  answer_key:
+                    accepted: ["难道"]
+                - key: g5-nandao-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"Surely you haven’t forgotten?\""
+                    tokens: ["吗", "忘了", "难道", "你"]
+                    pinyin: "nándào nǐ wàng le ma"
+                  answer_key:
+                    order: [2, 3, 1, 0]
+                    full_pinyin: "nándào nǐ wàng le ma"

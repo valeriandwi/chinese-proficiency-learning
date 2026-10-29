@@ -58,6 +58,21 @@ func (s *Server) handleStudioQueue(w http.ResponseWriter, r *http.Request) {
 	s.serveStudioQueue(w, r, writingTypes, "writing")
 }
 
+// handleStudioCharacters lists every character the writing studio can drill, so the page can
+// show them all and let the learner pick one rather than only search for it.
+func (s *Server) handleStudioCharacters(w http.ResponseWriter, r *http.Request) {
+	level, ok := studyLevel(w, r, 0)
+	if !ok {
+		return
+	}
+	items, err := s.store.StudioCharacters(r.Context(), writingTypes, level)
+	if err != nil {
+		s.respondStoreError(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"items": items, "level": level})
+}
+
 // handleSpeakingQueue serves the speaking studio's drills.
 func (s *Server) handleSpeakingQueue(w http.ResponseWriter, r *http.Request) {
 	s.serveStudioQueue(w, r, speakingTypes, "speaking")

@@ -159,12 +159,15 @@ social features, an offline PWA, native apps, and a shop/currency economy.
    reason the feature cannot quietly become a lie. Only `speak_repeat` and `read_aloud`
    can be scored: an open speaking prompt has no reference utterance to compare
    against, and scoring one against its own question would mark a correct answer wrong.
-12. **Levels 2–5 are drilled, not taught.** They cover every word of the published
-   HSK 2.0 lists for those levels with meaning, listening, dictation, speaking and
-   stroke-order drills, but they contain no authored sentences: `fill_blank`,
-   `sentence_order`, `translation` and `short_answer` exist only in level 1, because
-   a generator asked to write Chinese would produce plausible but wrong grammar.
-   Writing those items is human work. The glosses also carry an open licence
+12. **Levels 2–5 are drilled, with a first layer of taught grammar.** They cover every
+   word of the published HSK 2.0 lists for those levels with meaning, listening,
+   dictation, speaking and stroke-order drills. Beyond level 1, the only authored
+   sentences are the grammar units in `content/hsk2.0/level-{2..5}-grammar.yaml`: six
+   to seven patterns per level (比, 了, 过 … 把, 被 … 连…都 … 不是…而是), each with a
+   `fill_blank`, a `sentence_order` and a plain-language rule. They were written by
+   hand, not generated, because a generator asked to write Chinese would produce
+   plausible but wrong grammar — so they need a native-speaker review before a real
+   deployment. `translation` and `short_answer` still exist only in level 1. The glosses also carry an open licence
    question — see `docs/sources.md` §3.
 13. **The interface shows only the gamification the server can back.** Streaks, XP,
    the daily goal, skill mastery, activity and the review-due count are real. Hearts,

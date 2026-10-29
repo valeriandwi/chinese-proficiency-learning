@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useOverview, useSession } from '../../api/hooks'
 import { Chip, ErrorNote, Skeleton } from '../../components/ui'
-import { ReadDoorArt, SpeakDoorArt, WriteDoorArt } from './door-art'
+import { ReadDoorArt, SpeakDoorArt } from './door-art'
 // The skills hub: three doors into practice that the lesson path does not gate.
 //
 // This page is a crossroads, not a dashboard: one door per skill the studios
@@ -50,61 +50,57 @@ export function SkillsPage() {
         </div>
       ) : null}
 
-      {/* One door per skill. Each door is a link, so a keyboard user can tab to
-          it, and the description says what is behind it rather than selling it. */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      {/* One card anatomy for every door: art, name, one-line job, a real fact, and a button
+          pinned to the bottom. The production skills get the larger row. */}
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-6">
         <SkillDoor
           to="/write"
           title="Write"
-          hanzi="写"
-          blurb="A large canvas for stroke order: trace with guidance or write from memory, with replay and undo."
-          art={<WriteDoorArt className="h-full w-full" />}
+          blurb="Stroke order on a tianzige grid — trace, then from memory."
+          art={<span className="hanzi text-6xl text-brand-700">写</span>}
+          artClass="bg-brand-50"
           mastery={skills.find((s) => s.skill === 'writing')}
-          targetLevel={targetLevel}
+          cta="Open studio"
+          large
         />
         <SkillDoor
           to="/speak"
           title="Speak"
-          hanzi="说"
-          blurb="Speak after the model, read aloud, and answer questions aloud — recorded in the browser, never judged for pronunciation."
+          blurb="Repeat the model and play both back to back. Recordings never leave the browser."
           art={<SpeakDoorArt className="h-full w-full" />}
+          artClass="bg-info-50 text-info-700"
           mastery={skills.find((s) => s.skill === 'speaking')}
-          targetLevel={targetLevel}
+          cta="Open studio"
+          large
+        />
+        <SkillDoor
+          to="/read"
+          title="Read"
+          blurb="Passages with pinyin and translation on tap."
+          art={<ReadDoorArt className="h-full w-full" />}
+          artClass="bg-reward-50 text-reward-700"
+          mastery={skills.find((s) => s.skill === 'reading')}
+          cta="Open"
+        />
+        <SkillDoor
+          to="/tones"
+          title="Tones"
+          blurb="Hear it, pick the tone pattern."
+          art={<span className="hanzi text-4xl text-brand-700">调</span>}
+          artClass="bg-brand-50"
+          mastery={undefined}
+          cta="Open"
+        />
+        <SkillDoor
+          to="/guide"
+          title="Study guide"
+          blurb="Every word, grammar notes, your bookmarks."
+          art={<span className="hanzi text-4xl text-ink-2">学</span>}
+          artClass="bg-surface-2"
+          mastery={undefined}
+          cta="Open"
         />
       </div>
-
-      {/* Reading and the guide: full-width doors, because reading is a passage
-          and the guide is a whole book — half-width doors would cramp them. */}
-      <SkillDoor
-        to="/read"
-        title="Read"
-        hanzi="读"
-        blurb="Read real passages from the lessons, sentence by sentence, with pinyin and translation on tap."
-        art={<ReadDoorArt className="h-16 w-28 shrink-0" />}
-        mastery={skills.find((s) => s.skill === 'reading')}
-        targetLevel={targetLevel}
-        wide
-      />
-      <SkillDoor
-        to="/tones"
-        title="Tones"
-        hanzi="调"
-        blurb="Hear a word and choose its tone pattern — the drill learners fail most, without walking the path first."
-        art={<span className="hanzi grid h-16 w-16 shrink-0 place-items-center rounded-tile bg-brand-50 text-3xl font-bold text-brand-700" aria-hidden>调</span>}
-        mastery={undefined}
-        targetLevel={targetLevel}
-        wide
-      />
-      <SkillDoor
-        to="/guide"
-        title="Study guide"
-        hanzi="学"
-        blurb="Every word in the curriculum with its meaning and audio, the grammar people wrote for level 1, and your bookmarks."
-        art={<span className="hanzi grid h-16 w-16 shrink-0 place-items-center rounded-tile bg-brand-50 text-3xl font-bold text-brand-700" aria-hidden>学</span>}
-        mastery={undefined}
-        targetLevel={targetLevel}
-        wide
-      />
 
       <p className="text-center text-xs text-ink-3">
         Level {targetLevel} is the level you are working on — change it in settings. The studios let you practise from
@@ -117,21 +113,21 @@ export function SkillsPage() {
 function SkillDoor({
   to,
   title,
-  hanzi,
   blurb,
   art,
+  artClass,
   mastery,
-  targetLevel,
-  wide = false,
+  cta,
+  large = false,
 }: {
   to: string
   title: string
-  hanzi: string
   blurb: string
   art: React.ReactNode
+  artClass: string
   mastery: { attempts: number; correct: number; mastery: number } | undefined
-  targetLevel: number
-  wide?: boolean
+  cta: string
+  large?: boolean
 }) {
   // Absence is not failure: a skill with no attempts is "not yet practised",
   // never 0% — a 0/N bar reads as a verdict on ability rather than missing data.
@@ -140,38 +136,29 @@ function SkillDoor({
   return (
     <Link
       to={to}
-      className={`group flex flex-row items-center gap-4 rounded-card border border-line bg-surface p-4 shadow-card transition hover:border-brand-300 hover:shadow-raised focus-visible:outline-2 sm:p-5 ${
-        wide ? '' : 'sm:flex-col sm:items-stretch'
+      className={`flex flex-col gap-2.5 rounded-card border-2 border-b-4 border-line bg-surface p-5 transition hover:border-line-strong focus-visible:outline-2 ${
+        large ? 'sm:col-span-3' : 'sm:col-span-2'
       }`}
     >
-      {art ? (
-        <div className="flex h-20 w-24 shrink-0 items-center justify-center rounded-tile bg-brand-50 p-2 sm:h-24 sm:w-auto" aria-hidden>
-          {art}
-        </div>
-      ) : (
-        <span
-          className="hanzi grid h-20 w-20 shrink-0 place-items-center rounded-tile bg-brand-50 text-4xl font-bold text-brand-700"
-          aria-hidden
-        >
-          {hanzi}
-        </span>
-      )}
-      <div className="flex min-w-0 flex-col gap-1.5">
-        <h2 className="text-xl font-extrabold text-ink">{title}</h2>
-        <p className="text-sm text-ink-2">{blurb}</p>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          {notPractised ? (
-            <Chip tone="neutral">not yet practised</Chip>
-          ) : (
-            <Chip tone="positive">
-              {mastery!.correct}/{mastery!.attempts} on the path
-            </Chip>
-          )}
-          <Chip tone="neutral">HSK {targetLevel} and beyond</Chip>
-        </div>
+      <div
+        className={`grid place-items-center overflow-hidden rounded-tile p-3 ${large ? 'h-28' : 'h-20'} ${artClass}`}
+        aria-hidden
+      >
+        {art}
       </div>
-      <span className="ml-auto hidden shrink-0 items-center self-center text-sm font-bold text-brand-700 group-hover:translate-x-0.5 sm:flex" aria-hidden>
-        →
+      <h2 className={`font-extrabold text-ink ${large ? 'text-xl' : 'text-lg'}`}>{title}</h2>
+      <p className="text-sm text-ink-3">{blurb}</p>
+      {mastery !== undefined ? (
+        notPractised ? (
+          <Chip tone="neutral">Not practised yet</Chip>
+        ) : (
+          <Chip tone="positive">
+            {mastery.correct}/{mastery.attempts} on the path
+          </Chip>
+        )
+      ) : null}
+      <span className="mt-auto inline-flex min-h-12 items-center gap-2 self-start rounded-card border-2 border-b-4 border-line bg-surface px-5 text-base font-extrabold text-ink-2">
+        {cta} <span aria-hidden>→</span>
       </span>
     </Link>
   )

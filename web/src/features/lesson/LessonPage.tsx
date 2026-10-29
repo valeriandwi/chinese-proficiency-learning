@@ -170,12 +170,18 @@ export function LessonPage() {
         >
           <X size={22} aria-hidden />
         </Link>
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-bold uppercase tracking-wide text-ink-3">
-            {lesson.unit_title} · Level {lesson.level_number}
-          </p>
-          <h1 className="truncate text-xl font-extrabold text-ink">{lesson.title}</h1>
-        </div>
+        {/* The title is not shown, but the page keeps its heading for screen readers. */}
+        <h1 className="sr-only min-w-0 flex-1">{lesson.title}</h1>
+        {/* Where the learner is, and how far there is to go, on the same row as the way out. */}
+        <ProgressBar
+          value={answeredCount / lesson.exercises.length}
+          tone={mode === 'exam' ? 'reward' : 'brand'}
+          className="min-w-24 flex-1"
+          label={`Question ${draft.index + 1} of ${lesson.exercises.length}`}
+        />
+        <span className="font-black tabular-nums text-ink-3">
+          {draft.index + 1} / {lesson.exercises.length}
+        </span>
         <div className="flex items-center gap-2">
           {combo >= 2 ? (
             <span
@@ -200,18 +206,6 @@ export function LessonPage() {
           </Chip>
         </div>
       </header>
-
-      {/* Where the learner is in the lesson, and how far there is to go. */}
-      <div className="flex flex-col gap-1.5">
-        <ProgressBar
-          value={answeredCount / lesson.exercises.length}
-          tone={mode === 'exam' ? 'reward' : 'brand'}
-          label={`Question ${draft.index + 1} of ${lesson.exercises.length}`}
-        />
-        <p className="text-center text-xs font-bold text-ink-3">
-          {draft.index + 1} / {lesson.exercises.length} · {answeredCount} answered
-        </p>
-      </div>
 
       {lesson.vocabulary.length ? (
         // A drawer, not a strip: the word list used to sit above every exercise and take ~110px

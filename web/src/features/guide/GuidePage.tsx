@@ -9,9 +9,9 @@ import { BookmarkButton } from '../read/BookmarkButton'
 // The study guide: every word in the curriculum, the grammar people wrote, and
 // the learner's bookmarks — a reference surface, not a drill.
 //
-// Its honesty rules: grammar exists only where a person authored it (level 1
-// today; levels 2-5 are generated from word lists and carry none — an honest
-// empty state, not filler), and a skill with no attempts shows "not yet
+// Its honesty rules: grammar exists only where a person authored it (levels 1-5
+// today; a level or a future curriculum without it shows an honest empty state,
+// not filler), and a skill with no attempts shows "not yet
 // assessed" rather than 0%.
 
 const LEVEL_CHOICES = [
@@ -153,7 +153,7 @@ export function GuidePage() {
           ) : grammar.data?.items.length === 0 ? (
             <EmptyState
               title="No authored grammar at this level"
-              hint="Grammar notes exist where a person wrote them — level 1 today. Levels 2-5 are generated from word lists and carry no grammar yet."
+              hint="Grammar notes exist where a person wrote them — levels 1 to 5 today. Choose another level to read them."
             />
           ) : (
             grammar.data?.items.map((note) => <GrammarCard key={note.id} note={note} />)

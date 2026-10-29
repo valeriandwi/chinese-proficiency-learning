@@ -1,7 +1,7 @@
 import { BackToPractice } from '../../components/BackToPractice'
 import { useEffect, useRef, useState } from 'react'
 import { PenLine, RotateCcw } from 'lucide-react'
-import { useAnswerStudio, useStudioQueue } from '../../api/hooks'
+import { useAnswerStudio, useStudioCharacters, useStudioQueue } from '../../api/hooks'
 import type { AnswerPayload, AttemptResult, StudyDrill } from '../../api/types'
 import { hanziPayload, type StrokeReport } from '../../lib/answers'
 import { Button, Card, Chip, EmptyState, ErrorNote, Spinner } from '../../components/ui'
@@ -31,6 +31,8 @@ export function WritePage() {
   const [character, setCharacter] = useState('')
   const [draft, setDraft] = useState('')
   const queue = useStudioQueue('writing', level, character)
+  // The picker lists the level the chips show: "All" until a level is chosen.
+  const characters = useStudioCharacters(level ?? 0)
   const answer = useAnswerStudio()
   const prefs = usePrefs()
 
@@ -154,6 +156,35 @@ export function WritePage() {
         </div>
       </header>
 
+      {/* Every character on the level's list, in the order it is taught: pick one to practise it. */}
+      {characters.data && characters.data.items.length > 0 ? (
+        <section aria-label="Characters" className="flex flex-col gap-2">
+          <p className="text-xs font-extrabold uppercase tracking-widest text-ink-3">
+            {characters.data.items.length} characters · tap one to practise it
+          </p>
+          <div className="grid max-h-72 grid-cols-5 gap-2 overflow-y-auto rounded-card border-2 border-line bg-surface p-2 sm:grid-cols-8">
+            {characters.data.items.map((item) => {
+              const picked = item.character === character
+              return (
+                <button
+                  key={item.character}
+                  type="button"
+                  aria-pressed={picked}
+                  aria-label={`${item.character} ${item.pinyin}`.trim()}
+                  onClick={() => chooseCharacter(picked ? '' : item.character)}
+                  className={`flex min-h-14 flex-col items-center justify-center rounded-tile border-2 border-b-4 px-1 py-1 transition active:translate-y-px ${
+                    picked ? 'border-brand-400 border-b-brand-600 bg-brand-50' : 'border-line bg-surface hover:border-line-strong'
+                  }`}
+                >
+                  <span className="hanzi text-2xl leading-none text-ink">{item.character}</span>
+                  {item.pinyin ? <span className="mt-0.5 text-[0.65rem] font-bold text-ink-3">{item.pinyin}</span> : null}
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      ) : null}
+
       {queue.data.items.length === 0 && session === null ? (
         <EmptyState
           icon={<PenLine size={22} aria-hidden />}
@@ -170,7 +201,9 @@ export function WritePage() {
         <Card className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Chip tone="neutral">HSK {current.level}</Chip>
+              <Chip tone="neutral">
+                {index + 1} of {drills.length} · HSK {current.level}
+              </Chip>
               <Chip tone="accent">{current.type === 'hanzi_recall' ? 'from memory' : 'guided'}</Chip>
             </div>
             {results[current.id] ? (

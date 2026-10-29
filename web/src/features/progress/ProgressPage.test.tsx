@@ -97,13 +97,14 @@ describe('ProgressPage', () => {
 
   it('keeps the rebuild control here rather than on the home screen', () => {
     renderPage()
+    screen.getByText('More').click()
     const recompute = screen.getByRole('button', { name: /recompute/i })
     recompute.click()
     expect(refresh).toHaveBeenCalledTimes(1)
   })
 
-  it('offers the way back to the path', () => {
+  it('makes the reviews tile the link to the queue', () => {
     renderPage()
-    expect(screen.getByRole('link', { name: /back to your path/i })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: /reviews due/i })).toHaveAttribute('href', '/reviews')
   })
 })

@@ -145,6 +145,7 @@ func (s *Server) Routes() http.Handler {
 			// passage reader and the study guide. Served from any level and graded
 			// without touching the path (see handlers_study.go and migrations/0008).
 			r.Get("/study/writing/queue", s.handleStudioQueue)
+			r.Get("/study/writing/characters", s.handleStudioCharacters)
 			r.Get("/study/speaking/queue", s.handleSpeakingQueue)
 			r.Post("/study/attempts", s.handleStudioAttempt)
 			r.Get("/study/vocabulary", s.handleVocabularyList)

@@ -64,7 +64,8 @@ describe('MascotMark', () => {
     expect(tile.style.height).toBe('30px')
     expect(tile.className).toContain('bg-brand-600')
     expect(container.querySelector('svg')).not.toBeNull()
-    // The moon sits behind the rabbit, so the moon's svg comes first.
-    expect(container.querySelector('svg circle')?.getAttribute('fill')).toBe('var(--color-reward-500)')
+    // Fifteen white trail dots and one yellow goal.
+    expect(container.querySelectorAll('svg circle')).toHaveLength(16)
+    expect(container.querySelector('svg circle:last-child')?.getAttribute('fill')).toBe('var(--color-reward-500)')
   })
 })

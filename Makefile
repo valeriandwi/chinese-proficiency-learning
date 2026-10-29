@@ -18,10 +18,10 @@ export
 endif
 
 TEST_DATABASE_URL ?= postgres://hanpath:hanpath_dev_pw@127.0.0.1:5435/hanpath?sslmode=disable
-# Tone-drill files append units to a level that already exists, so they are imported
-# last: the wildcard would otherwise order level-1-tones.yaml before level-1.yaml and
-# add the tone unit before the level it belongs to is imported.
-CONTENT := $(filter-out %-tones.yaml,$(wildcard content/*/*.yaml)) $(wildcard content/*/*-tones.yaml)
+# Tone-drill and grammar files append units to a level that already exists, so they are
+# imported last: the wildcard would otherwise order level-1-tones.yaml before level-1.yaml
+# and add the unit before the level it belongs to is imported.
+CONTENT := $(filter-out %-tones.yaml %-grammar.yaml,$(wildcard content/*/*.yaml)) $(wildcard content/*/*-tones.yaml) $(wildcard content/*/*-grammar.yaml)
 
 .PHONY: help
 help: ## Show this help

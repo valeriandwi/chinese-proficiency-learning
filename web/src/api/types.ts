@@ -174,6 +174,9 @@ export type AnswerPayload = Record<string, unknown>
 
 export type StudyDrill = Exercise & { level: number }
 
+/** One character the writing studio can drill, in curriculum order. */
+export type StudioCharacter = { character: string; pinyin: string; level: number }
+
 export type StudyLexeme = Lexeme & { level: number; bookmarked: boolean }
 
 export type ReadingPassage = Passage & { level: number }

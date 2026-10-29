@@ -56,9 +56,9 @@ func contentFiles(t *testing.T) []int {
 	for _, path := range contentPaths(t) {
 		base := strings.TrimSuffix(filepath.Base(path), ".yaml")
 		rest := strings.TrimPrefix(base, "level-")
-		// A known addition, not a typo: level-1-tones.yaml appends the tone unit to the
-		// authored level (see the Makefile, which imports it last for that reason).
-		if strings.HasSuffix(rest, "-tones") {
+		// A known addition, not a typo: level-1-tones.yaml and level-N-grammar.yaml append a
+		// unit to a level that already exists (see the Makefile, which imports it last for that reason).
+		if strings.HasSuffix(rest, "-tones") || strings.HasSuffix(rest, "-grammar") {
 			continue
 		}
 		n, err := strconv.Atoi(rest)

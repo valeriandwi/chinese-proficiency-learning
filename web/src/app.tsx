@@ -1,11 +1,11 @@
 import { Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { Languages, LogOut, Volume2, VolumeX } from 'lucide-react'
+import { Languages } from 'lucide-react'
 import type { ReactElement, SVGProps } from 'react'
 import { LearnGlyph, ReviewsGlyph, SettingsGlyph, SkillsGlyph, TonesGlyph } from './components/icons'
 import { MascotMark } from './components/Mascot'
-import { useLogout, useOverview, useSession } from './api/hooks'
-import { Button, IconButton, Spinner } from './components/ui'
+import { useOverview, useSession } from './api/hooks'
+import { Spinner } from './components/ui'
 import { GamifiedHeader } from './components/GamifiedHeader'
 import { usePrefs } from './stores/prefs'
 import { LoginPage, RegisterPage } from './features/auth/AuthPages'
@@ -221,9 +221,7 @@ function PublicShell() {
 /** Signed in: sidebar + content + progress rail on desktop, bottom bar on mobile. */
 function LearnerShell() {
   const prefs = usePrefs()
-  const logout = useLogout()
   const overview = useOverview()
-  const signOut = () => void logout.mutateAsync()
   const due = overview.data?.due_reviews ?? 0
   // A lesson is a focus screen: no navigation, no numbers strip, nothing to leave through
   // by accident. The lesson page carries its own way out.
@@ -247,31 +245,12 @@ function LearnerShell() {
           the content room without stretching prose to an unreadable measure. */}
       {/* No rail any more, so the content column no longer needs a 7xl row to hold it. */}
       <div className="mx-auto flex w-full max-w-5xl gap-6 px-4 lg:px-6">
-        <Sidebar
-          due={due}
-          pinyinOn={prefs.pinyinVisible}
-          onTogglePinyin={prefs.togglePinyin}
-          soundOn={prefs.soundEnabled}
-          onToggleSound={prefs.toggleSound}
-          onSignOut={signOut}
-        />
+        <Sidebar due={due} />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <MobileBar
-            pinyinOn={prefs.pinyinVisible}
-            onTogglePinyin={prefs.togglePinyin}
-            soundOn={prefs.soundEnabled}
-            onToggleSound={prefs.toggleSound}
-            onSignOut={signOut}
-          />
+          <TopBar pinyinOn={prefs.pinyinVisible} onTogglePinyin={prefs.togglePinyin} />
           {/* pb-24 keeps the last control clear of the fixed bottom bar. */}
-          <main className="flex-1 pb-24 pt-4 lg:pb-10 lg:pt-6">
-            {/* The one place the numbers appear. It used to be a tile row on the home
-                page, the same cards again in a desktop rail, and the goal a third time
-                under the greeting. */}
-            <div className="mb-5">
-              <GamifiedHeader />
-            </div>
+          <main className="flex-1 pb-24 pt-4 lg:pb-10 lg:pt-0">
             <Outlet />
           </main>
           <LicenceFooter className="hidden pb-8 lg:block" />
@@ -285,33 +264,20 @@ function LearnerShell() {
 
 function Brand() {
   return (
-    <NavLink to="/" className="flex items-center gap-1.5">
-      <MascotMark size={32} />
-      <span className="flex flex-col leading-none">
-        <span className="text-sm font-extrabold tracking-wide text-ink">hanpath</span>
-        <span aria-hidden className="hanzi mt-1 text-[0.7rem] font-extrabold tracking-[0.06em] text-ink-2">
-          汉语
+    <NavLink to="/" className="flex items-center gap-2.5">
+      <MascotMark size={40} />
+      <span className="flex items-center gap-2.5 leading-none text-ink">
+        <span className="text-[1.3rem] font-bold tracking-[0.01em]">hanpath</span>
+        <span aria-hidden className="h-5 w-px bg-current opacity-25" />
+        <span aria-hidden className="hanzi text-[0.55rem] font-medium tracking-[0.2em] opacity-70">
+          汉路
         </span>
       </span>
     </NavLink>
   )
 }
 
-function Sidebar({
-  due,
-  pinyinOn,
-  onTogglePinyin,
-  soundOn,
-  onToggleSound,
-  onSignOut,
-}: {
-  due: number
-  pinyinOn: boolean
-  onTogglePinyin: () => void
-  soundOn: boolean
-  onToggleSound: () => void
-  onSignOut: () => void
-}) {
+function Sidebar({ due }: { due: number }) {
   return (
     // A nav, not an aside: this is the primary set of destinations on a wide screen.
     <nav className="hidden w-56 shrink-0 flex-col gap-1 py-6 lg:flex" aria-label="Main">
@@ -321,14 +287,6 @@ function Sidebar({
       {DESTINATIONS.map((destination) => (
         <SidebarLink key={destination.to} destination={destination} badge={destination.to === '/reviews' ? due : 0} />
       ))}
-
-      <div className="mt-auto flex flex-col gap-2 pt-6">
-        <PinyinToggle on={pinyinOn} onToggle={onTogglePinyin} />
-        <SoundToggle on={soundOn} onToggle={onToggleSound} />
-        <Button variant="ghost" onClick={onSignOut} className="justify-start">
-          <LogOut size={16} aria-hidden /> Sign out
-        </Button>
-      </div>
     </nav>
   )
 }
@@ -340,10 +298,10 @@ function SidebarLink({ destination, badge }: { destination: Destination; badge: 
       to={destination.to}
       end={destination.end}
       className={({ isActive }) =>
-        `flex items-center gap-3 rounded-tile px-3 py-2.5 text-sm font-bold transition ${
+        `flex min-h-12 items-center gap-3 rounded-tile border-2 px-3 text-sm font-extrabold uppercase tracking-widest transition ${
           isActive
-            ? 'bg-brand-600 text-white shadow-[0_3px_0_var(--color-brand-700)]'
-            : 'text-ink-2 hover:bg-brand-50 hover:text-brand-700'
+            ? 'border-info-200 bg-info-50 text-info-700'
+            : 'border-transparent text-ink-2 hover:bg-surface-2'
         }`
       }
     >
@@ -368,28 +326,25 @@ function PublicLink({ to, children }: { to: string; children: ReactNode }) {
 }
 
 /** The phone header: identity, plus the two things a learner reaches for mid-lesson. */
-function MobileBar({
-  pinyinOn,
-  onTogglePinyin,
-  soundOn,
-  onToggleSound,
-  onSignOut,
-}: {
-  pinyinOn: boolean
-  onTogglePinyin: () => void
-  soundOn: boolean
-  onToggleSound: () => void
-  onSignOut: () => void
-}) {
+/** The one place the numbers appear, in one element at every width. On a phone: the level on
+ *  the left, streak / XP / goal ring on the right. On a desktop: the pinyin toggle on the
+ *  left. Sound and sign out live in Profile. */
+function TopBar({ pinyinOn, onTogglePinyin }: { pinyinOn: boolean; onTogglePinyin: () => void }) {
+  const session = useSession()
+  const level = session.data?.authenticated ? session.data.user.target_level : null
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b-2 border-line bg-paper px-1 py-2 lg:hidden">
-      <Brand />
-      <div className="flex items-center gap-2">
+    <header className="sticky top-0 z-20 -mx-4 flex items-center gap-2.5 border-b-2 border-line bg-surface px-4 py-3 lg:static lg:mx-0 lg:mb-5 lg:bg-paper lg:px-0 lg:pt-6">
+      <NavLink
+        to="/settings"
+        className="inline-flex min-h-10 items-center rounded-card border-2 border-line bg-surface px-3 text-sm font-extrabold text-ink-2 lg:hidden"
+      >
+        {level ? `HSK ${level}` : 'Level'}
+      </NavLink>
+      <div className="mr-auto max-lg:hidden">
         <PinyinToggle on={pinyinOn} onToggle={onTogglePinyin} />
-        <SoundToggle on={soundOn} onToggle={onToggleSound} />
-        <IconButton label="Sign out" onClick={onSignOut}>
-          <LogOut size={18} aria-hidden />
-        </IconButton>
+      </div>
+      <div className="ml-auto lg:ml-0">
+        <GamifiedHeader />
       </div>
     </header>
   )
@@ -454,22 +409,6 @@ function PinyinToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   )
 }
 
-function SoundToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-pressed={on}
-      title="Toggle the correct-answer sound"
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-pill border-2 px-3 py-1.5 text-xs font-extrabold transition ${
-        on ? 'border-brand-600 bg-brand-600 text-white' : 'border-line bg-surface text-ink-3 hover:text-ink'
-      }`}
-    >
-      {on ? <Volume2 size={14} aria-hidden /> : <VolumeX size={14} aria-hidden />}
-      音效 {on ? 'on' : 'off'}
-    </button>
-  )
-}
 
 /** The licence notice is a legal obligation, not decoration, so it stays in the DOM
  *  on every screen — including the phone, where the sidebar does not exist. */

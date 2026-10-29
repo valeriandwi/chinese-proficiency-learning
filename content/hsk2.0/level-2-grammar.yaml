@@ -1,0 +1,277 @@
+# Hand-authored grammar lessons for HSK 2.0 level 2.
+#
+# Unlike level-2.yaml, which cmd/contentgen derives from the word lists, these sentences
+# were written by a person: each is a standard textbook pattern with a plain-language
+# explanation. This file ADDS one unit to level 2 (the way level-1-tones.yaml adds a unit
+# to level 1), so it is imported after the level it belongs to — see the Makefile.
+#
+# The vocabulary entries below are copied verbatim from level-2.yaml; the importer
+# requires every key a lesson names to be defined in the same file, and re-importing an
+# identical entry changes nothing.
+version: hsk2.0
+name: HSK 2.0 — Levels 1-6
+standard: HSK 2.0 (Chinese Testing International six-level syllabus)
+stage_model: six-levels
+status: published
+effective_from: "2010-01-01"
+notes: |
+    The legacy six-level HSK syllabus. Vocabulary placement follows the published
+    HSK 2.0 level word lists; definitions and example sentences here are authored
+    for this application (see docs/sources.md for what is derived from third-party
+    data and under which licence).
+
+    HSK 3.0 (three stages, nine levels) is a separate curriculum version and is
+    imported alongside this one — nothing in the application assumes six levels.
+
+    Levels 2 to 5 are generated from the same published word lists by
+    cmd/contentgen, and carry only the drills that can be derived from a word without
+    inventing language: meaning, listening, dictation, speaking and stroke order.
+    Authored sentences — fill_blank, sentence_order, translation, short_answer — exist
+    only where a person wrote them, which today means this file.
+
+    Every listening drill needs generated reference audio; the importer synthesises it
+    from the item's audio_text and stores a content-hash key, so an item whose audio
+    cannot be produced fails the import instead of shipping a silent lesson.
+vocabulary:
+    - key: Bi3
+      simplified: 比
+      traditional: 比
+      pinyin: Bǐ
+      parts_of_speech:
+        - noun
+        - preposition
+        - verb
+      senses:
+        - en: Belgium
+      audio_key: ""
+      freq_rank: 155
+      levels:
+        hsk2.0: 2
+    - key: Gao1
+      simplified: 高
+      traditional: 高
+      pinyin: Gāo
+      parts_of_speech:
+        - adjective
+        - verb
+      senses:
+        - en: high
+      audio_key: ""
+      freq_rank: 290
+      levels:
+        hsk2.0: 2
+    - key: ka1fei1
+      simplified: 咖啡
+      traditional: 咖啡
+      pinyin: kā fēi
+      parts_of_speech:
+        - noun
+      senses:
+        - en: coffee (loanword)
+      audio_key: ""
+      freq_rank: 1698
+      levels:
+        hsk2.0: 2
+levels:
+    - level: 2
+      stage: elementary
+      title: Level 2 — core vocabulary
+      description: The published HSK 2.0 level-2 word list in frequency order, practised as meaning, listening and speaking drills. Thematic units are not yet curated; every word is covered by a meaning drill, a listening drill and a speaking drill.
+      vocab_target: 147
+      units:
+        - unit: 8
+          title: 语法 — grammar
+          description: 'Grammar patterns of this level, each with a plain-language rule, a fill-in-the-blank and a sentence to put in order.'
+          lessons:
+            - lesson: 1
+              title: "比 — comparing"
+              kind: lesson
+              goal: "Say that one thing is more than another with 比."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["Bi3", "Gao1"]
+              passages: []
+              exercises:
+                - key: g2-bi-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "A 比 B + adjective compares two things: 今天比昨天冷 is “today is colder than yesterday”. 比 sits between the two things and the adjective comes last, with no 很 in front of it."
+                  prompt:
+                    sentence: "今天___昨天冷。"
+                    pinyin: "jīntiān ___ zuótiān lěng."
+                    hint: "Add the word that means “than”."
+                    word_bank: ["比", "在", "的"]
+                  answer_key:
+                    accepted: ["比"]
+                - key: g2-bi-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"He is taller than me.\""
+                    tokens: ["比", "我", "高", "他"]
+                    pinyin: "tā bǐ wǒ gāo"
+                  answer_key:
+                    order: [3, 0, 1, 2]
+                    full_pinyin: "tā bǐ wǒ gāo"
+            - lesson: 2
+              title: "了 — a finished action"
+              kind: lesson
+              goal: "Mark a completed action with 了 after the verb."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: []
+              passages: []
+              exercises:
+                - key: g2-le-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "了 right after a verb says the action is completed: 买了 is “bought”. It is not a past tense — it marks completion, and the same verb can take 了 in a sentence about the future."
+                  prompt:
+                    sentence: "我昨天买___一本书。"
+                    pinyin: "wǒ zuótiān mǎi ___ yì běn shū."
+                    hint: "Add the particle that marks a finished action."
+                    word_bank: ["了", "吗", "呢"]
+                  answer_key:
+                    accepted: ["了"]
+                - key: g2-le-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"He ate two apples.\""
+                    tokens: ["苹果", "了", "他", "两个", "吃"]
+                    pinyin: "tā chī le liǎng gè píngguǒ"
+                  answer_key:
+                    order: [2, 4, 1, 3, 0]
+                    full_pinyin: "tā chī le liǎng gè píngguǒ"
+            - lesson: 3
+              title: "过 — having done it before"
+              kind: lesson
+              goal: "Say you have (or have never) done something with 过."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: []
+              passages: []
+              exercises:
+                - key: g2-guo-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "过 after a verb says you have done it at least once: 去过 is “have been to”. With 没 in front, 没去过 is “have never been”."
+                  prompt:
+                    sentence: "我没去___北京。"
+                    pinyin: "wǒ méi qù ___ Běijīng."
+                    hint: "Add the word that means “have ever”."
+                    word_bank: ["过", "了", "在"]
+                  answer_key:
+                    accepted: ["过"]
+                - key: g2-guo-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"I have been to the Great Wall.\""
+                    tokens: ["去", "过", "我", "长城"]
+                    pinyin: "wǒ qù guo Chángchéng"
+                  answer_key:
+                    order: [2, 0, 1, 3]
+                    full_pinyin: "wǒ qù guo Chángchéng"
+            - lesson: 4
+              title: "正在 — happening now"
+              kind: lesson
+              goal: "Say that you are in the middle of something with 正在."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: []
+              passages: []
+              exercises:
+                - key: g2-zhengzai-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "正在 (or just 在) before a verb says the action is in progress right now: 他正在看电视 is “he is watching TV”. 呢 often ends the sentence."
+                  prompt:
+                    sentence: "他___看电视呢。"
+                    pinyin: "tā ___ kàn diànshì ne."
+                    hint: "Add the word that means “right now, in the middle of”."
+                    word_bank: ["正在", "一起", "以后"]
+                  answer_key:
+                    accepted: ["正在"]
+                - key: g2-zhengzai-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"He is watching TV.\""
+                    tokens: ["电视", "他", "正在", "看"]
+                    pinyin: "tā zhèngzài kàn diànshì"
+                  answer_key:
+                    order: [1, 2, 3, 0]
+                    full_pinyin: "tā zhèngzài kàn diànshì"
+            - lesson: 5
+              title: "要……了 — about to happen"
+              kind: lesson
+              goal: "Say something is about to happen with 要……了."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: []
+              passages: []
+              exercises:
+                - key: g2-yaole-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "要……了 wraps a verb to say something is about to happen: 要下雨了 is “it is going to rain”. 快要……了 and 就要……了 say the same thing a little more urgently."
+                  prompt:
+                    sentence: "火车___开了。"
+                    pinyin: "huǒchē ___ kāi le."
+                    hint: "Add the word that means “about to”."
+                    word_bank: ["要", "会", "能"]
+                  answer_key:
+                    accepted: ["要"]
+                - key: g2-yaole-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"It is going to rain.\""
+                    tokens: ["了", "下雨", "天", "要"]
+                    pinyin: "tiān yào xiàyǔ le"
+                  answer_key:
+                    order: [2, 3, 1, 0]
+                    full_pinyin: "tiān yào xiàyǔ le"
+            - lesson: 6
+              title: "还是 — choosing in a question"
+              kind: lesson
+              goal: "Offer a choice inside a question with 还是."
+              xp_reward: 10
+              estimated_minutes: 3
+              vocabulary: ["ka1fei1"]
+              passages: []
+              exercises:
+                - key: g2-haishi-fill
+                  type: fill_blank
+                  skill: grammar
+                  difficulty: 2
+                  explanation: "还是 offers a choice inside a question: 你喝茶还是喝咖啡 is “do you drink tea or coffee?”. In a statement the word for “or” is 或者 — 还是 belongs to questions."
+                  prompt:
+                    sentence: "你喝茶___喝咖啡？"
+                    pinyin: "nǐ hē chá ___ hē kāfēi?"
+                    hint: "Add the word that means “or” in a question."
+                    word_bank: ["还是", "或者", "和"]
+                  answer_key:
+                    accepted: ["还是"]
+                - key: g2-haishi-order
+                  type: sentence_order
+                  skill: grammar
+                  difficulty: 3
+                  prompt:
+                    instruction: "Put the words in order to say \"Are you going, or is he going?\""
+                    tokens: ["还是", "他去", "你去"]
+                    pinyin: "nǐ qù háishi tā qù"
+                  answer_key:
+                    order: [2, 0, 1]
+                    full_pinyin: "nǐ qù háishi tā qù"

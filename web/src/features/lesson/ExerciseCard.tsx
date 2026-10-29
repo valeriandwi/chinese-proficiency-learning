@@ -257,7 +257,7 @@ function renderer(
                   })
                 }
                 disabled={disabled}
-                className={`rounded-card border-2 px-4 py-3.5 text-left transition active:translate-y-px ${optionClass(isChosen, isSolution, Boolean(result))}`}
+                className={`flex items-center rounded-card border-2 border-b-4 p-4 text-left transition active:translate-y-px active:border-b-2 ${optionClass(isChosen, isSolution, Boolean(result))}`}
               >
                 <span className="mr-3 inline-block h-4 w-4 rounded border border-line-strong align-middle" aria-hidden />
                 <span className="hanzi text-xl">{option.text}</span>
@@ -485,7 +485,7 @@ function OptionChoices({
   }, [disabled, options, onChange])
 
   return (
-    <fieldset className="flex flex-col gap-2" disabled={disabled}>
+    <fieldset className={`grid gap-3 ${contour ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2'}`} disabled={disabled}>
       {legend ? <legend className="mb-2 text-lg font-medium">{legend}</legend> : null}
       {options.map((option, index) => {
         const isChosen = chosen === option.id
@@ -498,15 +498,25 @@ function OptionChoices({
             disabled={disabled}
             className={`rounded-card border-2 px-4 py-3.5 text-left transition active:translate-y-px ${optionClass(isChosen, isSolution, Boolean(result))}`}
           >
-            {/* aria-hidden: the number is a shortcut hint, not part of the option's name. */}
-            <span
-              aria-hidden
-              className="mr-3 inline-grid h-7 w-7 place-items-center rounded-tile border-2 border-line text-xs font-extrabold tabular-nums text-ink-3"
-            >
-              {index + 1}
-            </span>
-            <span className="hanzi text-xl">{option.text}</span>
-            {contour ? <ToneContour pattern={option.text} /> : null}
+            {contour ? (
+              /* A tone card draws the pitch of each syllable in its tone colour and prints the
+                 digits beside it, so the answer reads without the colours. */
+              <span className="flex items-center gap-3.5">
+                <ToneContour pattern={option.text} />
+                <b className="tabular-nums">{option.text}</b>
+              </span>
+            ) : (
+              <>
+                {/* aria-hidden: the number is a shortcut hint, not part of the option's name. */}
+                <span
+                  aria-hidden
+                  className="mr-3 inline-grid h-7 w-7 place-items-center rounded-tile border-2 border-line text-xs font-extrabold tabular-nums text-ink-3"
+                >
+                  {index + 1}
+                </span>
+                <span className="hanzi text-2xl">{option.text}</span>
+              </>
+            )}
           </button>
         )
       })}
@@ -514,26 +524,38 @@ function OptionChoices({
   )
 }
 
-/** One pitch shape per tone digit, so a pattern like "3-3" is seen as well as read. 0 and 5
- *  (neutral) are a short low dot. Decorative: the digits beside it carry the meaning. */
-const TONE_SHAPES: Record<string, string> = {
-  '1': 'M2 4H16',
-  '2': 'M2 16L16 4',
-  '3': 'M2 6Q9 24 16 6',
-  '4': 'M2 4L16 16',
+/** One pitch stroke per tone digit, drawn in a 36px cell so a pattern like "1-4" is seen as well
+ *  as read. 0 and 5 (neutral) are a short dashed line. Decorative: the digits beside it carry
+ *  the meaning, and the tone colours are never the only signal. */
+const TONE_SHAPES: Record<string, { d: string; stroke: string; dash?: string; width: number }> = {
+  '1': { d: 'M4 8h24', stroke: 'var(--color-tone-1)', width: 5 },
+  '2': { d: 'M4 30l24-22', stroke: 'var(--color-tone-2)', width: 5 },
+  '3': { d: 'M4 14q12 24 24 0', stroke: 'var(--color-tone-3)', width: 5 },
+  '4': { d: 'M4 6l24 24', stroke: 'var(--color-tone-4)', width: 5 },
+  '0': { d: 'M4 18h22', stroke: 'var(--color-tone-0)', width: 4, dash: '3 6' },
+  '5': { d: 'M4 18h22', stroke: 'var(--color-tone-0)', width: 4, dash: '3 6' },
 }
 
 function ToneContour({ pattern }: { pattern: string }) {
   const tones = pattern.split('-')
   if (!tones.every((t) => /^[0-5]$/.test(t))) return null
   return (
-    <span aria-hidden className="ml-3 inline-flex items-center gap-1 align-middle text-ink-3">
-      {tones.map((tone, i) => (
-        <svg key={i} viewBox="0 0 18 20" width="18" height="20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-          {TONE_SHAPES[tone] ? <path d={TONE_SHAPES[tone]} /> : <circle cx="9" cy="15" r="1.6" fill="currentColor" />}
-        </svg>
-      ))}
-    </span>
+    <svg aria-hidden width={tones.length * 36 - 2} height="36" viewBox={`0 0 ${tones.length * 36 - 2} 36`} fill="none">
+      {tones.map((tone, i) => {
+        const shape = TONE_SHAPES[tone]
+        return (
+          <path
+            key={i}
+            d={shape.d}
+            transform={`translate(${i * 36} 0)`}
+            stroke={shape.stroke}
+            strokeWidth={shape.width}
+            strokeLinecap="round"
+            strokeDasharray={shape.dash}
+          />
+        )
+      })}
+    </svg>
   )
 }
 

@@ -1735,9 +1735,9 @@ export interface paths {
         /**
          * Authored grammar notes for the study guide
          * @description One note per authored grammar exercise: the explanation a person wrote, plus
-         *     the example drawn from the same exercise's own prompt. Levels 2-5 are
-         *     generated from word lists and carry no authored grammar, so they contribute
-         *     no notes — an honest empty state, not generated filler.
+         *     the example drawn from the same exercise's own prompt. Only exercises a person
+         *     wrote carry a note (levels 1-5 today); generated drills contribute none — an
+         *     honest empty state, not generated filler.
          */
         get: {
             parameters: {

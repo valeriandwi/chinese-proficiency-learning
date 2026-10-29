@@ -16,6 +16,7 @@ import type {
   ProficiencySubmitResponse,
   ReadingPassagesResponse,
   StudioAnswerResponse,
+  StudioCharacter,
   StudioQueue,
   StudyLexeme,
   ToneAnswersResponse,
@@ -41,6 +42,7 @@ export const queryKeys = {
   // level is" — the same contract as the tone queue.
   studioQueue: (kind: 'writing' | 'speaking', level: number | null, character = '') =>
     ['study', kind, 'queue', level ?? 'mine', character] as const,
+  studioCharacters: (level: number) => ['study', 'writing', 'characters', level] as const,
   reading: (level: number) => ['study', 'reading', level] as const,
   vocabulary: (level: number, search: string, offset: number) => ['study', 'vocabulary', level, search, offset] as const,
   grammar: (level: number) => ['study', 'grammar', level] as const,
@@ -290,6 +292,14 @@ export function useStudioQueue(kind: 'writing' | 'speaking', level: number | nul
       const query = params.toString()
       return api<StudioQueue>(`/api/v1/study/${kind}/queue${query ? `?${query}` : ''}`)
     },
+  })
+}
+
+/** Every character the writing studio can drill at a level (0 = all), for its picker. */
+export function useStudioCharacters(level: number) {
+  return useQuery({
+    queryKey: queryKeys.studioCharacters(level),
+    queryFn: () => api<{ items: StudioCharacter[]; level: number }>(`/api/v1/study/writing/characters?level=${level}`),
   })
 }
 
