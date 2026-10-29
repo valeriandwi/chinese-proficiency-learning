@@ -182,9 +182,26 @@ Three things it does not do for you, all documented at the top of the file:
 
 1. **The database starts empty of curriculum.** The audio for it ships in the repo
    (`var/media`, 2,375 files), so the import resolves that audio instead of synthesising:
-   `docker compose exec api contentctl import --file /app/content/hsk2.0/level-1.yaml …`
-   works on a Linux server with no synthesiser. Alternatively copy a dump from a machine
-   that already has content:
+   `contentctl import` works on a Linux server with no synthesiser. Import the level files
+   first, then the files that add a unit to a level (`level-1-tones.yaml`, then the
+   `level-N-grammar.yaml` files — the grammar units for HSK 2–5), in this order:
+
+   ```bash
+   # the TLS stack (add -f docker-compose.tls.yml and --env-file .env.compose as deployed)
+   sudo docker compose --env-file .env.compose \
+     -f docker-compose.yml -f docker-compose.tls.yml \
+     exec api contentctl import \
+       --file /app/content/hsk2.0/level-1.yaml --file /app/content/hsk2.0/level-2.yaml \
+       --file /app/content/hsk2.0/level-3.yaml --file /app/content/hsk2.0/level-4.yaml \
+       --file /app/content/hsk2.0/level-5.yaml --file /app/content/hsk2.0/level-1-tones.yaml \
+       --file /app/content/hsk2.0/level-2-grammar.yaml --file /app/content/hsk2.0/level-3-grammar.yaml \
+       --file /app/content/hsk2.0/level-4-grammar.yaml --file /app/content/hsk2.0/level-5-grammar.yaml
+   ```
+
+   The content is copied into the image, so rebuild (`up -d --build`) after pulling new
+   content files or the import will not find them. It is idempotent: re-running it updates
+   in place. From a development checkout the same thing is `make content-import`.
+   Alternatively copy a dump from a machine that already has content:
 
    ```bash
    ./scripts/seed-content.sh dump          # seeded dev database → hanpath-content.sql
