@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/screenshots/mascot.png" width="104" alt="hanpath mascot: a moon rabbit on a green tile">
+  <img src="docs/screenshots/logo.svg" width="104" alt="hanpath logo: a trail of growing white dots ending in a yellow goal on a green tile">
   <h1>hanpath</h1>
   <p><strong>Learn Mandarin on a path that tells you what to do next — and pass the HSK.</strong></p>
   <p>
@@ -67,13 +67,15 @@ lessons reach it can, without the app pretending they learned it.
 ![the practice hub](docs/screenshots/04-practice.webp)
 
 **Writing** is a full stroke-order studio: a model character, a tianzige-style guide grid,
-undo/clear/replay, trace drills and from-memory recall (465 + 270 of them). Stroke data is
+undo/clear/replay, trace drills and from-memory recall (465 + 270 of them), and a picker that lists
+every character of a level so you can choose the one to practise. Stroke data is
 the Make Me a Hanzi set, shipped locally and attributed under the Arphic Public License.
 
 ![the writing studio](docs/screenshots/05-writing.webp)
 
 **Tones** exist as their own drill type because tones are what learners actually fail at:
-choose the tone pattern without walking the path, with a tally of what you got right.
+choose the tone pattern from cards that draw each pitch contour, without walking the path, with a
+right/missed tally.
 
 ![tone drills](docs/screenshots/06-tones.webp)
 
@@ -113,18 +115,18 @@ rather than a month.
 ### The study guide — every word, the grammar notes, your bookmarks
 
 Searchable vocabulary by level (character, pinyin or meaning), hand-written grammar notes
-tied to the unit that teaches them, and bookmarks for the words you keep forgetting.
+for HSK 1 to 5 (each pattern with a rule, a fill-in and a sentence to order), and bookmarks for the words you keep forgetting.
 
 ![study guide](docs/screenshots/12-study-guide.webp)
 
 ### The interface is a system, not a stylesheet
 
 The visual language follows the OpenDesign `duolingo` design-system package — chunky fills,
-a solid "clay" lip under every primary control, a compact stats bar (streak, XP, today's goal) above every page — with
+a solid "clay" lip under every primary control, a compact top bar (streak, XP, today's goal) above every page — with
 one deliberate departure: **the package's own colour pairings fail WCAG, so they were
 corrected rather than copied.** White on Owl Green `#58cc02` measures **2.09:1**; on
 Cardinal `#ff4b4b`, **3.30:1**. Signature hues therefore carry large shapes and dark labels
-(the mascot is bright Owl Green with an ink initial at 5.28:1), while white-labelled fills
+(the Up-next hero is bright Owl Green with ink text at 5.28:1), while white-labelled fills
 use the darkened step `brand-600 #398501` at **4.64:1**.
 
 A test computes those ratios, another refuses any `var(--color-…)` that `index.css` does not
@@ -133,14 +135,15 @@ horizontal overflow, ≥44px touch targets, one fixed bottom bar. Type and icons
 self-hosted; nothing is fetched from a third-party CDN at runtime.
 
 <p>
-  <img src="docs/screenshots/01-sign-in.webp" width="64%" alt="sign-in with the mascot">
+  <img src="docs/screenshots/01-sign-in.webp" width="64%" alt="sign-in with the logo">
   <img src="docs/screenshots/14-phone.webp" width="26%" alt="the path on a phone">
 </p>
 
-The mascot is a **moon rabbit (玉兔)** — Chang'e's companion, drawn in flat vector from
-circles and capsules so it holds 32px in the header and 64px on the sign-in card. It has a
-`cheer` face for welcomes, and it drops its finer features below 40px where they would only
-alias. In the logo (tile, favicon) it sits in front of its full moon.
+The logo is **a trail**: fifteen white dots that grow along one curve towards a yellow goal, on a
+`#398501` tile (corner radius 23% of the side). The wordmark is Nunito 700, lowercase, a hairline
+divider, then 汉路 in Noto Serif SC with wide tracking. The favicon uses fewer, larger dots so it
+holds at 16px. The moon rabbit (玉兔) stays as a mascot: it appears in the Up-next hero, drawn in
+flat vector from circles and capsules, with a `cheer` face for welcomes.
 
 ---
 
