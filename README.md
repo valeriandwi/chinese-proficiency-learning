@@ -142,8 +142,7 @@ self-hosted; nothing is fetched from a third-party CDN at runtime.
 The logo is **a trail**: fifteen white dots that grow along one curve towards a yellow goal, on a
 `#398501` tile (corner radius 23% of the side). The wordmark is Nunito 700, lowercase, a hairline
 divider, then 汉路 in Noto Serif SC with wide tracking. The favicon uses fewer, larger dots so it
-holds at 16px. The moon rabbit (玉兔) stays as a mascot: it appears in the Up-next hero, drawn in
-flat vector from circles and capsules, with a `cheer` face for welcomes.
+holds at 16px.
 
 ---
 

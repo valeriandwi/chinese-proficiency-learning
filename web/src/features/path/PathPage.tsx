@@ -118,20 +118,6 @@ export function PathPage() {
             </h2>
           )}
         </div>
-        {/* The design's hero art: the plain rabbit on a light-green disc, not the logo tile. */}
-        <svg width="120" height="120" viewBox="0 0 120 120" aria-hidden className="shrink-0 max-sm:hidden">
-          <circle cx="60" cy="60" r="56" fill="var(--color-brand-300)" />
-          <g transform="translate(18 14) scale(1.34)" stroke="var(--color-ink)" strokeWidth="3">
-            <rect x="18" y="4" width="10" height="26" rx="5" fill="var(--color-surface)" />
-            <rect x="36" y="4" width="10" height="26" rx="5" fill="var(--color-surface)" />
-            <circle cx="32" cy="40" r="19" fill="var(--color-surface)" />
-            <circle cx="25" cy="38" r="2.6" fill="var(--color-ink)" stroke="none" />
-            <circle cx="39" cy="38" r="2.6" fill="var(--color-ink)" stroke="none" />
-            <path d="M27 46c3 3 7 3 10 0" fill="none" strokeLinecap="round" />
-            <circle cx="20" cy="45" r="3" fill="var(--color-danger-100)" stroke="none" />
-            <circle cx="44" cy="45" r="3" fill="var(--color-danger-100)" stroke="none" />
-          </g>
-        </svg>
       </section>
 
       {shownLevels.map((level) => {
