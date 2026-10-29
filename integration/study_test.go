@@ -164,4 +164,27 @@ func TestStudyGuideVocabularyEndToEnd(t *testing.T) {
 	if len(grammar.Items) == 0 {
 		t.Error("the guide's grammar tab is empty for level 1")
 	}
+
+	// The writing studio's character search: only that character's drills come back.
+	var writing struct {
+		Items []struct {
+			Prompt struct {
+				Character string `json:"character"`
+			} `json:"prompt"`
+		} `json:"items"`
+	}
+	if code := c.do(http.MethodGet, "/api/v1/study/writing/queue?character=%E4%BD%A0&limit=20", nil, &writing); code != http.StatusOK {
+		t.Fatalf("writing queue for 你: status %d", code)
+	}
+	if len(writing.Items) == 0 {
+		t.Fatal("searching the writing studio for 你 found no drill")
+	}
+	for _, item := range writing.Items {
+		if item.Prompt.Character != "你" {
+			t.Errorf("character=你 returned a drill for %q", item.Prompt.Character)
+		}
+	}
+	if code := c.do(http.MethodGet, "/api/v1/study/writing/queue?character=abcde", nil, nil); code != http.StatusUnprocessableEntity {
+		t.Errorf("an over-long character: status %d, want 422", code)
+	}
 }

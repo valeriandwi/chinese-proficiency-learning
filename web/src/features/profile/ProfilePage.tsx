@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLogout, useOverview, useSession, useUpdateMe } from '../../api/hooks'
 import { describeGoal } from '../../lib/labels'
@@ -34,18 +34,31 @@ export function ProfilePage() {
   const [pinyinDefault, setPinyinDefault] = useState(user.pinyin_default)
   const [targetLevel, setTargetLevel] = useState(user.target_level ?? 1)
 
-  const save = async () => {
+  // Each change saves itself (after a short pause, so typing is one save, and only while the
+  // form is valid) — a Save button is a step a learner forgets.
+  const firstRender = useRef(true)
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+      return
+    }
+    if (displayName.trim() === '' || !(goalValue >= 1 && goalValue <= 600)) return
     setSaved(false)
-    await update.mutateAsync({
-      display_name: displayName,
-      timezone,
-      daily_goal_kind: goalKind,
-      daily_goal_value: goalValue,
-      pinyin_default: pinyinDefault,
-      target_level: targetLevel,
-    })
-    setSaved(true)
-  }
+    const timer = window.setTimeout(() => {
+      update
+        .mutateAsync({
+          display_name: displayName,
+          timezone,
+          daily_goal_kind: goalKind,
+          daily_goal_value: goalValue,
+          pinyin_default: pinyinDefault,
+          target_level: targetLevel,
+        })
+        .then(() => setSaved(true))
+        .catch(() => undefined) // shown through update.error below
+    }, 700)
+    return () => window.clearTimeout(timer)
+  }, [displayName, timezone, goalKind, goalValue, pinyinDefault, targetLevel]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
@@ -132,16 +145,9 @@ export function ProfilePage() {
         </label>
 
         {update.error ? <ErrorNote>{(update.error as Error).message}</ErrorNote> : null}
-        <div className="flex items-center gap-3">
-          <Button onClick={save} disabled={update.isPending}>
-            {update.isPending ? 'Saving…' : 'Save'}
-          </Button>
-          {saved ? (
-            <span role="status" className="text-sm font-bold text-brand-700">
-              Saved — your rollups were recomputed.
-            </span>
-          ) : null}
-        </div>
+        <p role="status" className="min-h-5 text-sm font-bold text-brand-700">
+          {update.isPending ? 'Saving…' : saved ? 'Saved — your rollups were recomputed.' : ''}
+        </p>
       </Card>
 
       <Card className="flex flex-col gap-3" aria-labelledby="display-h">

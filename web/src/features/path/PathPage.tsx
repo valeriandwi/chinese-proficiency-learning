@@ -7,19 +7,12 @@ import { Chip, ErrorNote, ProgressRing, Skeleton } from "../../components/ui";
 import { CheckpointGlyph } from "../../components/icons";
 import { MascotMark } from "../../components/Mascot";
 
-/** One accent per unit, cycling through five families — Duolingo's device for telling
- *  one stretch of the path from the next. Written as literal class strings because
- *  Tailwind scans this file for them: a template-built class would compile to nothing.
- *
- *  The unit colour dresses the UNIT only (band, connector, checkpoint, badge). A lesson
- *  node keeps the four semantic state colours, so colour never has to carry two
- *  meanings at once. */
+/** One skin for every unit: the app is green, and a blue-then-violet-then-magenta trail made
+ *  the path the one screen that was not. Kept as an array so a unit can still be dressed
+ *  differently later. Literal class strings because Tailwind scans this file for them; the
+ *  eyebrow is white because brand-100 on brand-600 is below 4.5:1. */
 const UNIT_SKINS = [
-  { band: "bg-unit-1-700", eyebrow: "text-unit-1-100", line: "bg-unit-1-300", chip: "bg-unit-1-100 text-unit-1-700", dot: "text-unit-1-600" },
-  { band: "bg-unit-2-700", eyebrow: "text-unit-2-100", line: "bg-unit-2-300", chip: "bg-unit-2-100 text-unit-2-700", dot: "text-unit-2-600" },
-  { band: "bg-unit-3-700", eyebrow: "text-unit-3-100", line: "bg-unit-3-300", chip: "bg-unit-3-100 text-unit-3-700", dot: "text-unit-3-600" },
-  { band: "bg-unit-4-700", eyebrow: "text-unit-4-100", line: "bg-unit-4-300", chip: "bg-unit-4-100 text-unit-4-700", dot: "text-unit-4-600" },
-  { band: "bg-unit-5-700", eyebrow: "text-unit-5-100", line: "bg-unit-5-300", chip: "bg-unit-5-100 text-unit-5-700", dot: "text-unit-5-600" },
+  { band: "bg-brand-600", eyebrow: "text-white", line: "bg-brand-300", chip: "bg-brand-100 text-brand-700", dot: "text-brand-600" },
 ] as const;
 
 function unitSkin(unitNumber: number) {

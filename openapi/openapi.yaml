@@ -775,6 +775,7 @@ paths:
         recorded with mode `studio` and excluded from every derived value.
       parameters:
         - { name: level, in: query, schema: { type: integer, default: 0, minimum: 0, maximum: 5 }, description: '0 = every level (your own level is served first, then the rest fills a full round); otherwise 1-5' }
+        - { name: character, in: query, schema: { type: string, maxLength: 4 }, description: "Only drills for this character (the studio's search); empty = any" }
         - { name: limit, in: query, schema: { type: integer, default: 10, maximum: 50 } }
       responses:
         '200':

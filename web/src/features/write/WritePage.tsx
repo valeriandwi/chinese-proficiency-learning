@@ -28,7 +28,9 @@ const LEVEL_CHOICES = [
 
 export function WritePage() {
   const [level, setLevel] = useState<number | null>(null)
-  const queue = useStudioQueue('writing', level)
+  const [character, setCharacter] = useState('')
+  const [draft, setDraft] = useState('')
+  const queue = useStudioQueue('writing', level, character)
   const answer = useAnswerStudio()
   const prefs = usePrefs()
 
@@ -54,6 +56,13 @@ export function WritePage() {
 
   const chooseLevel = (value: number) => {
     setLevel(value)
+    setSession(null)
+  }
+
+  // Searching a character deals that character's drills, from any level.
+  const chooseCharacter = (value: string) => {
+    setCharacter(value)
+    setDraft(value)
     setSession(null)
   }
 
@@ -101,6 +110,32 @@ export function WritePage() {
             recorded for you to see.
           </p>
         </div>
+        <form
+          className="flex items-center gap-2"
+          onSubmit={(event) => {
+            event.preventDefault()
+            chooseCharacter(draft.trim())
+          }}
+        >
+          <label className="flex flex-1 flex-col gap-1 text-sm font-bold text-ink-2">
+            Practise a character
+            <input
+              className="input hanzi"
+              value={draft}
+              maxLength={4}
+              placeholder="好"
+              onChange={(event) => setDraft(event.target.value)}
+            />
+          </label>
+          <Button type="submit" variant="secondary" className="self-end">
+            Find
+          </Button>
+          {character ? (
+            <Button variant="ghost" onClick={() => chooseCharacter('')} className="self-end">
+              Clear
+            </Button>
+          ) : null}
+        </form>
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Level">
           {LEVEL_CHOICES.map((choice) => {
             const selected = level === null ? queue.data?.level === choice.value : level === choice.value
@@ -122,8 +157,12 @@ export function WritePage() {
       {queue.data.items.length === 0 && session === null ? (
         <EmptyState
           icon={<PenLine size={22} aria-hidden />}
-          title="No writing drills at this level"
-          hint="Try another level — level 1 has a writing drill for every character it teaches."
+          title={character ? `No writing drill for ${character}` : 'No writing drills at this level'}
+          hint={
+            character
+              ? 'Only characters the curriculum teaches have a drill. Clear the search to deal a mixed round.'
+              : 'Try another level — level 1 has a writing drill for every character it teaches.'
+          }
         />
       ) : null}
 

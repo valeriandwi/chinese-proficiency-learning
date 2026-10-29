@@ -462,7 +462,11 @@ function LessonResult({
         <dl className="mt-5 grid grid-cols-2 gap-3 text-left sm:grid-cols-4">
           <Stat label="Correct" value={`${correct}/${graded.length}`} />
           <Stat label="XP" value={completedNow ? `+${outcome?.xp_awarded ?? 0}` : '0'} />
-          <Stat label="Status" value={outcome?.status === 'completed' ? 'completed' : 'in progress'} />
+          {next ? (
+            <Stat label="Streak" value={`${next.streak.current_streak} day${next.streak.current_streak === 1 ? '' : 's'}`} />
+          ) : (
+            <Stat label="Status" value={outcome?.status === 'completed' ? 'completed' : 'in progress'} />
+          )}
           <Stat label="Lesson score" value={outcome ? formatPercent(outcome.correct / Math.max(1, outcome.total)) : '—'} />
         </dl>
 

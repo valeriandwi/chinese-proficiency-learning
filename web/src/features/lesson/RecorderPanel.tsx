@@ -288,7 +288,7 @@ export function RecorderPanel({
       <div className="flex flex-wrap items-center gap-3">
         {status === 'recording' ? (
           <>
-            <Button type="button" variant="danger" onClick={stop} disabled={disabled}>
+            <Button type="button" variant="danger" onClick={stop} disabled={disabled} className="min-h-14 px-8 text-base">
               ■ Stop
             </Button>
             <span className="flex items-center gap-2 text-sm text-danger-700">
@@ -297,7 +297,7 @@ export function RecorderPanel({
             </span>
           </>
         ) : (
-          <Button type="button" onClick={start} disabled={disabled || status === 'requesting'}>
+          <Button type="button" onClick={start} disabled={disabled || status === 'requesting'} className="min-h-14 px-8 text-base">
             {status === 'requesting' ? 'Waiting for the microphone…' : blobUrl ? '● Record again' : '● Record'}
           </Button>
         )}

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 
@@ -82,7 +84,16 @@ func (s *Server) serveStudioQueue(w http.ResponseWriter, r *http.Request, types 
 		prefer = toneDefaultLevel(*user)
 	}
 
-	drills, err := s.store.StudioQueue(r.Context(), user.ID, types, level, limit, prefer)
+	// The writing studio's character search: drills for one character, from any level.
+	// Only prompts that carry a `character` can match, so the speaking studio ignores it.
+	character := strings.TrimSpace(r.URL.Query().Get("character"))
+	if utf8.RuneCountInString(character) > 4 {
+		writeError(w, r, http.StatusUnprocessableEntity, "validation_failed",
+			"character must be at most 4 characters", nil)
+		return
+	}
+
+	drills, err := s.store.StudioQueue(r.Context(), user.ID, types, level, limit, prefer, character)
 	if err != nil {
 		s.respondStoreError(w, r, err)
 		return

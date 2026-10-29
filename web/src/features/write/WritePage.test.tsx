@@ -27,7 +27,7 @@ vi.mock('../../api/hooks', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../api/hooks')>()
   return {
     ...actual,
-    useStudioQueue: (kind: string, level: number | null) => queueMock(kind, level),
+    useStudioQueue: (kind: string, level: number | null, character = '') => queueMock(kind, level, character),
     useAnswerStudio: () => ({ mutate: answerMock, isPending: false, error: null }),
   }
 })
@@ -122,13 +122,24 @@ describe('WritePage', () => {
 
     // Level is part of the query key: the page asks the server rather than filtering
     // its own copy of the curriculum.
-    expect(queueMock).toHaveBeenCalledWith('writing', null)
+    expect(queueMock).toHaveBeenCalledWith('writing', null, '')
 
     await userEvent.click(screen.getByRole('button', { name: 'HSK 2' }))
 
-    expect(queueMock).toHaveBeenCalledWith('writing', 2)
+    expect(queueMock).toHaveBeenCalledWith('writing', 2, '')
     expect(screen.getByRole('button', { name: 'HSK 2' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('searches for one character, and clears the search', async () => {
+    render(<MemoryRouter><WritePage /></MemoryRouter>)
+
+    await userEvent.type(screen.getByLabelText(/practise a character/i), '好')
+    await userEvent.click(screen.getByRole('button', { name: 'Find' }))
+    expect(queueMock).toHaveBeenLastCalledWith('writing', null, '好')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Clear' }))
+    expect(queueMock).toHaveBeenLastCalledWith('writing', null, '')
   })
 
   it('shows the character the drill asks for, and its pinyin only when the learner wants it', () => {

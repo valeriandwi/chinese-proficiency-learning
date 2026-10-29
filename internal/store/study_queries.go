@@ -45,7 +45,7 @@ type StudyDrill struct {
 // level's drills come first and the rest of the round is filled from the others — so a
 // beginner practises characters they have met first, and still gets a full round even
 // though level 1 is small.
-func (s *Store) StudioQueue(ctx context.Context, userID uuid.UUID, types []string, level, limit, prefer int) ([]StudyDrill, error) {
+func (s *Store) StudioQueue(ctx context.Context, userID uuid.UUID, types []string, level, limit, prefer int, character string) ([]StudyDrill, error) {
 	rows, err := s.Pool.Query(ctx, `
 		SELECT e.id, e.exercise_number, e.type, e.skill, e.difficulty, e.prompt, l.level_number
 		FROM exercises e
@@ -54,8 +54,9 @@ func (s *Store) StudioQueue(ctx context.Context, userID uuid.UUID, types []strin
 		JOIN levels l ON l.id = u.level_id
 		WHERE e.type = ANY($1)
 		  AND ($2 = 0 OR l.level_number = $2)
+		  AND ($6::text = '' OR e.prompt->>'character' = $6)
 		ORDER BY (l.level_number = $5) DESC, md5(e.content_key || $3::text)
-		LIMIT $4`, types, level, userID, limit, prefer)
+		LIMIT $4`, types, level, userID, limit, prefer, character)
 	if err != nil {
 		return nil, mapErr(err)
 	}

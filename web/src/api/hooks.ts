@@ -39,7 +39,8 @@ export const queryKeys = {
   // The study surfaces: writing studio, speaking studio, guide, bookmarks.
   // `null` for the writing/speaking queues means "whatever the server says my
   // level is" — the same contract as the tone queue.
-  studioQueue: (kind: 'writing' | 'speaking', level: number | null) => ['study', kind, 'queue', level ?? 'mine'] as const,
+  studioQueue: (kind: 'writing' | 'speaking', level: number | null, character = '') =>
+    ['study', kind, 'queue', level ?? 'mine', character] as const,
   reading: (level: number) => ['study', 'reading', level] as const,
   vocabulary: (level: number, search: string, offset: number) => ['study', 'vocabulary', level, search, offset] as const,
   grammar: (level: number) => ['study', 'grammar', level] as const,
@@ -278,11 +279,17 @@ export function usePlacementQuestions(version: string, level = 1, limit = 20) {
  * Writing or speaking drills for the studio. `null` lets the server pick the
  * learner's own level — the same contract as the tone queue.
  */
-export function useStudioQueue(kind: 'writing' | 'speaking', level: number | null) {
+/** `character` narrows the writing queue to one character (the studio's search). */
+export function useStudioQueue(kind: 'writing' | 'speaking', level: number | null, character = '') {
   return useQuery({
-    queryKey: queryKeys.studioQueue(kind, level),
-    queryFn: () =>
-      api<StudioQueue>(`/api/v1/study/${kind}/queue${level === null ? '' : `?level=${level}`}`),
+    queryKey: queryKeys.studioQueue(kind, level, character),
+    queryFn: () => {
+      const params = new URLSearchParams()
+      if (level !== null) params.set('level', String(level))
+      if (character) params.set('character', character)
+      const query = params.toString()
+      return api<StudioQueue>(`/api/v1/study/${kind}/queue${query ? `?${query}` : ''}`)
+    },
   })
 }
 
