@@ -12,7 +12,7 @@ import { MascotMark } from "../../components/Mascot";
  *  differently later. Literal class strings because Tailwind scans this file for them; the
  *  eyebrow is white because brand-100 on brand-600 is below 4.5:1. */
 const UNIT_SKINS = [
-  { band: "bg-brand-600", eyebrow: "text-white", line: "bg-brand-300", chip: "bg-brand-100 text-brand-700", dot: "text-brand-600" },
+  { band: "bg-brand-600", eyebrow: "text-white", chip: "bg-brand-100 text-brand-700", dot: "text-brand-600" },
 ] as const;
 
 function unitSkin(unitNumber: number) {
@@ -164,8 +164,6 @@ export function PathPage() {
                         key={lesson.id}
                         lesson={lesson}
                         isNext={lesson.id === nextLessonId}
-                        showConnector={index > 0}
-                        connectorClass={skin.line}
                         order={index}
                       />
                     ))}
@@ -190,17 +188,18 @@ export function PathPage() {
   );
 }
 
+/** How far each node sits from the trail's centre, in px: a gentle S so the trail reads as a
+ *  path rather than a list. Applied through the independent `translate` property, which the
+ *  entrance animation's `transform` cannot override, and only from the `sm` breakpoint up. */
+const TRAIL_OFFSETS = [0, 44, 72, 44, 0, -44, -72, -44];
+
 function LessonNode({
   lesson,
   isNext,
-  showConnector,
-  connectorClass,
   order,
 }: {
   lesson: LessonSummary;
   isNext: boolean;
-  showConnector: boolean;
-  connectorClass: string;
   order: number;
 }) {
   const state = describeLessonState(lesson.state);
@@ -240,15 +239,14 @@ function LessonNode({
 
   return (
     <li
-      className="animate-bounce-in relative flex w-full flex-col items-center"
-      style={{ animationDelay: `${order * 55}ms` }}
+      className="animate-bounce-in relative flex w-full flex-col items-center sm:[translate:var(--trail-x)_0]"
+      style={
+        {
+          animationDelay: `${order * 55}ms`,
+          "--trail-x": `${TRAIL_OFFSETS[order % TRAIL_OFFSETS.length]}px`,
+        } as React.CSSProperties
+      }
     >
-      {showConnector ? (
-        <span
-          aria-hidden
-          className={`absolute -top-7 left-1/2 h-7 w-2 -translate-x-1/2 rounded-full ${connectorClass}`}
-        />
-      ) : null}
 
       {/* One target per lesson: the circle and its label are a single link, so the
           tap area is the whole node rather than a 80px puck — and the lesson's name

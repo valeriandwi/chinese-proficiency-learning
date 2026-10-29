@@ -143,6 +143,7 @@ export function ProgressPage() {
         <StatTile
           label="Review queue"
           tone="accent"
+          className="sm:col-span-2 xl:col-span-1"
           icon={<BookOpenCheck size={20} />}
           value={
             <>

@@ -140,12 +140,12 @@ function SkillDoor({
   return (
     <Link
       to={to}
-      className={`group flex flex-col gap-4 rounded-card border border-line bg-surface p-5 shadow-card transition hover:border-brand-300 hover:shadow-raised focus-visible:outline-2 ${
-        wide ? 'sm:flex-row sm:items-center' : ''
+      className={`group flex flex-row items-center gap-4 rounded-card border border-line bg-surface p-4 shadow-card transition hover:border-brand-300 hover:shadow-raised focus-visible:outline-2 sm:p-5 ${
+        wide ? '' : 'sm:flex-col sm:items-stretch'
       }`}
     >
       {art ? (
-        <div className="flex h-24 items-center justify-center rounded-tile bg-brand-50 p-2" aria-hidden>
+        <div className="flex h-20 w-24 shrink-0 items-center justify-center rounded-tile bg-brand-50 p-2 sm:h-24 sm:w-auto" aria-hidden>
           {art}
         </div>
       ) : (

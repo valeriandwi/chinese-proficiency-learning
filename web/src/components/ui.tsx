@@ -34,15 +34,17 @@ export function StatTile({
   hint,
   icon,
   tone = 'neutral',
+  className = '',
 }: {
   label: string
   value: ReactNode
   hint?: ReactNode
   icon?: ReactNode
   tone?: Tone
+  className?: string
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-card border-2 border-line bg-surface p-4 shadow-tile">
+    <div className={`flex items-start gap-3 rounded-card border-2 border-line bg-surface p-4 shadow-tile ${className}`}>
       {icon ? (
         <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-tile ${toneClasses[tone]}`} aria-hidden>
           {icon}
