@@ -4,6 +4,7 @@ import { useAnswerReview, useOverview, useReviewQueue } from '../../api/hooks'
 import { relativeDue } from '../../lib/labels'
 import { Button, Card, Chip, EmptyState, ErrorNote, ProgressBar, Spinner } from '../../components/ui'
 import { usePrefs } from '../../stores/prefs'
+import type { ReviewForecast } from '../../api/types'
 
 export function ReviewPage() {
   const prefs = usePrefs()
@@ -23,6 +24,7 @@ export function ReviewPage() {
   // The deck is dealt as a batch of at most `limit` cards; the session bar tracks
   // this sitting, not the lifetime queue, so it can actually reach 100%.
   const presented = items.length
+  const forecast = queue.data?.forecast
 
   const record = (itemId: string, lexemeId: string, correct: boolean) =>
     answer.mutate(
@@ -56,6 +58,8 @@ export function ReviewPage() {
           Pinyin {prefs.pinyinVisible ? 'on' : 'off'}
         </button>
       </header>
+
+      {forecast && Object.values(forecast).some((n) => n > 0) ? <ForecastCard forecast={forecast} /> : null}
 
       {presented > 0 ? (
         <div className="flex flex-col gap-1.5">
@@ -137,5 +141,41 @@ export function ReviewPage() {
         </p>
       ) : null}
     </div>
+  )
+}
+
+const FORECAST_WINDOWS: { key: keyof ReviewForecast; label: string }[] = [
+  { key: 'now', label: 'now' },
+  { key: 'day', label: 'next 24 h' },
+  { key: 'days3', label: '2–3 days' },
+  { key: 'week', label: 'this week' },
+  { key: 'later', label: 'later' },
+]
+
+/** When the deck comes due. Bars are scaled to the busiest window, and every window prints
+ *  its number, so the chart is never the only carrier of a count. */
+function ForecastCard({ forecast }: { forecast: ReviewForecast }) {
+  const busiest = Math.max(...FORECAST_WINDOWS.map((w) => forecast[w.key]), 1)
+  return (
+    <Card className="flex flex-col gap-3" aria-labelledby="forecast-h">
+      <h2 id="forecast-h" className="font-extrabold text-ink">
+        Coming up
+      </h2>
+      <ul className="grid grid-cols-5 gap-2 text-center">
+        {FORECAST_WINDOWS.map(({ key, label }) => (
+          <li key={key} className="flex flex-col items-center gap-1">
+            <span className="flex h-16 w-full items-end">
+              <span
+                aria-hidden
+                className={`w-full rounded-t-tile ${key === 'now' ? 'bg-danger-600' : 'bg-brand-500'}`}
+                style={{ height: `${Math.max(forecast[key] > 0 ? 8 : 0, (forecast[key] / busiest) * 100)}%` }}
+              />
+            </span>
+            <span className="text-sm font-extrabold tabular-nums text-ink">{forecast[key]}</span>
+            <span className="text-[0.7rem] font-bold text-ink-3">{label}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
   )
 }

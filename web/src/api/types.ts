@@ -391,7 +391,9 @@ export type ReviewItem = {
   due_at: string
 }
 
-export type ReviewQueue = { items: ReviewItem[]; due_total: number }
+export type ReviewForecast = { now: number; day: number; days3: number; week: number; later: number }
+
+export type ReviewQueue = { items: ReviewItem[]; due_total: number; forecast?: ReviewForecast }
 
 export type ReviewAnswerResponse = {
   lexeme_id: string

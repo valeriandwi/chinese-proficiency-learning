@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLogout, useOverview, useSession, useUpdateMe } from '../../api/hooks'
 import { describeGoal } from '../../lib/labels'
@@ -36,13 +36,17 @@ export function ProfilePage() {
 
   // Each change saves itself (after a short pause, so typing is one save, and only while the
   // form is valid) — a Save button is a step a learner forgets.
-  const firstRender = useRef(true)
+  // "Changed" is measured against what is stored, not against the first render: React runs
+  // effects twice in development, and a first-render flag would save an untouched form.
   useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false
-      return
-    }
-    if (displayName.trim() === '' || !(goalValue >= 1 && goalValue <= 600)) return
+    const changed =
+      displayName !== user.display_name ||
+      timezone !== user.timezone ||
+      goalKind !== user.daily_goal_kind ||
+      goalValue !== user.daily_goal_value ||
+      pinyinDefault !== user.pinyin_default ||
+      targetLevel !== (user.target_level ?? 1)
+    if (!changed || displayName.trim() === '' || !(goalValue >= 1 && goalValue <= 600)) return
     setSaved(false)
     const timer = window.setTimeout(() => {
       update

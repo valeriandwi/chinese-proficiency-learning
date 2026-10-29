@@ -734,6 +734,15 @@ paths:
                     type: array
                     items: { $ref: '#/components/schemas/ReviewItem' }
                   due_total: { type: integer }
+                  forecast:
+                    type: object
+                    description: Cards by when they fall due, relative to now; every card is in exactly one bucket.
+                    properties:
+                      now: { type: integer, description: Due already }
+                      day: { type: integer, description: Within the next 24 hours }
+                      days3: { type: integer, description: 1 to 3 days from now }
+                      week: { type: integer, description: 3 to 7 days from now }
+                      later: { type: integer, description: Beyond a week }
 
   /api/v1/reviews/answer:
     post:

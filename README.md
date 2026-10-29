@@ -60,7 +60,7 @@ awaiting review. No audio files ship; it is a few lines of Web Audio, and it has
 
 ### Practice studios — outside the path, on purpose
 
-The practice hub leads to four studios. They serve drills from **any** level and state up
+The practice hub leads to four studios (writing, speaking, reading, tones) and the study guide. They serve drills from **any** level and state up
 front that nothing there moves the path — a learner who wants to drill 写 before their
 lessons reach it can, without the app pretending they learned it.
 
@@ -120,7 +120,7 @@ tied to the unit that teaches them, and bookmarks for the words you keep forgett
 ### The interface is a system, not a stylesheet
 
 The visual language follows the OpenDesign `duolingo` design-system package — chunky fills,
-a solid "clay" lip under every primary control, a two-row learner card in the header — with
+a solid "clay" lip under every primary control, a compact stats bar (streak, XP, today's goal) above every page — with
 one deliberate departure: **the package's own colour pairings fail WCAG, so they were
 corrected rather than copied.** White on Owl Green `#58cc02` measures **2.09:1**; on
 Cardinal `#ff4b4b`, **3.30:1**. Signature hues therefore carry large shapes and dark labels
@@ -140,7 +140,7 @@ self-hosted; nothing is fetched from a third-party CDN at runtime.
 The mascot is a **moon rabbit (玉兔)** — Chang'e's companion, drawn in flat vector from
 circles and capsules so it holds 32px in the header and 64px on the sign-in card. It has a
 `cheer` face for welcomes, and it drops its finer features below 40px where they would only
-alias.
+alias. In the logo (tile, favicon) it sits in front of its full moon.
 
 ---
 

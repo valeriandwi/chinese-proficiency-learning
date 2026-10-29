@@ -420,7 +420,12 @@ func (s *Server) handleReviewQueue(w http.ResponseWriter, r *http.Request) {
 		s.respondStoreError(w, r, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"items": items, "due_total": due})
+	forecast, err := s.store.ReviewForecast(r.Context(), user.ID)
+	if err != nil {
+		s.respondStoreError(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"items": items, "due_total": due, "forecast": forecast})
 }
 
 type reviewAnswerRequest struct {

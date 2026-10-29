@@ -428,6 +428,29 @@ func (s *Store) CountDue(ctx context.Context, userID uuid.UUID) (int, error) {
 	return n, mapErr(err)
 }
 
+// ReviewForecast says how many cards fall due in each window from now. The windows are
+// relative to now, not to a calendar day, so the forecast needs no time zone and cannot
+// disagree with the "due now" count: every card is in exactly one bucket.
+type ReviewForecast struct {
+	Now   int `json:"now"`   // due already
+	Day   int `json:"day"`   // within the next 24 hours
+	Days3 int `json:"days3"` // 1 to 3 days from now
+	Week  int `json:"week"`  // 3 to 7 days from now
+	Later int `json:"later"` // beyond a week
+}
+
+func (s *Store) ReviewForecast(ctx context.Context, userID uuid.UUID) (ReviewForecast, error) {
+	var f ReviewForecast
+	err := s.Pool.QueryRow(ctx, `
+		SELECT count(*) FILTER (WHERE due_at <= now())::int,
+		       count(*) FILTER (WHERE due_at > now() AND due_at <= now() + interval '1 day')::int,
+		       count(*) FILTER (WHERE due_at > now() + interval '1 day' AND due_at <= now() + interval '3 days')::int,
+		       count(*) FILTER (WHERE due_at > now() + interval '3 days' AND due_at <= now() + interval '7 days')::int,
+		       count(*) FILTER (WHERE due_at > now() + interval '7 days')::int
+		FROM review_items WHERE user_id = $1::uuid`, userID).Scan(&f.Now, &f.Day, &f.Days3, &f.Week, &f.Later)
+	return f, mapErr(err)
+}
+
 // ApplyReviewResult advances one card. The scheduler maths lives in
 // internal/progress so the interval ladder is unit-tested, not embedded in SQL.
 func (s *Store) ApplyReviewResult(ctx context.Context, userID, lexemeID uuid.UUID, correct bool, intervalIndex int, ease float64, dueAt time.Time) error {

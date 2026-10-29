@@ -1,3 +1,4 @@
+import { StrictMode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
@@ -58,6 +59,18 @@ describe('ProfilePage auto-save', () => {
 
     expect(mutateAsync).toHaveBeenCalledTimes(1)
     expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ daily_goal_value: 30 }))
+  })
+
+  it('does not save an untouched form, even when effects run twice', async () => {
+    render(
+      <StrictMode>
+        <MemoryRouter>
+          <ProfilePage />
+        </MemoryRouter>
+      </StrictMode>,
+    )
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(mutateAsync).not.toHaveBeenCalled()
   })
 
   it('never sends an invalid form', async () => {
