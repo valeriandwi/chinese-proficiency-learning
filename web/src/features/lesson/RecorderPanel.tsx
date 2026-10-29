@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '../../components/ui'
 import { ApiError, apiUpload } from '../../api/client'
 import type { AnswerPayload } from '../../api/types'
+import { Waveform } from './Waveform'
 
 // Records the learner's voice for a speaking exercise, and — when this deployment has
 // a pronunciation provider — has it scored.
@@ -333,6 +334,7 @@ export function RecorderPanel({
             both in turn.
           </p>
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+          <Waveform url={blobUrl} />
           <audio controls src={blobUrl} data-testid="learner-recording" className="w-full" />
 
           {scoring === 'uploading' ? <p className="text-sm text-ink-3">Sending it to be scored…</p> : null}
