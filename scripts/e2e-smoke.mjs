@@ -307,14 +307,14 @@ async function main() {
     // The greeting renders with the session; the cards render when the progress
     // query resolves. Waiting only for the greeting reads a half-painted page.
     // Comparisons are case-insensitive because several labels are uppercased by CSS.
-    await cdp.waitFor('window.__t.text().toLowerCase().includes("next up") ? "cards" : ""', 'the home screen')
+    await cdp.waitFor('window.__t.text().toLowerCase().includes("up next") ? "cards" : ""', 'the home screen')
     await shot('01-home-desktop')
     const dash = (await cdp.eval('window.__t.text()')).toLowerCase()
     assert('the home greets the new learner', dash.includes('e2e learner'))
-    assert('the home is the path, not a dashboard', dash.includes('next up') && !dash.includes('skill mastery'), 'path rendered as home')
+    assert('the home is the path, not a dashboard', dash.includes('up next') && !dash.includes('skill mastery'), 'path rendered as home')
     assert(
       'the home offers the first lesson',
-      dash.includes('next up') && dash.includes('你好'),
+      dash.includes('up next') && dash.includes('你好'),
       'continue CTA present',
     )
     assert('the first lesson is offered to a learner with no chosen curriculum', !dash.includes('path complete'), 'no dead end')
@@ -355,7 +355,8 @@ async function main() {
     // `assert` takes a condition; `check` compares two values as strings, which is
     // what turned a correct count into "expected (rendered 398 lesson nodes)".
     assert('path: the whole curriculum is in the trail', trailNodes > 6, `rendered ${trailNodes} lesson nodes`)
-    check('path: lessons in order, only the first is startable', (path.match(/Start/g) || []).length, 1)
+    // The hero's own "Start lesson" button is the same lesson, not a second startable node.
+    check('path: lessons in order, only the first is startable', (path.match(/Start(?! lesson)/g) || []).length, 1)
     check('path: every other lesson is locked', (path.match(/Locked/g) || []).length, trailNodes - 1)
     assert('path: unit titles render', path.includes('greetings and names'))
 
@@ -386,8 +387,10 @@ async function main() {
       await cdp.eval(`window.__t.click("${expect}")`)
     }
     await shot('03-lesson-player')
+    // The words are a drawer now; hidden content is not in innerText until it is opened.
+    await cdp.eval('window.__t.click("Words in this lesson", "summary")')
     const vocab = await cdp.eval('window.__t.text()')
-    assert('lesson: the vocabulary strip shows the new words', vocab.includes('你') && vocab.includes('谢谢'))
+    assert('lesson: the words drawer shows the new words', vocab.includes('你') && vocab.includes('谢谢'))
     assert('lesson: progress reads 1 / 9 (five original drills plus listening and speaking)', vocab.includes('1 / 9'))
 
     // Answering first, then moving on: "Next" is disabled until the current
@@ -584,7 +587,7 @@ async function main() {
     assert('result: per-answer feedback is shown in practice mode', (result.match(/checked by/g) || []).length >= 3, `${(result.match(/checked by/g) || []).length} graded items`)
 
     // --- progress is recomputed by the server, not by the client ------------
-    await cdp.eval('window.__t.click("Continue", "button")')
+    await cdp.eval('window.__t.click("Back to the path", "button")')
     await cdp.waitFor('window.__t.text().toLowerCase().includes("locked") ? "path" : ""', 'the path again')
     // The path query was invalidated by the submission; wait for the refetched
     // state instead of reading the stale cache.
@@ -595,7 +598,7 @@ async function main() {
     assert('path: the lesson is now in progress, not merely available', pathAfter.includes('continue'), 'state changed after submitting')
 
     await cdp.eval('window.__t.click("Learn", "a")')
-    await cdp.waitFor('window.__t.text().toLowerCase().includes("next up") ? "home" : ""', 'the home screen again')
+    await cdp.waitFor('window.__t.text().toLowerCase().includes("up next") ? "home" : ""', 'the home screen again')
     // The statistics live on /progress now that the home screen is the path, so they
     // are read where a learner reads them — on the page, not inferred from the home.
     await cdp.send('Page.navigate', { url: `${BASE}/progress` })
@@ -619,7 +622,7 @@ async function main() {
       'Recompute on /progress',
     )
     await cdp.eval('window.__t.click("Learn", "a")')
-    await cdp.waitFor('window.__t.text().toLowerCase().includes("next up") ? "home" : ""', 'the home screen again')
+    await cdp.waitFor('window.__t.text().toLowerCase().includes("up next") ? "home" : ""', 'the home screen again')
 
     // --- a generated level, served by the running API -----------------------
     // The generated levels are checked hardest where a file check cannot reach:
@@ -683,7 +686,7 @@ async function main() {
     })
     await cdp.send('Page.navigate', { url: `${BASE}/` })
     await cdp.waitFor(
-      'window.__t.text().toLowerCase().includes("next up") ? "home" : ""',
+      'window.__t.text().toLowerCase().includes("up next") ? "home" : ""',
       'the dashboard on a phone',
     )
     await shot('06-phone-today')
@@ -711,8 +714,8 @@ async function main() {
       `${phoneLayout.visibleNavs} visible, position ${phoneLayout.position.join('/') || 'none'}`,
     )
     assert(
-      'phone: all four destinations are reachable from the bottom bar',
-      ['Learn', 'Reviews', 'Tones', 'Settings'].every((label) => phoneLayout.tabs.some((tab) => tab.includes(label))),
+      'phone: all five destinations are reachable from the bottom bar',
+      ['Learn', 'Practice', 'Reviews', 'Progress', 'Profile'].every((label) => phoneLayout.tabs.some((tab) => tab.includes(label))),
       phoneLayout.tabs.join(', '),
     )
     assert(
@@ -741,7 +744,7 @@ async function main() {
     await cdp.send('Emulation.clearDeviceMetricsOverride')
     await cdp.send('Page.navigate', { url: `${BASE}/` })
     await cdp.waitFor(
-      'window.__t.text().toLowerCase().includes("next up") ? "home" : ""',
+      'window.__t.text().toLowerCase().includes("up next") ? "home" : ""',
       'the dashboard under reduced motion',
     )
     const reduced = await cdp.eval(
@@ -752,7 +755,7 @@ async function main() {
       'reduced motion: the interface renders its content with no dependence on animation',
       // Case-insensitive: the labels are styled `uppercase`, and innerText reflects
       // the rendered casing, so the rail reads STREAK rather than Streak.
-      /next up/i.test(reducedMotion.text) &&
+      /up next/i.test(reducedMotion.text) &&
         (await cdp.eval('document.querySelectorAll(\'[data-testid="gamified-header"] a\').length')) === 3,
       'content present under prefers-reduced-motion: reduce',
     )
@@ -861,6 +864,9 @@ async function main() {
       )
     const answersBefore = await countedAnswers()
 
+    // Tones lives in Practice now, beside the other studios.
+    await cdp.eval('window.__t.click("Practice", "a")')
+    await cdp.waitFor('window.__t.text().includes("Tones") ? "practice" : ""', 'the practice hub')
     await cdp.eval('window.__t.click("Tones", "a")')
     await cdp.waitFor('window.__t.text().includes("声调") ? "tones" : ""', 'the tone page')
     // The drill arrives from its own query. Its options are rendered as numbered tone
@@ -908,7 +914,7 @@ async function main() {
     // ...and the path does not. The dashboard's answer count is the learner-visible
     // proof: a tone answer must not appear as one.
     await cdp.eval('window.__t.click("Learn", "a")')
-    await cdp.waitFor('window.__t.text().toLowerCase().includes("next up") ? "home" : ""', 'the home screen after tone practice')
+    await cdp.waitFor('window.__t.text().toLowerCase().includes("up next") ? "home" : ""', 'the home screen after tone practice')
     const dashAfterTones = (await cdp.eval('window.__t.text()')).toLowerCase()
     const answersAfter = await countedAnswers()
     assert(

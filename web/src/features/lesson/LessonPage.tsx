@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Clock, Flame, Lock, Sparkles, X } from 'lucide-react'
-import { useLesson, useSubmitAttempts } from '../../api/hooks'
+import { useLesson, useOverview, useSubmitAttempts } from '../../api/hooks'
 import type { AnswerPayload, AttemptInput, AttemptResult, Exercise, SubmitSummary } from '../../api/types'
 import { emptyAnswer, isAnswered, modelAnswer } from '../../lib/answers'
 import { describeGrader, formatPercent } from '../../lib/labels'
@@ -412,6 +412,13 @@ function LessonResult({
   const accuracy = graded.length > 0 ? correct / graded.length : 0
   // The number earns its arrival: it counts up to what the server actually awarded.
   const xp = useCountUp(outcome?.xp_awarded ?? 0)
+  // What opened: the server's own next lesson, offered once this one is done.
+  const overview = useOverview()
+  const next = overview.data
+  const nextLesson =
+    completedNow && next?.next_lesson_id && next.next_lesson_title !== title
+      ? { id: next.next_lesson_id, title: next.next_lesson_title }
+      : null
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
@@ -474,8 +481,16 @@ function LessonResult({
         ) : null}
 
         <div className="mt-6 flex flex-col gap-2 sm:flex-row-reverse">
-          <Button onClick={onDone} className="flex-1">
-            Continue
+          {nextLesson ? (
+            <Link
+              to={`/lessons/${nextLesson.id}`}
+              className="inline-flex flex-1 items-center justify-center rounded-tile bg-brand-600 px-5 py-3 text-sm font-extrabold tracking-wide text-white shadow-[0_4px_0_var(--color-brand-700)] transition hover:bg-brand-500 active:translate-y-px active:shadow-none"
+            >
+              Next: {nextLesson.title}
+            </Link>
+          ) : null}
+          <Button onClick={onDone} variant={nextLesson ? 'secondary' : 'primary'} className="flex-1">
+            Back to the path
           </Button>
           {correct < graded.length ? (
             <Link

@@ -444,7 +444,7 @@ function PinyinToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
       onClick={onToggle}
       aria-pressed={on}
       title="Toggle pinyin across the app"
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition ${
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-bold transition ${
         on ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-line-strong bg-surface text-ink-2 hover:text-ink'
       }`}
     >
@@ -461,7 +461,7 @@ function SoundToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
       onClick={onToggle}
       aria-pressed={on}
       title="Toggle the correct-answer sound"
-      className={`inline-flex items-center gap-1.5 rounded-pill border-2 px-3 py-1.5 text-xs font-extrabold transition ${
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-pill border-2 px-3 py-1.5 text-xs font-extrabold transition ${
         on ? 'border-brand-600 bg-brand-600 text-white' : 'border-line bg-surface text-ink-3 hover:text-ink'
       }`}
     >

@@ -37,7 +37,7 @@ export function ReadPage() {
   const [tappedWord, setTappedWord] = useState<{ zh: string; pinyin?: string; en?: string } | null>(null)
 
   if (passages.isLoading) return <Spinner label="Loading passages" />
-  if (passages.error) return <ErrorNote>{(passages.error as Error).message}</ErrorNote>
+  if (passages.error) return <ErrorNote onRetry={() => void passages.refetch()}>{(passages.error as Error).message}</ErrorNote>
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">

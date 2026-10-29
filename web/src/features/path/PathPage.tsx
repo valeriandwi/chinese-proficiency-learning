@@ -38,8 +38,8 @@ export function PathPage() {
   if (overview.isLoading || (overview.data && path.isLoading))
     return <PathSkeleton />;
   if (overview.error)
-    return <ErrorNote>{(overview.error as Error).message}</ErrorNote>;
-  if (path.error) return <ErrorNote>{(path.error as Error).message}</ErrorNote>;
+    return <ErrorNote onRetry={() => void overview.refetch()}>{(overview.error as Error).message}</ErrorNote>;
+  if (path.error) return <ErrorNote onRetry={() => void path.refetch()}>{(path.error as Error).message}</ErrorNote>;
   if (!path.data) return <PathSkeleton />;
 
   // The trail marks exactly one "start here" node: the first lesson that is not
@@ -98,7 +98,7 @@ export function PathPage() {
             </h2>
           )}
         </div>
-        <MascotMark size={88} />
+        <MascotMark size={88} className="max-sm:hidden" />
       </section>
 
       {path.data.levels.map((level) => {

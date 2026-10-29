@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import type { AnswerPayload, AttemptResult, Exercise } from '../../api/types'
-import { describeExerciseType, describeGrader, describeSkill, formatPercent } from '../../lib/labels'
+import { describeExerciseType, describeGrader, formatPercent } from '../../lib/labels'
 import { modelAnswer } from '../../lib/answers'
 import { Chip } from '../../components/ui'
 import { AudioPanel } from './AudioPanel'
@@ -51,8 +51,6 @@ export function ExerciseCard({ exercise, answer, disabled, showPinyin, result, o
     <div className="flex flex-col gap-4">
       <header className="flex flex-wrap items-center gap-2">
         <Chip tone="accent">{describeExerciseType(exercise.type)}</Chip>
-        <Chip tone={describeSkill(exercise.skill).tone}>{describeSkill(exercise.skill).label}</Chip>
-        <Chip>difficulty {exercise.difficulty}/5</Chip>
         {result ? (
           <Chip tone={result.is_correct === null ? 'warning' : result.is_correct ? 'positive' : 'danger'}>
             {result.is_correct === null ? 'needs review' : result.is_correct ? 'correct' : 'not quite'}

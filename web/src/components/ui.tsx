@@ -226,13 +226,18 @@ export function ProgressRing({
   )
 }
 
-export function ErrorNote({ children }: { children: ReactNode }) {
+export function ErrorNote({ children, onRetry }: { children: ReactNode; onRetry?: () => void }) {
   return (
     <p
       role="alert"
-      className="rounded-tile border border-danger-300 bg-danger-50 px-3 py-2 text-sm font-semibold text-danger-700"
+      className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-tile border border-danger-300 bg-danger-50 px-3 py-2 text-sm font-semibold text-danger-700"
     >
-      {children}
+      <span className="min-w-0 flex-1">{children}</span>
+      {onRetry ? (
+        <button type="button" onClick={onRetry} className="min-h-8 font-extrabold underline underline-offset-2">
+          Try again
+        </button>
+      ) : null}
     </p>
   )
 }

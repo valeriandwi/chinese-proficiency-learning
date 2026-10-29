@@ -16,7 +16,7 @@ export function ReviewPage() {
   const answered = doneIds.size
 
   if (queue.isLoading) return <Spinner label="Loading your review queue" />
-  if (queue.error) return <ErrorNote>{(queue.error as Error).message}</ErrorNote>
+  if (queue.error) return <ErrorNote onRetry={() => void queue.refetch()}>{(queue.error as Error).message}</ErrorNote>
 
   const items = queue.data?.items ?? []
   const dueTotal = queue.data?.due_total ?? 0

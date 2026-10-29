@@ -33,7 +33,7 @@ export function ProgressPage() {
   const refresh = useRefreshProgress()
 
   if (overview.isLoading) return <Spinner label="Loading your progress" />
-  if (overview.error) return <ErrorNote>{(overview.error as Error).message}</ErrorNote>
+  if (overview.error) return <ErrorNote onRetry={() => void overview.refetch()}>{(overview.error as Error).message}</ErrorNote>
   if (!overview.data) {
     return <EmptyState title="No progress yet" hint="Complete a lesson to see your streak grow." />
   }
