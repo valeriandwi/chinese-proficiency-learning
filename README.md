@@ -235,6 +235,16 @@ HANPATH_SESSION_COOKIE_SECURE=true \
 docker compose -f docker-compose.yml -f docker-compose.tls.yml up -d
 ```
 
+On a server, keep those settings in `.env.compose` (copy `docker/.env.compose.example`) and
+build and start the whole stack with one command. Run it again after every `git pull` to
+rebuild the web and API images with the new code and content:
+
+```bash
+sudo docker compose --env-file .env.compose \
+  -f docker-compose.yml -f docker-compose.tls.yml \
+  up -d --build
+```
+
 `docker-compose.tls.yml` publishes 80/443 and requires `HANPATH_SITE_ADDRESS` — unset is a
 hard error, not a stack quietly serving the wrong name. Caddy keeps certificates in the
 `caddy-data` volume, so rebuilding the image does not re-request them.
